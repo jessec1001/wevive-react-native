@@ -1,0 +1,32 @@
+diff --git a/node_modules/react-native-textinput-effects/lib/Fumi.js b/node_modules/react-native-textinput-effects/lib/Fumi.js
+index c1a86b4..6499ddb 100644
+--- a/node_modules/react-native-textinput-effects/lib/Fumi.js
++++ b/node_modules/react-native-textinput-effects/lib/Fumi.js
+@@ -84,11 +84,11 @@ export default class Fumi extends BaseInput {
+               bottom: focusedAnim.interpolate({
+                 inputRange: [0, 0.5, 0.51, 0.7, 1],
+                 outputRange: [
+-                  24,
++                  20,
+                   ANIM_PATH,
+                   NEGATIVE_ANIM_PATH,
+                   NEGATIVE_ANIM_PATH,
+-                  24,
++                  20,
+                 ],
+               }),
+               color: focusedAnim.interpolate({
+@@ -131,11 +131,11 @@ export default class Fumi extends BaseInput {
+                 {
+                   fontSize: focusedAnim.interpolate({
+                     inputRange: [0, 0.7, 0.71, 1],
+-                    outputRange: [16, 16, 12, 12],
++                    outputRange: [14, 14, 11, 11],
+                   }),
+                   color: focusedAnim.interpolate({
+                     inputRange: [0, 0.7],
+-                    outputRange: ['#696969', '#a3a3a3'],
++                    outputRange: ['#ababab', '#777'],
+                   }),
+                 },
+                 labelStyle,

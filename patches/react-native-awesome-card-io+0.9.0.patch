@@ -1,0 +1,10 @@
+diff --git a/node_modules/react-native-awesome-card-io/RNAwesomeCardIO.podspec b/node_modules/react-native-awesome-card-io/RNAwesomeCardIO.podspec
+index a104044..b2f44a8 100644
+--- a/node_modules/react-native-awesome-card-io/RNAwesomeCardIO.podspec
++++ b/node_modules/react-native-awesome-card-io/RNAwesomeCardIO.podspec
+@@ -16,4 +16,5 @@ Pod::Spec.new do |s|
+   s.libraries        = 'c++'
+   s.dependency 'React'
+   s.dependency 'CardIO'
++  s.xcconfig = { "OTHER_LDFLAGS" => "-ObjC"}
+ end

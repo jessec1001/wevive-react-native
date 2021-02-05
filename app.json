@@ -1,4 +1,60 @@
 {
   "name": "WeviveRN",
-  "displayName": "WeviveRN"
+  "displayName": "WeviveRN",
+  "domainReversed": "com.praxisfintech.lotteryapp",
+  "deepLinkURL": "https://staging.mygamesaccess.com/",
+  "api_url": "https://staging.mygamesaccess.com/api/",
+  "api_hmac_secret": "api_hmac_secret",
+  "debug": false,
+  "client_name": "Vivid Unity",
+  "colors": {
+    "contentBorder": "rgb(227,165,57)",
+    "main":"rgb(18,56,99)",
+    "secondary": "rgb(246,164,0)",
+    "textSecondary": "rgb(255,255,255)",
+    "textMain": "rgb(18,56,99)",
+    "footer": "rgb(8,33,54)",
+    "footerText": "rgb(255,255,255)",
+    "footerIcons": "rgb(255,255,255)",
+    "header": "rgba(0,0,0,0)",
+    "headerText": "rgb(255,255,255)",
+    "background": "rgb(0,56,104)",
+    "sidebarText": "rgb(255,255,255)",
+    "secondaryBackground": "rgb(255,255,255)",
+    "sidebarBackground": "rgba(8,33,54, 0.992)",
+    "formBackground": "rgb(255,255,255)",
+    "versionText": "rgba(130,130,255,0.15)",
+    "headlineBackground": "rgba(0,0,0,0.5)",
+    "alert": "rgb(235, 83, 229)",
+    "alert2": "rgb(246,164,0)",
+    "alert3": "rgb(8, 220, 63)",
+  },
+  "oauth": {
+    "facebook": {
+      "serviceConfiguration": {
+        "authorizationEndpoint":"https://www.facebook.com/dialog/oauth",
+        "tokenEndpoint":"https://graph.facebook.com/oauth/access_token"
+      },
+      "clientId":" 476308949904550",
+      "redirectUrl":"https://staging.mygamesaccess.com/oauth/",
+      "scopes": ["email"]
+    },
+    "google": {
+      "issuer": "https://accounts.google.com",
+      "clientId":"1062564125537-kb1649pt6f1k3utom1gtq1m19pe7rb32.apps.googleusercontent.com",
+      "redirectUrl":"com.praxisfintech.lotteryapp:/oauth2redirect",
+      "scopes": ["openid", "profile", "email"]
+    }
+  },
+  "public_key": "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAqWatefaZy+uqcIsInttyXodtLtPD6sALZ8i4zfdxVnLueDClI14c\nYdG6awmWRwzRn83vAAZ4/pfjtKvsn+yvlsUWHwEzo7rG5caJc+BNUf9ZsWg6ROIi\n3jnqJTQt1OWOT5TA6yyhiP4ocCeQAORHjf/BQDdPXR+kuAtIYGWC26FGEoFd0dR9\nTAD7x1jy2SCabmEW5R6luHWuX2liIbRas4zEBc5x89KJPdcvQbPFEnWCtqBfGt3c\nAbNS0w8BvJ6HChZLR0MrlhY0375qrzqlkoBnKCEVnTSRLPoTdcbNTA3p3pMLJqtq\ntjcQvzW5N7xjK+047tfS0AuPQFOed8J2mQIDAQAB\n-----END RSA PUBLIC KEY-----",
+  "paypalUrl": "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=info@lancswt.org.uk&item_name=LWT+Donation&currency_code=GBP&bn=PP%2dDonationsBF",
+  "ecom_url": "https://gateway.cardstream.com/direct/",
+  "ecom_hosted_url": "https://staging.mygamesaccess.com/redirect",
+  "ecom_merchant_id": "100001",
+  "ecom_signature": "Circle4Take40Idea",
+  "ecom_merchant": "PRAXISLOTTERY",
+  "ecom_website": "https://staging.mygamesaccess.com/",
+  "ecom_3ds_redirect": "https://staging.mygamesaccess.com/3ds",
+  "ecom_3ds_term": "https://staging.mygamesaccess.com/3dsr",
+  "ecom_callback_url": "https://staging.mygamesaccess.com/ipn"
 }

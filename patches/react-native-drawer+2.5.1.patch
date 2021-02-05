@@ -1,0 +1,35 @@
+diff --git a/node_modules/react-native-drawer/index.js b/node_modules/react-native-drawer/index.js
+index ad60ecc..7a034d8 100644
+--- a/node_modules/react-native-drawer/index.js
++++ b/node_modules/react-native-drawer/index.js
+@@ -117,24 +117,18 @@ export default class Drawer extends Component {
+     this._childDrawer = drawer
+   }
+ 
+-  componentWillMount() {
+-    if (this.context.drawer) this.context.drawer._registerChildDrawer(this)
+-    if (this.props.openDrawerThreshold && process.env.NODE_ENV !== 'production') console.error('react-native-drawer: openDrawerThreshold is obsolete. Use panThreshold instead.')
+-    if (this.props.panStartCompensation && process.env.NODE_ENV !== 'production') console.error('react-native-drawer: panStartCompensation is deprecated.')
+-    if (this.props.relativeDrag && process.env.NODE_ENV !== 'production') console.error('react-native-drawer: relativeDrag is deprecated.')
++  constructor(props) {
++    super(props);
+     this.initialize(this.props)
+   }
+ 
+-  componentWillReceiveProps(nextProps) {
+-    if (this.requiresResync(nextProps)) this.resync(null, nextProps)
++  componentDidUpdate(prevProps) {
++    if (this.requiresResync(prevProps)) this.resync(null, prevProps)
+ 
+-    if (nextProps.open !== null && this._open !== nextProps.open) {
++    if (prevProps.open !== null && this._open !== prevProps.open) {
+       this._syncAfterUpdate = true
+-      this._open = nextProps.open
++      this._open = prevProps.open
+     }
+-  }
+-
+-  componentDidUpdate() {
+     if (this._syncAfterUpdate) {
+       this._syncAfterUpdate = false
+       this._open ? this.open('force') : this.close('force')
