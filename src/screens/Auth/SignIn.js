@@ -48,18 +48,33 @@ const mainHeadline = 'Register';
 const googleLogin = false;
 const appleLogin = false;
 import {AuthContext} from '../../context/AuthContext';
+import ImagePicker from 'react-native-image-crop-picker';
+
 export default class SignIn extends Component {
   state = {
     email: null,
     bioAccessToken: null,
+    avatarImage: null,
   };
   navigateSuccess = () => {
+
+    ImagePicker.openPicker({
+      width: 500,
+      height: 500,
+      cropping: true,
+      cropperCircleOverlay: true,
+      avoidEmptySpaceAroundImage: true,
+    }).then(image => {
+      this.setState({avatarImage: image.path});
+      console.log(image.path);
+    });
+    /*
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
         routes: [{name: 'App'}],
       }),
-    );
+    );*/
   };
   componentDidMount() {
     AsyncStorage.getItem('email').then((email) => {
@@ -255,6 +270,9 @@ export default class SignIn extends Component {
                   </Text>
                   <View style={styles.buttonContainerStyle}>
                     <Button onPress={handleSubmit} title="NEXT" />
+                  </View>
+                  <View>
+                    {this.state.avatarImage && <Image source={{uri:this.state.avatarImage}} style={styles.avatarImage} />}
                   </View>
                   {this.state.email && keysExist && (
                     <View style={styles.buttonContainerStyle}>

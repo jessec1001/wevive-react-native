@@ -402,6 +402,15 @@ PODS:
     - RNFBApp
   - RNGestureHandler (1.9.0):
     - React-Core
+  - RNImageCropPicker (0.35.3):
+    - React-Core
+    - React-RCTImage
+    - RNImageCropPicker/QBImagePickerController (= 0.35.3)
+    - TOCropViewController
+  - RNImageCropPicker/QBImagePickerController (0.35.3):
+    - React-Core
+    - React-RCTImage
+    - TOCropViewController
   - RNInAppBrowser (3.5.1):
     - React-Core
   - RNLocalize (2.0.1):
@@ -427,6 +436,7 @@ PODS:
   - SQLCipher/common (4.4.2)
   - SQLCipher/standard (4.4.2):
     - SQLCipher/common
+  - TOCropViewController (2.6.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -487,6 +497,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - RNInAppBrowser (from `../node_modules/react-native-inappbrowser-reborn`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
@@ -517,6 +528,7 @@ SPEC REPOS:
     - SDWebImage
     - SDWebImageWebPCoder
     - SQLCipher
+    - TOCropViewController
 
 EXTERNAL SOURCES:
   BVLinearGradient:
@@ -627,6 +639,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/messaging"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNImageCropPicker:
+    :path: "../node_modules/react-native-image-crop-picker"
   RNInAppBrowser:
     :path: "../node_modules/react-native-inappbrowser-reborn"
   RNLocalize:
@@ -715,6 +729,7 @@ SPEC CHECKSUMS:
   RNFBApp: 2ea68d6e69ba19e28061c8d1b3f3c90c989a9a50
   RNFBMessaging: d98ef35e9d44ceb43774cfd88364c2c1c7c091bd
   RNGestureHandler: 9b7e605a741412e20e13c512738a31bd1611759b
+  RNImageCropPicker: 08ba3a2e2f4f8833d606f01906c371e382c4dea9
   RNInAppBrowser: 48b95ba7a4eaff5cc223bca338d3e319561dbd1b
   RNLocalize: 41026b7c14878f1a1b381bc79f668f1fbf841adb
   RNPermissions: 99dd8d4a30ff13509b949ca63cd1f69edc461775
@@ -725,6 +740,7 @@ SPEC CHECKSUMS:
   SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   SQLCipher: 1ab0b9486a77d141e72e92ff30681926ed79c07a
+  TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
 
 PODFILE CHECKSUM: d2df0be3f220a302f1260db2c904850e282075f9

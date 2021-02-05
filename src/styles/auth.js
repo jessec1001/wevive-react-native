@@ -320,6 +320,13 @@ const styles = keyboard => {
       fontSize: responsiveFontSize(1.55),
       fontWeight: "200",
       textAlign: "center",
+    },
+    avatarImage: {
+      width: 100,
+      height: 100,
+      borderRadius: 100,
+      justifyContent: "center",
+      alignSelf: "center",
     }
   });
 };
