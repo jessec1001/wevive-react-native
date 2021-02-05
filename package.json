@@ -19,6 +19,10 @@
   "copyFiles": [
   ],
   "dependencies": {
+    "base64-js": "^1.5.1",
+    "react-native-chat-plugin": "git+ssh://git@gitlab.com/wevive/chat-plugin#master",
+    "react-native-libsodium": "git+ssh://git@gitlab.com/wevive/react-native-libsodium#master",
+    "react-native-sqlite-storage": "git+ssh://git@gitlab.com/wevive/react-native-sqlite-storage#master",
     "@invertase/react-native-apple-authentication": "^2.1.0",
     "@react-native-community/async-storage": "^1.12.1",
     "@react-native-community/datetimepicker": "^3.0.9",
