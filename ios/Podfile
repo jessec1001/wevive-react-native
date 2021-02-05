@@ -2,7 +2,17 @@ require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
 platform :ios, '10.0'
-
+pre_install do |installer|
+  def installer.verify_no_static_framework_transitive_dependencies; end
+  installer.pod_targets.each do |pod|
+    if pod.name.eql?('RNPermissions') || pod.name.start_with?('Permission-')
+      def pod.build_type;
+        Pod::BuildType.static_library # >= 1.9
+      end
+    end
+  end
+  Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_static_framework_transitive_dependencies) {}
+end
 target 'WeviveRN' do
   config = use_native_modules!
 
@@ -12,15 +22,20 @@ target 'WeviveRN' do
     inherit! :complete
     # Pods for testing
   end
-
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
+  #pod 'Permission-Camera', :path => "#{permissions_path}/Camera.podspec"
+  pod 'Permission-Notifications', :path => "#{permissions_path}/Notifications"
+  
   # Enables Flipper.
   #
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable these next few lines.
-  use_flipper!
-  post_install do |installer|
-    flipper_post_install(installer)
-  end
+  #use_flipper!
+
+  use_native_modules!
+  config = use_native_modules!
+
 end
 
 target 'WeviveRN-tvOS' do
@@ -29,5 +44,16 @@ target 'WeviveRN-tvOS' do
   target 'WeviveRN-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
+  end
+end
+
+post_install do |installer|
+  #flipper_post_install(installer)
+  #system(". ./pod_post_install.sh")
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      #config.build_settings['SWIFT_VERSION'] = '5.0'  # required by simple_permission
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
   end
 end

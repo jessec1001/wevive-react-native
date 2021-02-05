@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -7,7 +7,7 @@ import {
   View,
   Text,
   ImageBackground,
-  Platform
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import {
@@ -17,9 +17,8 @@ import {
 } from 'react-native-responsive-dimensions';
 import {colors} from '../../app.json';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-const logo = require('../images/PNG/balls.png');
-const logo2 = require('../images/PNG/praxislogo.png');
-const background = require('../images/PNG/background.png');
+const logo = require('../images/PNG/wetalk_logo.png');
+const background = require('../images/PNG/wevive_bg.png');
 
 export default class AppBootstrap extends Component {
   responsiveWidth(val) {
@@ -40,7 +39,7 @@ export default class AppBootstrap extends Component {
     isReady: false,
     styles: StyleSheet.create({
       spinnerStyle: {
-        color: 'rgb(255,255,255)',
+        color: 'rgb(130,176,120)',
         overlayColor: 'rgba(0, 0, 0, 0.00)',
       },
       spinnerTextStyle: {
@@ -55,100 +54,68 @@ export default class AppBootstrap extends Component {
       bg: {
         width: this.responsiveWidth(100),
         height: '100%',
-        backgroundColor: colors.main,
       },
       bgStyle: {
-        opacity: 0.3,
+        opacity: 0.4,
       },
       logo: {
-        width: 138,
-        height: 151,
+        width: 417/93 * responsiveWidth(15),
+        height: responsiveWidth(15),
         top: -80,
-      },
-      logo2: {
-        width: 180,
-        height: 180 / (1000 / 225),
-        bottom: 60,
       },
       logoContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-        flex:1,
-        top:-this.responsiveHeight(15),
+        flex: 1,
+        top: -this.responsiveHeight(15),
       },
       backgroundPart1: {
         backgroundColor: 'rgb(0,0,0)',
-        position:'absolute',
-        width:'100%',
-        height:this.responsiveHeight(100),
-        top:0,
+        position: 'absolute',
+        width: '100%',
+        height: this.responsiveHeight(100),
+        top: 0,
       },
       headerText: {
-        color:'black',
+        color: 'black',
         //fontFamily:'Adelle',
-        fontSize:responsiveFontSize(3.5),
-        textAlign:'center',
-        marginTop:this.responsiveHeight(3.5),
-      },
-      wildfooter: {
-        width: this.responsiveWidth(100),
-        position:'absolute',
-        bottom:0,
-        height: this.responsiveWidth(100) / 5.91,
-      },
-      headerFooter: {
-        position:'absolute',
-        top:this.responsiveHeight(5),
-        height:this.responsiveWidth(100) / 34.09,
-        width:this.responsiveWidth(100),
-        tintColor:'black',
-      },
-      headerBackground: {
-        height:this.responsiveHeight(5),
-        width:this.responsiveWidth(100),
-        backgroundColor: 'black',
-        position:'absolute',
-        top:0,
+        fontSize: responsiveFontSize(3.5),
+        textAlign: 'center',
+        marginTop: this.responsiveHeight(3.5),
       },
     }),
-  }
+  };
   async componentDidMount() {
     var $this = this;
     if (Platform.OS === 'android') {
       changeNavigationBarColor('#082136', false, false);
     }
-    setTimeout(function() {
+    setTimeout(function () {
       $this._bootstrapAsync($this);
-    },1500);
+    }, 1500);
   }
 
   _bootstrapAsync = async ($this) => {
     //AsyncStorage.removeItem('userToken');
     const userToken = await AsyncStorage.getItem('userToken');
-    $this.setState({ isReady: true });
+    $this.setState({isReady: true});
     $this.props.navigation.navigate(userToken ? 'App' : 'Auth');
-  }
+  };
 
   render() {
     return (
       <ImageBackground
-          resizeMode="cover"
-          imageStyle={this.state.styles.bgStyle}
-          source={background} style={this.state.styles.bg}>
-          <View style={this.state.styles.container}>
-            <View style={this.state.styles.logoContainer}>
-              <Image
-                  style={this.state.styles.logo}
-                  source={logo}
-                  />
-                  <ActivityIndicator color={this.state.styles.spinnerStyle.color} />
-                </View>
-                <Image
-                  style={this.state.styles.logo2}
-                  source={logo2}
-                />
+        resizeMode="cover"
+        imageStyle={this.state.styles.bgStyle}
+        source={background}
+        style={this.state.styles.bg}>
+        <View style={this.state.styles.container}>
+          <View style={this.state.styles.logoContainer}>
+            <Image style={this.state.styles.logo} source={logo} />
+            <ActivityIndicator color={this.state.styles.spinnerStyle.color} />
           </View>
+        </View>
       </ImageBackground>
-  );
+    );
   }
 }
