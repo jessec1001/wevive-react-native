@@ -1,5 +1,6 @@
 {
   "auth": {
+    "country": "Country",
     "name": "Name",
     "email": "Email",
     "address1": "Address 1",

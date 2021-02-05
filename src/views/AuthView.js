@@ -22,9 +22,8 @@ import {UIManager, LayoutAnimation, Linking, Platform} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import { ScrollContext } from '../context/ScrollContext';
 import AsyncStorage from '@react-native-community/async-storage';
-const logo = require('../images/PNG/balls.png');
-const logo2 = require('../images/PNG/praxislogo.png');
-const background = require('../images/PNG/background.png');
+const logo = require('../images/PNG/wetalk_logo.png');
+const background = require('../images/PNG/wevive_bg.png');
 export default class AuthView extends Component {
   state = {
     styles: styles(false),
@@ -111,14 +110,6 @@ export default class AuthView extends Component {
               <View style={this.state.styles.container}>
                 {this.props.children}
               </View>
-              <Image
-                style={this.state.styles.logo}
-                source={logo}
-              />
-              <Image
-                style={this.state.styles.logo2}
-                source={logo2}
-              />
             </ScrollContext.Provider>
           </KeyboardAwareScrollView>
         </ImageBackground>

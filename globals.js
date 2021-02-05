@@ -1,1 +1,1 @@
-export const logo = require('./src/images/PNG/burnley.png');
+export const logo = require('./src/images/PNG/wetalk_logo.png');

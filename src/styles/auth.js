@@ -7,6 +7,10 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import {colors} from "../../app.json";
+
+const textColor = 'black';
+const backgroundColor = 'rgb(240,240,240)';
+
 const styles = keyboard => {
   return StyleSheet.create({
     bigHeadlineText: {
@@ -42,36 +46,44 @@ const styles = keyboard => {
       paddingLeft: responsiveWidth(20),
       fontSize: responsiveFontSize(3),
       textAlign: 'center',
-      color: 'rgb(255,255,255)',
+      color: textColor,
       fontWeight: "800",
       marginTop: 20,
       marginBottom: 20,
       //fontFamily: 'Adelle-Bold',
     },
+    pageHeadlineStyle: {
+      marginTop: responsiveWidth(5),
+      marginBottom: responsiveWidth(5),
+      fontSize: responsiveFontSize(2.3),
+      textAlign: 'center',
+    },
     mainLogoStyle: {
-      backgroundColor: 'rgb(255,255,255)',
-      borderRadius: 7,
-      width: responsiveWidth(45),
-      height: responsiveWidth(20),
+      width: responsiveWidth(50),
+      height: responsiveWidth(16),
     },
     mainLogoContainerStyle: {
-      backgroundColor: 'rgb(255,255,255)',
-      borderRadius: 7,
+      backgroundColor: backgroundColor,
       padding: responsiveWidth(1.5),
       marginBottom: responsiveWidth(1.5),
+      width: responsiveWidth(100),
+      justifyContent: "center",
+      alignContent: "center",
+      alignItems: "center",
+      borderBottomColor: "rgb(227,140,57)",
+      borderBottomWidth: 2,
     },
     mainLogoImageStyle: {
       resizeMode: "contain",
     },
     mainHeadlineStyle: {
-      color: 'rgb(255,255,255)',
+      color: textColor,
       fontSize: responsiveFontSize(2.55),
       fontWeight: "700",
-      marginBottom: responsiveWidth(10),
 
     },
     codeHeadlineStyle: {
-      color: 'rgb(255,255,255)',
+      color: textColor,
       fontSize: responsiveFontSize(2.55),
       fontWeight: "700",
       marginBottom: responsiveWidth(10),
@@ -79,7 +91,7 @@ const styles = keyboard => {
     },
     errorStyle: {
       fontSize: responsiveFontSize(1.75),
-      color: 'rgb(255,255,255)',
+      color: textColor,
       top: -responsiveHeight(1),
       left: responsiveWidth(3),
     },
@@ -94,7 +106,6 @@ const styles = keyboard => {
       justifyContent: 'center',
       alignItems: 'center',
       flexDirection: 'column',
-      marginTop: responsiveHeight(5),
       marginBottom: responsiveHeight(18),
       flex: 1,
       position: "relative",
@@ -119,7 +130,7 @@ const styles = keyboard => {
     footerStyle: {
       marginTop: responsiveHeight(2),
       fontSize: responsiveFontSize(1.65),
-      color: 'rgb(255,255,255)',
+      color: textColor,
       //fontFamily: 'Adelle-Bold',
       textAlign: 'center',
     },
@@ -127,7 +138,7 @@ const styles = keyboard => {
       marginTop: responsiveHeight(1),
       paddingBottom: 1,
       fontSize: responsiveFontSize(2.5),
-      color: 'rgb(255,255,255)',
+      color: textColor,
       //fontFamily: 'Adelle',
       zIndex: 9,
     },
@@ -137,14 +148,14 @@ const styles = keyboard => {
       padding: responsiveHeight(2.5),
       marginTop: responsiveHeight(0),
       //fontFamily: 'Adelle',
-      color: colors.textMain,
+      color: 'black',
     },
     inputContainerStyle: {
       marginBottom: responsiveHeight(2),
-      backgroundColor: colors.formBackground,
-      borderRadius: 30,
-      borderWidth: 1,
-      borderColor: colors.secondary,
+      backgroundColor: 'transparent',
+      //borderRadius: 3,
+      borderBottomWidth: 1,
+      borderColor: 'black',
       width: responsiveWidth(80),
       //alignItems: "center",
       flexDirection: "column",
@@ -214,7 +225,6 @@ const styles = keyboard => {
     contentBg: {
       width: responsiveWidth(100),
       flex:1,
-      backgroundColor: colors.main,
     },
     bgStyle: {
       opacity: 0.3,
@@ -242,7 +252,7 @@ const styles = keyboard => {
       width: responsiveWidth(8),
       height: responsiveWidth(8),
       borderRadius: responsiveWidth(4),
-      backgroundColor: "rgb(255,255,255)",
+      backgroundColor: textColor,
       borderColor: colors.main,
       borderWidth: 1,
       zIndex: 3,

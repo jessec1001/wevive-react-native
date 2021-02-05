@@ -14,7 +14,7 @@ export default class Button extends Component {
         paddingTop:responsiveHeight(1.75),
         paddingBottom:responsiveHeight(1.75),
         backgroundColor:this.props.backgroundColor || colors.secondary,
-        borderRadius: 30,
+        borderRadius: 5,
         borderWidth: 1,
         borderColor: colors.textSecondary,
         width: !this.props.width ? responsiveWidth(80) : this.props.width,

@@ -10,9 +10,9 @@
   "colors": {
     "contentBorder": "rgb(227,165,57)",
     "main":"rgb(18,56,99)",
-    "secondary": "rgb(246,164,0)",
+    "secondary": "rgb(227,140,57)",
     "textSecondary": "rgb(255,255,255)",
-    "textMain": "rgb(18,56,99)",
+    "textMain": "rgb(255,255,255)",
     "footer": "rgb(8,33,54)",
     "footerText": "rgb(255,255,255)",
     "footerIcons": "rgb(255,255,255)",

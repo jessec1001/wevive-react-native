@@ -137,7 +137,7 @@ export default class extends Component {
                           },
                         }
                       }
-                      Icon={() => <Icon name="arrowdown" size={responsiveFontSize(2)} color={styles.inputStyle.color}/>}
+                      //Icon={() => <Icon name="arrowdown" size={responsiveFontSize(2)} color={styles.inputStyle.color}/>}
                   />
                 </View>
               </>
