@@ -1,6 +1,7 @@
 import React, {Fragment, Component, useContext} from 'react';
 import {
   Image,
+  ImageBackground,
   Alert,
   Text,
   TextInput,
@@ -37,11 +38,16 @@ import {CommonActions} from '@react-navigation/native';
 import ClientLogo from '../../components/ClientLogo';
 import FormInput from '../../components/FormInput';
 import trans from '../../utils/trans';
+import getFlag from '../../../countryflags';
+import allCountries from '../../../countries.json';
+import phoneCodes from '../../../phones.json';
 
+//const countries = Object.keys(allCountries).sort((a, b) => {return allCountries[a] > allCountries[b]});
+//console.error(countries);
 const mainHeadline = 'Register';
 const googleLogin = false;
 const appleLogin = false;
-import { AuthContext } from '../../context/AuthContext';
+import {AuthContext} from '../../context/AuthContext';
 export default class SignIn extends Component {
   state = {
     email: null,
@@ -195,32 +201,58 @@ export default class SignIn extends Component {
                 setFieldValue,
               }) => (
                 <View>
-                  <Text style={styles.pageHeadlineStyle}>Enter your phone number</Text>
-                  <AuthContext.Provider value={{ styles:styles, values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit, setFieldValue }}>
-                    <FormInput type="select" values={{UK:"United Kingdom"}} name="`Country" label={trans('auth.country')} />
+                  <Text style={styles.pageHeadlineStyle}>
+                    Enter your phone number
+                  </Text>
+                  <AuthContext.Provider
+                    value={{
+                      styles: styles,
+                      values,
+                      handleChange,
+                      errors,
+                      setFieldTouched,
+                      touched,
+                      isValid,
+                      handleSubmit,
+                      setFieldValue,
+                    }}>
+                    <View>
+                      <FormInput
+                        type="select"
+                        values={allCountries}
+                        name="country"
+                        label={trans('auth.country')}
+                      />
+                      {values.country && <ImageBackground source={getFlag(values.country)} style={styles.countryFlag} resizeMode={"contain"}/>}
+                    </View>
                   </AuthContext.Provider>
                   <View style={styles.inputContainerStyle}>
-                    <TextInput
-                      value={values.phone}
-                      onChangeText={(phone) =>
-                        setFieldValue('phone', phone.trim())
-                      }
-                      onBlur={() => setFieldTouched('phone')}
-                      placeholder="Phone"
-                      style={styles.inputStyle}
-                      name="phone"
-                      placeholderTextColor={styles.inputStyle.color}
-                      autoCapitalize="none"
-                      testID="phone"
-                      accessibilityLabel="phone"
-                      accessible
-                      textContentType="telephoneNumber"
-                    />
+                    <View>
+                      {values.country && <Text style={styles.countryCode}>+{phoneCodes[values.country]}</Text>}
+                      <TextInput
+                        value={values.phone}
+                        onChangeText={(phone) =>
+                          setFieldValue('phone', phone.trim())
+                        }
+                        onBlur={() => setFieldTouched('phone')}
+                        placeholder="Phone"
+                        style={styles.inputStyle}
+                        name="phone"
+                        placeholderTextColor={styles.inputStyle.color}
+                        autoCapitalize="none"
+                        testID="phone"
+                        accessibilityLabel="phone"
+                        accessible
+                        textContentType="telephoneNumber"
+                      />
+                    </View>
                   </View>
                   {touched.phone && errors.phone && (
                     <Text style={styles.errorStyle}>{errors.phone}</Text>
                   )}
-                  <Text style={styles.ageHeadlineStyle}>Are you under the age of 16?</Text>
+                  <Text style={styles.ageHeadlineStyle}>
+                    Are you under the age of 16?
+                  </Text>
                   <View style={styles.buttonContainerStyle}>
                     <Button onPress={handleSubmit} title="NEXT" />
                   </View>

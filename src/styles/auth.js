@@ -146,6 +146,7 @@ const styles = keyboard => {
       textAlign: 'left',
       fontSize: responsiveHeight(2.5),
       padding: responsiveHeight(2.5),
+      paddingLeft: responsiveWidth(13.5),
       marginTop: responsiveHeight(0),
       //fontFamily: 'Adelle',
       color: 'black',
@@ -304,6 +305,22 @@ const styles = keyboard => {
       alignItems: 'center',
       marginHorizontal: responsiveWidth(10),
     },
+    countryFlag: {
+      width: responsiveWidth(14.5),
+      height: responsiveWidth(6),
+      position: "absolute",
+      top: responsiveWidth(5),
+      left: -responsiveWidth(2.5),
+    },
+    countryCode: {
+      width: responsiveWidth(12.5),
+      height: responsiveWidth(5),
+      position: "absolute",
+      top: responsiveWidth(5.5),
+      fontSize: responsiveFontSize(1.55),
+      fontWeight: "200",
+      textAlign: "center",
+    }
   });
 };
 export default styles;
