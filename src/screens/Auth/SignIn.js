@@ -35,21 +35,34 @@ import {
 import {BioIDContext} from '../../utils/BioAuth';
 
 import {CommonActions} from '@react-navigation/native';
-import ClientLogo from '../../components/ClientLogo';
+
 import FormInput from '../../components/FormInput';
 import trans from '../../utils/trans';
 import getFlag from '../../../countryflags';
 import allCountries from '../../../countries.json';
 import phoneCodes from '../../../phones.json';
-
-//const countries = Object.keys(allCountries).sort((a, b) => {return allCountries[a] > allCountries[b]});
+const sortedCountries = {};
+Object.keys(allCountries)
+  .sort((a, b) => {
+    return allCountries[a].localeCompare(allCountries[b]);
+  })
+  .map((s) => {
+    sortedCountries[s] = allCountries[s];
+  });
 //console.error(countries);
-const mainHeadline = 'Register';
 const googleLogin = false;
 const appleLogin = false;
 import {AuthContext} from '../../context/AuthContext';
-import ImagePicker from 'react-native-image-crop-picker';
-
+const countryPhoneCode = (country) => {
+  if (!country || !phoneCodes[country]) {
+    return;
+  }
+  if (Array.isArray(phoneCodes[country])) {
+    return <Text style={styles.countryCode}>+{phoneCodes[country][0]}</Text>;
+  } else {
+    return <Text style={styles.countryCode}>+{phoneCodes[country]}</Text>;
+  }
+};
 export default class SignIn extends Component {
   state = {
     email: null,
@@ -57,24 +70,12 @@ export default class SignIn extends Component {
     avatarImage: null,
   };
   navigateSuccess = () => {
-
-    ImagePicker.openPicker({
-      width: 500,
-      height: 500,
-      cropping: true,
-      cropperCircleOverlay: true,
-      avoidEmptySpaceAroundImage: true,
-    }).then(image => {
-      this.setState({avatarImage: image.path});
-      console.log(image.path);
-    });
-    /*
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: 'App'}],
+        routes: [{name: 'VerificationScreen'}],
       }),
-    );*/
+    );
   };
   componentDidMount() {
     AsyncStorage.getItem('email').then((email) => {
@@ -141,17 +142,11 @@ export default class SignIn extends Component {
       <BioIDContext.Consumer>
         {({available, keysExist, signMessage, toggleBioID}) => (
           <AuthView
+            headline={"Register"}
             route={this.props.route}
             bioLoginFunction={this.bioLoginFunction.bind(this)}
             signMessage={available ? signMessage : false}
             navigation={this.props.navigation}>
-            <View style={styles.mainLogoContainerStyle}>
-              <ClientLogo
-                style={styles.mainLogoStyle}
-                imageStyle={styles.mainLogoImageStyle}
-              />
-              <Text style={styles.mainHeadlineStyle}>{mainHeadline}</Text>
-            </View>
             {this.props.route.params?.message ? (
               <Text style={styles.headlineStyle}>
                 {this.props.route.params.message}
@@ -234,16 +229,22 @@ export default class SignIn extends Component {
                     <View>
                       <FormInput
                         type="select"
-                        values={allCountries}
+                        values={sortedCountries}
                         name="country"
                         label={trans('auth.country')}
                       />
-                      {values.country && <ImageBackground source={getFlag(values.country)} style={styles.countryFlag} resizeMode={"contain"}/>}
+                      {values.country && (
+                        <ImageBackground
+                          source={getFlag(values.country)}
+                          style={styles.countryFlag}
+                          resizeMode={'contain'}
+                        />
+                      )}
                     </View>
                   </AuthContext.Provider>
                   <View style={styles.inputContainerStyle}>
                     <View>
-                      {values.country && <Text style={styles.countryCode}>+{phoneCodes[values.country]}</Text>}
+                      {countryPhoneCode(values.country)}
                       <TextInput
                         value={values.phone}
                         onChangeText={(phone) =>
@@ -270,9 +271,6 @@ export default class SignIn extends Component {
                   </Text>
                   <View style={styles.buttonContainerStyle}>
                     <Button onPress={handleSubmit} title="NEXT" />
-                  </View>
-                  <View>
-                    {this.state.avatarImage && <Image source={{uri:this.state.avatarImage}} style={styles.avatarImage} />}
                   </View>
                   {this.state.email && keysExist && (
                     <View style={styles.buttonContainerStyle}>

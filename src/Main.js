@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -12,8 +12,8 @@ import {
   Alert,
 } from 'react-native';
 
-import { AppThemeContext } from './context/UserContext';
-import Drawer  from 'react-native-drawer';
+import {AppThemeContext} from './context/UserContext';
+import Drawer from 'react-native-drawer';
 import Header from './Header';
 import FooterTabs from './FooterTabs';
 import Sidebar from './components/Sidebar/Sidebar';
@@ -25,14 +25,12 @@ import AppNavigator from './navigation/AppNavigator';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 const background = require('./images/PNG/background.png');
-import {colors,domainReversed} from '../app.json';
+import {colors, domainReversed} from '../app.json';
 import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {
-  getUniqueId,
-} from 'react-native-device-info';
+import {getUniqueId} from 'react-native-device-info';
 
 import {PushNotificationsService} from './service/PushNotificationsService';
 
@@ -47,13 +45,12 @@ export default class Main extends Component {
     global.mainNavigation = this.props.navigation;
   }
   onRegister(token) {
-    APIService('push-notifications/fcm/',
-    {
-      'registration_id':token,
-      'name':getUniqueId(),
-      'application_id':domainReversed,
+    APIService('push-notifications/fcm/', {
+      registration_id: token,
+      name: getUniqueId(),
+      application_id: domainReversed,
       //'device_id':getUniqueId().replace(/[-_]/g,''),
-      'cloud_message_type':'FCM',
+      cloud_message_type: 'FCM',
     });
   }
   onNotification(notification) {
@@ -66,7 +63,11 @@ export default class Main extends Component {
     if (Platform.OS === 'android') {
       changeNavigationBarColor('#082136', false, true);
     }
-    PushNotificationsService.register(this.onRegister,this.onNotification,this.onOpenNotification);
+    PushNotificationsService.register(
+      this.onRegister,
+      this.onNotification,
+      this.onOpenNotification,
+    );
     /*
     const title = 'Test Event';
     const eventConfig = {
@@ -108,16 +109,19 @@ export default class Main extends Component {
         backgroundColor: colors.main,
       },
       contentBgImage: {
-        resizeMode:'cover',
+        resizeMode: 'cover',
         flex: 1,
-        width:undefined,
-        height:undefined,
+        width: undefined,
+        height: undefined,
         opacity: 1,
       },
     }),
   };
   toggleDonationModal = (amount) => {
-    this.setState({ isDonationModalVisible: !this.state.isDonationModalVisible, amount });
+    this.setState({
+      isDonationModalVisible: !this.state.isDonationModalVisible,
+      amount,
+    });
   };
   closeDrawer = () => {
     this.drawer && this.drawer.close();
@@ -128,7 +132,7 @@ export default class Main extends Component {
         setTimeout(() => {
           this.setState({drawerType});
           this.toggleDrawer(drawerType);
-        },400);
+        }, 400);
       } else {
         this.setState({drawerType});
       }
@@ -154,91 +158,95 @@ export default class Main extends Component {
       return true;
     }
     if (this.state.hiddenHeader && !hiddenHeader) {
-      this.setState({ hiddenHeader: false });
+      this.setState({hiddenHeader: false});
     } else if (!this.state.hiddenHeader && hiddenHeader) {
-      this.setState({ hiddenHeader: true });
+      this.setState({hiddenHeader: true});
     }
     if (this.state.hiddenFooter && !hiddenFooter) {
-      this.setState({ hiddenFooter: false });
+      this.setState({hiddenFooter: false});
     } else if (!this.state.hiddenFooter && hiddenFooter) {
-      this.setState({ hiddenFooter: true });
+      this.setState({hiddenFooter: true});
     }
     this.props.navigation.navigate(route, routeParams);
   };
 
   render() {
-    const { navigate } = this.props.navigation;
+    const {navigate} = this.props.navigation;
     return (
-      <ImageBackground resizeMode="cover" imageStyle={this.state.styles.contentBgImage} style={this.state.styles.contentBg} source={background}>
-
-      <AppThemeContext.Consumer>
-        {({ themeSettings, goBack, insets }) => (
-          <>
-            <Drawer
-              ref={ref => {
-                this.drawer = ref;
-              }}
-              type={'overlay'}
-              content={
-                <Sidebar
-                  sidebarLinks={this.state.sidebarLinks}
-                  closeDrawer={this.closeDrawer}
-                  navigation={this.props.navigation}
-                  route={this.props.route}
-                  drawerType={this.state.drawerType}
-                />
-              }
-              onClose={() => this.closeDrawer()}
-              side="right"
-              styles={{
-                drawer: {
-                  shadowColor: '#000000',
-                  marginTop: responsiveHeight(8.5) + insets.top,
-                  backgroundColor: 'rgba(0,0,0,0)',
-                },
-                mainOverlay: {
-                  backgroundColor: 'rgba(0,0,0,0)',
-                  opacity: 0,
-                  marginTop: responsiveHeight(8.5) + insets.top,
-                  position: 'absolute',
-                },
-              }}
-              tweenDuration={300}
-              tweenHandler={ratio => ({
-                mainOverlay: { opacity: ratio  },
-              })}>
-              {!themeSettings.hiddenHeader ? (
-                <Header
-                  themeSettings={themeSettings}
-                  navigation={this.props.navigation}
-                  toggleDrawer={this.toggleDrawer.bind(this)}
-                  hiddenBack={themeSettings.hiddenBack}
-                  goBack={goBack}
-                />
-              ) : null}
-              <AppNavigator />
-            </Drawer>
-            {!themeSettings.hiddenFooter ?
-              <>
-                <FooterTabs
-                  toggleDrawer={this.toggleDrawer.bind(this)}
-                  navigation={this.props.navigation}
-                  route={this.props.route}
-                />
-                <Image
-                  source={contentFooter}
-                  style={{
+      <ImageBackground
+        resizeMode="cover"
+        imageStyle={this.state.styles.contentBgImage}
+        style={this.state.styles.contentBg}
+        source={background}>
+        <AppThemeContext.Consumer>
+          {({themeSettings, goBack, insets}) => (
+            <>
+              <Drawer
+                ref={(ref) => {
+                  this.drawer = ref;
+                }}
+                type={'overlay'}
+                content={
+                  <Sidebar
+                    sidebarLinks={this.state.sidebarLinks}
+                    closeDrawer={this.closeDrawer}
+                    navigation={this.props.navigation}
+                    route={this.props.route}
+                    drawerType={this.state.drawerType}
+                  />
+                }
+                onClose={() => this.closeDrawer()}
+                side="right"
+                styles={{
+                  drawer: {
+                    shadowColor: '#000000',
+                    marginTop: responsiveHeight(8.5) + insets.top,
+                    backgroundColor: 'rgba(0,0,0,0)',
+                  },
+                  mainOverlay: {
+                    backgroundColor: 'rgba(0,0,0,0)',
+                    opacity: 0,
+                    marginTop: responsiveHeight(8.5) + insets.top,
                     position: 'absolute',
-                    marginBottom: 0,
-                    bottom: responsiveHeight(9),
-                    height: 15,
-                    width: '100%',
-                  }}
-                />
-              </>
-              : null}
-          </>)}
-      </AppThemeContext.Consumer>
+                  },
+                }}
+                tweenDuration={300}
+                tweenHandler={(ratio) => ({
+                  mainOverlay: {opacity: ratio},
+                })}>
+                {!themeSettings.hiddenHeader ? (
+                  <Header
+                    themeSettings={themeSettings}
+                    navigation={this.props.navigation}
+                    toggleDrawer={this.toggleDrawer.bind(this)}
+                    hiddenBack={themeSettings.hiddenBack}
+                    goBack={goBack}
+                  />
+                ) : null}
+                <AppNavigator />
+              </Drawer>
+              {!themeSettings.hiddenFooter ? (
+                <>
+                  <FooterTabs
+                    toggleDrawer={this.toggleDrawer.bind(this)}
+                    navigation={this.props.navigation}
+                    route={this.props.route}
+                  />
+                  <Image
+                    source={contentFooter}
+                    style={{
+                      position: 'absolute',
+                      marginBottom: 0,
+                      bottom: responsiveHeight(9),
+                      height: 15,
+                      width: '100%',
+                    }}
+                  />
+                </>
+              ) : null}
+            </>
+          )}
+        </AppThemeContext.Consumer>
       </ImageBackground>
     );
   }

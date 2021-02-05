@@ -54,9 +54,22 @@ const styles = keyboard => {
     },
     pageHeadlineStyle: {
       marginTop: responsiveWidth(5),
-      marginBottom: responsiveWidth(5),
+      marginBottom: responsiveWidth(2.5),
       fontSize: responsiveFontSize(2.3),
       textAlign: 'center',
+    },
+    pageTextStyle: {
+      marginTop: responsiveWidth(1),
+      marginBottom: responsiveWidth(2.5),
+      fontSize: responsiveFontSize(1.8),
+      textAlign: 'center',
+    },
+    pageTextStyleBold: {
+      marginTop: responsiveWidth(1),
+      marginBottom: responsiveWidth(2.5),
+      fontSize: responsiveFontSize(3),
+      textAlign: 'center',
+      fontWeight: "900",
     },
     mainLogoStyle: {
       width: responsiveWidth(50),
@@ -160,6 +173,7 @@ const styles = keyboard => {
       width: responsiveWidth(80),
       //alignItems: "center",
       flexDirection: "column",
+      alignSelf: "center",
     },
     buttonContainerStyle: {
       marginTop: responsiveHeight(0),
@@ -322,11 +336,25 @@ const styles = keyboard => {
       textAlign: "center",
     },
     avatarImage: {
-      width: 100,
-      height: 100,
-      borderRadius: 100,
+      width: responsiveWidth(50),
+      height: responsiveWidth(50),
+      borderRadius: responsiveWidth(25),
       justifyContent: "center",
       alignSelf: "center",
+      borderWidth: 3,
+      borderColor: "rgb(227,140,57)",
+    },
+    defaultAvatarImage: {
+      width: responsiveWidth(50),
+      height: responsiveWidth(52),
+      borderRadius: responsiveWidth(0),
+      justifyContent: "center",
+      alignSelf: "center",
+    },
+    notificationDemo: {
+      width: responsiveWidth(100),
+      height: responsiveWidth(100),
+      marginBottom: responsiveWidth(3),
     }
   });
 };

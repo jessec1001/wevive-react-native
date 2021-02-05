@@ -12,22 +12,24 @@ import {
   StatusBar,
   ScrollView,
 } from 'react-native';
-import styles from '../styles/auth';
-
+import authStyles from '../styles/auth';
+import ClientLogo from '../components/ClientLogo';
 import KeyboardManager from 'react-native-keyboard-manager';
-
 
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {UIManager, LayoutAnimation, Linking, Platform} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-import { ScrollContext } from '../context/ScrollContext';
+import {ScrollContext} from '../context/ScrollContext';
 import AsyncStorage from '@react-native-community/async-storage';
+import {AppThemeContext} from '../context/UserContext';
+
 const logo = require('../images/PNG/wetalk_logo.png');
 const background = require('../images/PNG/wevive_bg.png');
+const mainHeadline = 'Register';
 export default class AuthView extends Component {
   state = {
-    styles: styles(false),
     scrollView: null,
+    styles: authStyles(false),
   };
   componentDidMount() {
     if (Platform.OS === 'ios') {
@@ -38,7 +40,7 @@ export default class AuthView extends Component {
       KeyboardManager.setToolbarDoneBarButtonItemText('Done');
       KeyboardManager.setToolbarManageBehaviour(0);
       KeyboardManager.setToolbarPreviousNextButtonEnable(true);
-      KeyboardManager.setShouldToolbarUsesTextFieldTintColor(true);// deprecated, use setShouldShowToolbarPlaceholder
+      KeyboardManager.setShouldToolbarUsesTextFieldTintColor(true); // deprecated, use setShouldShowToolbarPlaceholder
       KeyboardManager.setShouldShowToolbarPlaceholder(true);
       KeyboardManager.setOverrideKeyboardAppearance(false);
       KeyboardManager.setShouldResignOnTouchOutside(true);
@@ -50,15 +52,19 @@ export default class AuthView extends Component {
           this.props.navigation.setParams({BioID: true});
         }
       }
-      if (this.props.signMessage && (!this.props.route.params || this.props.route.params.BioID)) {
-        AsyncStorage.getItem('email').then((email)=>{
+      if (
+        this.props.signMessage &&
+        (!this.props.route.params || this.props.route.params.BioID)
+      ) {
+        AsyncStorage.getItem('email').then((email) => {
           if (email) {
-            this.props.signMessage(':biometric_login', 'Sign in using ' + email + '?').then((success)=>{
-              this.props.bioLoginFunction({success,hideError:true});
-            });
+            this.props
+              .signMessage(':biometric_login', 'Sign in using ' + email + '?')
+              .then((success) => {
+                this.props.bioLoginFunction({success, hideError: true});
+              });
           }
         });
-
       }
     });
 
@@ -76,10 +82,10 @@ export default class AuthView extends Component {
       global.Auth_Last_URL = '';
     });
     this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () =>
-      this.setState({styles: styles(true)})
+      this.setState({styles: authStyles(true)}),
     );
     this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () =>
-      this.setState({styles: styles(false)})
+      this.setState({styles: authStyles(false)}),
     );
   }
   handleOpenURL = async (url) => {
@@ -96,24 +102,45 @@ export default class AuthView extends Component {
   constructor(props) {
     super(props);
   }
+
   render() {
     return (
-      <>
-        <StatusBar backgroundColor="rgba(0,56,104,0)" translucent={true} barStyle="light-content" />
-        <ImageBackground
-          resizeMode="cover"
-          imageStyle={this.state.styles.bgStyle}
-          style={this.state.styles.contentBg}
-          source={background}>
-          <KeyboardAwareScrollView ref={ref => (this.state.scrollView = ref)}>
-            <ScrollContext.Provider value={{scroll:this.state.scrollView}}>
-              <View style={this.state.styles.container}>
-                {this.props.children}
+      <AppThemeContext.Consumer>
+        {({themeSettings, goBack, insets}) => (
+          <>
+            <StatusBar
+              backgroundColor="rgba(0,56,104,0)"
+              translucent={true}
+              barStyle="light-content"
+            />
+            <ImageBackground
+              resizeMode="cover"
+              imageStyle={this.state.styles.bgStyle}
+              style={this.state.styles.contentBg}
+              source={background}>
+              <View style={this.state.styles.mainLogoContainerStyle}>
+                <View style={{marginTop: insets.top}}>
+                  <ClientLogo
+                    style={this.state.styles.mainLogoStyle}
+                    imageStyle={this.state.styles.mainLogoImageStyle}
+                  />
+                </View>
+                {this.props.headline && (
+                  <Text style={this.state.styles.mainHeadlineStyle}>
+                    {this.props.headline}
+                  </Text>
+                )}
               </View>
-            </ScrollContext.Provider>
-          </KeyboardAwareScrollView>
-        </ImageBackground>
-      </>
+              <KeyboardAwareScrollView
+                ref={(ref) => (this.state.scrollView = ref)}>
+                <ScrollContext.Provider value={{scroll: this.state.scrollView}}>
+                  <View style={this.state.styles.container}>{this.props.children}</View>
+                </ScrollContext.Provider>
+              </KeyboardAwareScrollView>
+            </ImageBackground>
+          </>
+        )}
+      </AppThemeContext.Consumer>
     );
   }
 }
