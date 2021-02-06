@@ -374,10 +374,19 @@ const styles = keyboard => {
     },
     defaultAvatarImage: {
       width: responsiveWidth(50),
-      height: responsiveWidth(52),
-      borderRadius: responsiveWidth(0),
+      height: responsiveWidth(50),
+      borderRadius: responsiveWidth(25),
+      borderWidth: 1,
       justifyContent: "center",
+      alignContent: "center",
       alignSelf: "center",
+      textAlign: "center",
+      flexDirection: "row",
+      borderColor: "rgb(227,140,57)",
+      backgroundColor: "rgb(227,140,57)",
+    },
+    defaultAvatarImageIcon: {
+      top: responsiveWidth(17.5),
     },
     notificationDemo: {
       width: responsiveWidth(100),
@@ -394,6 +403,13 @@ const styles = keyboard => {
     cellInputStyle: {
       marginBottom: responsiveWidth(5),
     },
+    smileyIcon: {
+      width: responsiveWidth(65),
+      height: responsiveWidth(65),
+      alignSelf: "center",
+      marginVertical: responsiveWidth(12),
+
+    }
   });
 };
 export default styles;

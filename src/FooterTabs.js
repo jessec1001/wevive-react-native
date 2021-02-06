@@ -10,7 +10,7 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useRoute} from '@react-navigation/native';
 import {redirectToNewParams} from './utils/helpers';
-const iconSize = 2.9;
+const iconSize = 3;
 
 import {colors} from './../app.json';
 export default function FooterTabs(props) {
@@ -25,7 +25,7 @@ export default function FooterTabs(props) {
               props.navigation.push('Chat');
             }}>
             <Icon
-              name="weshare-icon"
+              name="wetalk"
               size={responsiveHeight(iconSize)}
               color={colors.footerIcons}
             />
@@ -39,7 +39,7 @@ export default function FooterTabs(props) {
               props.navigation.push('Chat');
             }}>
             <Icon
-              name="weshare-icon"
+              name="calls"
               size={responsiveHeight(iconSize)}
               color={colors.footerIcons}
             />
@@ -53,7 +53,7 @@ export default function FooterTabs(props) {
               props.navigation.push('Chat');
             }}>
             <Icon
-              name="weshare-icon"
+              name="add-new"
               size={responsiveHeight(iconSize)}
               color={colors.footerIcons}
             />
@@ -67,7 +67,7 @@ export default function FooterTabs(props) {
               props.navigation.push('Chat');
             }}>
             <Icon
-              name="weshare-icon"
+              name="chats"
               size={responsiveHeight(iconSize)}
               color={colors.footerIcons}
             />
@@ -81,7 +81,7 @@ export default function FooterTabs(props) {
               props.toggleDrawer('menu');
             }}>
             <Icon
-              name="weshare-icon"
+              name="groups"
               size={responsiveHeight(iconSize)}
               color={colors.footerIcons}
             />

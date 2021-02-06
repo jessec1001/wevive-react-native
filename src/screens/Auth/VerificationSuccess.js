@@ -1,5 +1,5 @@
 import React, {Fragment, Component, useContext} from 'react';
-import {Text, TextInput, View} from 'react-native';
+import {Text, Image, View} from 'react-native';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import Button from '../../components/Button';
@@ -69,6 +69,7 @@ export default class VerificationSuccess extends Component {
             <View>
               <Text style={styles.pageHeadlineStyle}>Congratulations!</Text>
               <Text style={styles.pageHeadlineStyle}>Your number is now verified</Text>
+              <Image source={require('../../images/PNG/smiley.png')} style={styles.smileyIcon}/>
               <View style={styles.buttonContainerStyle}>
                 <Button onPress={handleSubmit} title="NEXT" />
               </View>

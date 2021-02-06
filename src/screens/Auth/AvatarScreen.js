@@ -10,6 +10,12 @@ import AuthView from '../../views/AuthView';
 
 import {CommonActions} from '@react-navigation/native';
 import ImagePicker from 'react-native-image-crop-picker';
+import Icon from '../../components/Icon';
+import {
+  responsiveHeight,
+  responsiveWidth,
+  responsiveFontSize
+} from 'react-native-responsive-dimensions';
 const defaultAvatar = require('../../images/PNG/wewelogo.png');
 export default class AvatarScreen extends Component {
   state = {
@@ -80,13 +86,32 @@ export default class AvatarScreen extends Component {
             setFieldValue,
           }) => (
             <View>
-              <Text style={styles.pageHeadlineStyle}>Your Profile Information</Text>
-              <Text style={styles.pageTextStyle}>Your profile is encrypted. It will be visible to your contacts, when you accept or start new chats, or when you join groups.</Text>
+              <Text style={styles.pageHeadlineStyle}>
+                Your Profile Information
+              </Text>
+              <Text style={styles.pageTextStyle}>
+                Your profile is encrypted. It will be visible to your contacts,
+                when you accept or start new chats, or when you join groups.
+              </Text>
               <TouchableOpacity onPress={this.pickImage.bind(this)}>
                 <Text style={styles.pageHeadlineStyle}>Your photo</Text>
 
-                {this.state.avatarImage ? <Image source={{uri:this.state.avatarImage}} style={styles.avatarImage} />
-                : <Image source={defaultAvatar} style={styles.defaultAvatarImage} /> }
+                {this.state.avatarImage ? (
+                  <Image
+                    source={{uri: this.state.avatarImage}}
+                    style={styles.avatarImage}
+                  />
+                ) : (
+                  <View style={styles.defaultAvatarImage}>
+                    <Icon
+                      source={defaultAvatar}
+                      name="plus-icon"
+                      size={responsiveHeight(8)}
+                      color={"white"}
+                      style={styles.defaultAvatarImageIcon}
+                    />
+                  </View>
+                )}
               </TouchableOpacity>
               <View style={styles.inputContainerStyle}>
                 <View>
@@ -95,7 +120,6 @@ export default class AvatarScreen extends Component {
                     onChangeText={handleChange('name')}
                     onBlur={() => setFieldTouched('name')}
                     placeholder="Name"
-                    
                     style={styles.inputStyle}
                     name="name"
                     placeholderTextColor={styles.inputStyle.color}
