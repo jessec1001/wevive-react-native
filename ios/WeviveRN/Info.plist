@@ -40,7 +40,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Send photos and videos to your contacts.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Send photos and videos to your contacts.</string>
 	<key>UILaunchStoryboardName</key>
@@ -57,5 +57,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>wevive.ttf</string>
+	</array>
 </dict>
 </plist>

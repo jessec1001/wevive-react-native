@@ -64,6 +64,15 @@ const styles = keyboard => {
       fontSize: responsiveFontSize(1.8),
       textAlign: 'center',
     },
+    checkboxTextStyle: {
+      marginTop: responsiveWidth(1),
+      marginBottom: responsiveWidth(8.5),
+      fontSize: responsiveFontSize(1.8),
+      textAlign: 'center',
+    },
+    dropdownIcon: {
+      top: 5,
+    },
     pageTextStyleBold: {
       marginTop: responsiveWidth(1),
       marginBottom: responsiveWidth(2.5),
@@ -174,6 +183,11 @@ const styles = keyboard => {
       //alignItems: "center",
       flexDirection: "column",
       alignSelf: "center",
+    },
+    checkboxContainerStyle: {
+      top: responsiveWidth(2),
+      marginLeft: responsiveWidth(4),
+      marginTop: responsiveWidth(3)
     },
     buttonContainerStyle: {
       marginTop: responsiveHeight(0),
@@ -327,13 +341,20 @@ const styles = keyboard => {
       left: -responsiveWidth(2.5),
     },
     countryCode: {
-      width: responsiveWidth(12.5),
-      height: responsiveWidth(5),
-      position: "absolute",
-      top: responsiveWidth(5.5),
-      fontSize: responsiveFontSize(1.55),
+      alignSelf:"center",
+      fontSize: responsiveFontSize(1.5),
       fontWeight: "200",
       textAlign: "center",
+    },
+    countryCodeBox: {
+      borderRightWidth: 1,
+      borderRightColor: "#999",
+      top: responsiveWidth(4),
+      width: responsiveWidth(12.5),
+      height: responsiveWidth(7),
+      position: "absolute",
+      alignItems: "center",
+      justifyContent: "center",
     },
     avatarImage: {
       width: responsiveWidth(50),

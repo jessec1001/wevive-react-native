@@ -58,9 +58,17 @@ const countryPhoneCode = (country) => {
     return;
   }
   if (Array.isArray(phoneCodes[country])) {
-    return <Text style={styles.countryCode}>+{phoneCodes[country][0]}</Text>;
+    return (
+      <View style={styles.countryCodeBox}>
+        <Text style={styles.countryCode}>+{phoneCodes[country][0]}</Text>
+      </View>
+    );
   } else {
-    return <Text style={styles.countryCode}>+{phoneCodes[country]}</Text>;
+    return (
+      <View style={styles.countryCodeBox}>
+        <Text style={styles.countryCode}>+{phoneCodes[country]}</Text>
+      </View>
+    );
   }
 };
 export default class SignIn extends Component {
@@ -142,7 +150,7 @@ export default class SignIn extends Component {
       <BioIDContext.Consumer>
         {({available, keysExist, signMessage, toggleBioID}) => (
           <AuthView
-            headline={"Register"}
+            headline={'Register'}
             route={this.props.route}
             bioLoginFunction={this.bioLoginFunction.bind(this)}
             signMessage={available ? signMessage : false}
@@ -210,22 +218,22 @@ export default class SignIn extends Component {
                 handleSubmit,
                 setFieldValue,
               }) => (
-                <View>
-                  <Text style={styles.pageHeadlineStyle}>
-                    Enter your phone number
-                  </Text>
-                  <AuthContext.Provider
-                    value={{
-                      styles: styles,
-                      values,
-                      handleChange,
-                      errors,
-                      setFieldTouched,
-                      touched,
-                      isValid,
-                      handleSubmit,
-                      setFieldValue,
-                    }}>
+                <AuthContext.Provider
+                  value={{
+                    styles: styles,
+                    values,
+                    handleChange,
+                    errors,
+                    setFieldTouched,
+                    touched,
+                    isValid,
+                    handleSubmit,
+                    setFieldValue,
+                  }}>
+                  <View>
+                    <Text style={styles.pageHeadlineStyle}>
+                      Enter your phone number
+                    </Text>
                     <View>
                       <FormInput
                         type="select"
@@ -241,60 +249,65 @@ export default class SignIn extends Component {
                         />
                       )}
                     </View>
-                  </AuthContext.Provider>
-                  <View style={styles.inputContainerStyle}>
-                    <View>
-                      {countryPhoneCode(values.country)}
-                      <TextInput
-                        value={values.phone}
-                        onChangeText={(phone) =>
-                          setFieldValue('phone', phone.trim())
-                        }
-                        onBlur={() => setFieldTouched('phone')}
-                        placeholder="Phone"
-                        style={styles.inputStyle}
-                        name="phone"
-                        placeholderTextColor={styles.inputStyle.color}
-                        autoCapitalize="none"
-                        testID="phone"
-                        accessibilityLabel="phone"
-                        accessible
-                        textContentType="telephoneNumber"
-                      />
-                    </View>
-                  </View>
-                  {touched.phone && errors.phone && (
-                    <Text style={styles.errorStyle}>{errors.phone}</Text>
-                  )}
-                  <Text style={styles.ageHeadlineStyle}>
-                    Are you under the age of 16?
-                  </Text>
-                  <View style={styles.buttonContainerStyle}>
-                    <Button onPress={handleSubmit} title="NEXT" />
-                  </View>
-                  {this.state.email && keysExist && (
-                    <View style={styles.buttonContainerStyle}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          signMessage(':biometric_login', 'Sign in?').then(
-                            (success) => {
-                              this.bioLoginFunction({success});
-                            },
-                          );
-                        }}
-                        title="Login automatically">
-                        <Image
-                          source={require('../../images/PNG/finger.png')}
-                          style={{
-                            width: 40,
-                            height: 40,
-                            tintColor: 'rgba(230,60,60,0.9)',
-                          }}
+                    <View style={styles.inputContainerStyle}>
+                      <View>
+                        {countryPhoneCode(values.country)}
+                        <TextInput
+                          value={values.phone}
+                          onChangeText={(phone) =>
+                            setFieldValue('phone', phone.trim())
+                          }
+                          onBlur={() => setFieldTouched('phone')}
+                          placeholder="Phone"
+                          style={styles.inputStyle}
+                          name="phone"
+                          placeholderTextColor={styles.inputStyle.color}
+                          autoCapitalize="none"
+                          testID="phone"
+                          accessibilityLabel="phone"
+                          accessible
+                          textContentType="telephoneNumber"
                         />
-                      </TouchableOpacity>
+                      </View>
                     </View>
-                  )}
-                </View>
+                    {touched.phone && errors.phone && (
+                      <Text style={styles.errorStyle}>{errors.phone}</Text>
+                    )}
+                    <Text style={styles.checkboxTextStyle}>
+                      Are you under the age of 16?
+                      <FormInput
+                        type="checkbox"
+                        name="over16"
+                        label={trans('auth.over16')}
+                      />
+                    </Text>
+                    <View style={styles.buttonContainerStyle}>
+                      <Button onPress={handleSubmit} title="NEXT" />
+                    </View>
+                    {this.state.email && keysExist && (
+                      <View style={styles.buttonContainerStyle}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            signMessage(':biometric_login', 'Sign in?').then(
+                              (success) => {
+                                this.bioLoginFunction({success});
+                              },
+                            );
+                          }}
+                          title="Login automatically">
+                          <Image
+                            source={require('../../images/PNG/finger.png')}
+                            style={{
+                              width: 40,
+                              height: 40,
+                              tintColor: 'rgba(230,60,60,0.9)',
+                            }}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                </AuthContext.Provider>
               )}
             </Formik>
 

@@ -1,3 +1,3 @@
-import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
-import icoMoonConfig from './../fonts/lottery.json';
-export default createIconSetFromIcoMoon(icoMoonConfig);
+import {createIconSetFromFontello} from 'react-native-vector-icons';
+import icoMoonConfig from './../fonts/wevive.json';
+export default createIconSetFromFontello(icoMoonConfig);
