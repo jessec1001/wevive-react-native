@@ -84,6 +84,7 @@
     "react-native-screens": "^2.17.1",
     "react-native-scroll-into-view": "^1.0.3",
     "react-native-simple-radio-button": "^2.7.4",
+    "react-native-smooth-pincode-input": "^1.0.9",
     "react-native-sqlite-storage": "git+ssh://git@gitlab.com/wevive/react-native-sqlite-storage#master",
     "react-native-store-review": "^0.1.5",
     "react-native-swiper": "^1.6.0",

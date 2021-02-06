@@ -111,7 +111,7 @@ export default class AuthView extends Component {
             <StatusBar
               backgroundColor="rgba(0,56,104,0)"
               translucent={true}
-              barStyle="light-content"
+              barStyle="dark-content"
             />
             <ImageBackground
               resizeMode="cover"

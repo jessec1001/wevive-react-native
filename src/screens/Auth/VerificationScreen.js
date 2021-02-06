@@ -9,7 +9,7 @@ import APIService from '../../service/APIService';
 import AuthView from '../../views/AuthView';
 
 import {CommonActions} from '@react-navigation/native';
-
+import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 export default class VerificationScreen extends Component {
   state = {
     email: null,
@@ -53,7 +53,7 @@ export default class VerificationScreen extends Component {
             });
           }}
           validationSchema={yup.object().shape({
-            pin: yup.string().min(4).required(),
+            pin: yup.string().min(6).required(),
           })}>
           {({
             values,
@@ -71,33 +71,25 @@ export default class VerificationScreen extends Component {
               </Text>
               <Text style={styles.pageTextStyle}>An SMS has been sent to:</Text>
               <Text style={styles.pageTextStyleBold}>+44 7760235520</Text>
-              <Text style={styles.pageTextStyle}>Please enter the code below:</Text>
-              <View style={styles.inputContainerStyle}>
-                <View>
-                  <TextInput
-                    value={values?.pin}
-                    onChangeText={(pin) =>
-                      setFieldValue('pin', pin.trim())
-                    }
-                    onBlur={() => setFieldTouched('pin')}
-                    placeholder="PIN"
-                    style={styles.inputStyle}
-                    name="pin"
-                    placeholderTextColor={styles.inputStyle.color}
-                    autoCapitalize="none"
-                    testID="pin"
-                    accessibilityLabel="pin"
-                    accessible
-                    textContentType="oneTimeCode"
-                  />
-                </View>
-              </View>
+              <Text style={styles.pageTextStyle}>
+                Please enter the code below:
+              </Text>
+              <SmoothPinCodeInput
+                codeLength={6}
+                containerStyle={styles.cellInputStyle}
+                cellStyle={styles.cellStyle}
+                cellStyleFocused={styles.cellStyleFocused}
+                value={values.pin}
+                onTextChange={handleChange('pin')}
+              />
               {touched.pin && errors.pin && (
                 <Text style={styles.errorStyle}>{errors.pin}</Text>
               )}
-              <View style={styles.buttonContainerStyle}>
-                <Button onPress={handleSubmit} title="NEXT" />
-              </View>
+              {!errors.pin && values.pin.length > 0 &&
+                <View style={styles.buttonContainerStyle}>
+                  <Button onPress={handleSubmit} title="NEXT" />
+                </View>
+              }
             </View>
           )}
         </Formik>

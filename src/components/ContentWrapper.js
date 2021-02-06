@@ -1,12 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import React, { useState,useEffect,useContext } from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  Image,
-} from 'react-native';
+import React, {useState, useEffect, useContext} from 'react';
+import {StyleSheet, ScrollView, View, Text, Image} from 'react-native';
 
 import {
   responsiveHeight,
@@ -44,24 +38,32 @@ const ScrollIntoViewOptions = {
 
   // Advanced: use these options as escape hatches if the lib default functions do not satisfy your needs
   //computeScrollY: (scrollViewLayout, viewLayout, scrollY, insets, align) => {},
-  measureElement: viewRef => {},
+  measureElement: (viewRef) => {},
 };
 
 // Wrap the original ScrollView
 const CustomScrollView = wrapScrollView(ScrollView);
 import {colors} from '../../app.json';
 import APIService from '../service/APIService';
-import { useNavigation } from '@react-navigation/native';
-import { UserContext } from '../context/UserContext';
+import {useNavigation} from '@react-navigation/native';
+import {UserContext} from '../context/UserContext';
 
 const ScrollComponent = (props) => {
   if (!props.scrollElement) {
-    return <CustomScrollView
-      scrollIntoViewOptions={ScrollIntoViewOptions}
-      contentContainerStyle={!props.center ? styles.contentContainerStyle : styles.contentContainerStyleCenter}
-      scrollEnabled={props.scrollEnabled} ref={(ref) => global.contentScrollView = ref} bounces={false}>
-      {props.children}
-    </CustomScrollView>;
+    return (
+      <CustomScrollView
+        scrollIntoViewOptions={ScrollIntoViewOptions}
+        contentContainerStyle={
+          !props.center
+            ? styles.contentContainerStyle
+            : styles.contentContainerStyleCenter
+        }
+        scrollEnabled={props.scrollEnabled}
+        ref={(ref) => (global.contentScrollView = ref)}
+        bounces={false}>
+        {props.children}
+      </CustomScrollView>
+    );
   } else {
     return props.scrollElement;
   }
@@ -69,7 +71,7 @@ const ScrollComponent = (props) => {
 
 export default function ContentWrapper(props) {
   const {authData, updateMe} = useContext(UserContext);
-  const [scrollEnabled,setScrollEnabled] = useState(true);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
   const navigation = useNavigation();
   useEffect(() => {
     if (!authData) {
@@ -77,34 +79,28 @@ export default function ContentWrapper(props) {
     }
   });
   return (
-      <View style={styles.scrollView}>
-        {props.title &&
-          <View style={styles.titleView}>
-            <Text style={styles.titleText}>{props.title}</Text>
-            <Text style={styles.balanceText}>£{authData?.balance}</Text>
-          </View>
-        }
-        <ScrollComponent>
-          <Image
-            style={styles.logo}
-            source={logo}
-          />
-          <Image
-            style={styles.logo2}
-            source={logo2}
-          />
-          <Image
-            style={styles.logo3}
-            source={logo3}
-          />
-          {props.details}
-          <View style={{
-            paddingHorizontal: !props.paddingHorizontal ? responsiveWidth(5) : props.paddingHorizontal,
+    <View style={styles.scrollView}>
+      {props.title && (
+        <View style={styles.titleView}>
+          <Text style={styles.titleText}>{props.title}</Text>
+          <Text style={styles.balanceText}>£{authData?.balance}</Text>
+        </View>
+      )}
+      <ScrollComponent>
+        <Image style={styles.logo} source={logo} />
+        <Image style={styles.logo2} source={logo2} />
+        <Image style={styles.logo3} source={logo3} />
+        {props.details}
+        <View
+          style={{
+            paddingHorizontal: !props.paddingHorizontal
+              ? responsiveWidth(5)
+              : props.paddingHorizontal,
           }}>
-            {props.children}
-          </View>
-        </ScrollComponent>
-      </View>
+          {props.children}
+        </View>
+      </ScrollComponent>
+    </View>
   );
 }
 
@@ -138,7 +134,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     justifyContent: 'center',
     textTransform: 'uppercase',
-    alignSelf:'center',
+    alignSelf: 'center',
     flexShrink: 1,
   },
   balanceText: {
@@ -146,10 +142,9 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     color: colors.textMain,
     textAlign: 'center',
-    alignSelf:'center',
+    alignSelf: 'center',
     justifyContent: 'center',
     textTransform: 'uppercase',
-
   },
   logo: {
     width: 138 * 1.2,
@@ -161,14 +156,14 @@ const styles = StyleSheet.create({
   },
   logo2: {
     width: responsiveWidth(45),
-    height: 25 / 111 * responsiveWidth(44),
+    height: (25 / 111) * responsiveWidth(44),
     position: 'absolute',
     bottom: responsiveWidth(0.5),
     left: responsiveWidth(50),
     marginLeft: -responsiveWidth(45) / 2,
   },
   logo3: {
-    width:  responsiveWidth(30),
+    width: responsiveWidth(30),
     height: (551 / 4243) * responsiveWidth(29),
     position: 'absolute',
     bottom: responsiveWidth(13),

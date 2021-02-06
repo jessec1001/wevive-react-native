@@ -106,7 +106,6 @@ export default class Main extends Component {
       contentBg: {
         width: responsiveWidth(100),
         flex: 1,
-        backgroundColor: colors.main,
       },
       contentBgImage: {
         resizeMode: 'cover',
@@ -176,8 +175,7 @@ export default class Main extends Component {
       <ImageBackground
         resizeMode="cover"
         imageStyle={this.state.styles.contentBgImage}
-        style={this.state.styles.contentBg}
-        source={background}>
+        style={this.state.styles.contentBg}>
         <AppThemeContext.Consumer>
           {({themeSettings, goBack, insets}) => (
             <>

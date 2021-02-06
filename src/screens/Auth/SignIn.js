@@ -49,7 +49,6 @@ Object.keys(allCountries)
   .map((s) => {
     sortedCountries[s] = allCountries[s];
   });
-//console.error(countries);
 const googleLogin = false;
 const appleLogin = false;
 import {AuthContext} from '../../context/AuthContext';

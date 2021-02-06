@@ -9,6 +9,8 @@ import APIService from '../../service/APIService';
 import AuthView from '../../views/AuthView';
 
 import {CommonActions} from '@react-navigation/native';
+import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
+import trans from '../../utils/trans';
 
 export default class PINScreen extends Component {
   state = {
@@ -24,7 +26,17 @@ export default class PINScreen extends Component {
       }),
     );
   };
+  makeid = (length) => {
+    var result = '';
+    var characters = '0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  };
   render() {
+    const rand = this.makeid(6);
     const {navigate} = this.props.navigation;
     return (
       <AuthView
@@ -54,7 +66,7 @@ export default class PINScreen extends Component {
           }}
           validationSchema={yup.object().shape({
             //email: yup.string().email().required(),
-            //password: yup.string().min(3).required(),
+            pin: yup.string().min(6).required().oneOf([rand, null], trans('auth.password_must_match')),
           })}>
           {({
             values,
@@ -66,34 +78,30 @@ export default class PINScreen extends Component {
             handleSubmit,
             setFieldValue,
           }) => (
-            <View>
+            <>
               <Text style={styles.pageHeadlineStyle}>Save this PIN!</Text>
-              <Text style={styles.pageTextStyleBold}>12345</Text>
-              <Text style={styles.pageTextStyle}>Your PIN keeps your information safe and accessible to you in case you need to reinstall WeTalk.</Text>
-              <Text style={styles.pageTextStyle}>Please write it down and then enter it below to continue.</Text>
-              <View style={styles.inputContainerStyle}>
-                  <TextInput
-                    value={values.pin}
-                    onChangeText={(pin) =>
-                      setFieldValue('pin', pin.trim())
-                    }
-                    onBlur={() => setFieldTouched('pin')}
-                    placeholder="PIN"
-                    style={styles.inputStyle}
-                    name="pin"
-                    placeholderTextColor={styles.inputStyle.color}
-                    autoCapitalize="none"
-                    testID="pin"
-                    accessibilityLabel="pin"
-                    accessible
-                    textContentType="oneTimeCode"
-                  />
-              </View>
-
-              <View style={styles.buttonContainerStyle}>
-                <Button onPress={handleSubmit} title="NEXT" />
-              </View>
-            </View>
+              <Text style={styles.pageTextStyleBold}>{rand}</Text>
+              <Text style={styles.pageTextStyle}>
+                Your PIN keeps your information safe and accessible to you in
+                case you need to reinstall WeTalk.
+              </Text>
+              <Text style={styles.pageTextStyle}>
+                Please write it down and then enter it below to continue.
+              </Text>
+              <SmoothPinCodeInput
+                codeLength={6}
+                containerStyle={styles.cellInputStyle}
+                cellStyle={styles.cellStyle}
+                cellStyleFocused={styles.cellStyleFocused}
+                value={values.pin}
+                onTextChange={handleChange('pin')}
+              />
+              {values.pin.length > 0 && !errors.pin && (
+                <View style={styles.buttonContainerStyle}>
+                  <Button onPress={handleSubmit} title="NEXT" />
+                </View>
+              )}
+            </>
           )}
         </Formik>
       </AuthView>

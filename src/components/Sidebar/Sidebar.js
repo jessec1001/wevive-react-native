@@ -1,5 +1,11 @@
 import React, {useState, useContext} from 'react';
-import { Text, StyleSheet, View,  ScrollView, TouchableOpacity} from 'react-native';
+import {
+  Text,
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import {
   responsiveHeight,
   responsiveWidth,
@@ -11,34 +17,45 @@ const socialIconSize = 5.5;
 import Icon from '../Icon';
 import AsyncStorage from '@react-native-community/async-storage';
 
-import { getAppVersion } from './../CodePushVersion';
+import {getAppVersion} from './../CodePushVersion';
 import {colors} from './../../../app.json';
-import { UserContext } from '../../context/UserContext';
+import {UserContext} from '../../context/UserContext';
 import ClientName from '../ClientName';
 
 export default function Sidebar(props) {
-  const [version,setVersion] = useState('unk');
+  const [version, setVersion] = useState('unk');
   const {authData} = useContext(UserContext);
-  getAppVersion().then(version => {
+  getAppVersion().then((version) => {
     setVersion(version);
   });
-  return <ScrollView style={styles.sidebar} padder={false}
+  return (
+    <ScrollView
+      style={styles.sidebar}
+      padder={false}
       contentContainerStyle={styles.sidebarContainer}>
-      <View style={{flexDirection:'row',marginHorizontal: responsiveWidth(3.5), borderBottomWidth:1,borderBottomColor:colors.contentBorder}}>
-
+      <View
+        style={{
+          flexDirection: 'row',
+          marginHorizontal: responsiveWidth(3.5),
+          borderBottomWidth: 1,
+          borderBottomColor: colors.contentBorder,
+        }}>
         <View style={{}}>
           <Icon
-            name="closeicon"
+            name="close"
             style={styles.closeButton}
             onPress={() => props.closeDrawer()}
           />
         </View>
-        {props.drawerType == 'profile' ?
-        <View style={{justifyContent: 'center',marginLeft: responsiveWidth(6.5)}}>
-          <Text style={styles.personText}>{authData?.name}</Text>
-          <ClientName style={styles.personText} />
-        </View>
-        : null}
+        {props.drawerType == 'profile' ? (
+          <View
+            style={{
+              justifyContent: 'center',
+              marginLeft: responsiveWidth(6.5),
+            }}>
+            <Text style={styles.personText}>{authData?.name}</Text>
+          </View>
+        ) : null}
       </View>
       <SidebarContent
         closeDrawer={props.closeDrawer}
@@ -48,7 +65,7 @@ export default function Sidebar(props) {
         drawerType={props.drawerType}
       />
       <Text style={styles.versionText}>{version}</Text>
-      {props.drawerType == 'profile' ?
+      {props.drawerType == 'profile' ? (
         <TouchableOpacity
           style={styles.logout}
           onPress={() => {
@@ -58,22 +75,20 @@ export default function Sidebar(props) {
             AsyncStorage.removeItem('password_sha512');
             props.closeDrawer();
             props.navigation.navigate('Auth', {
-              screen:'SignIn',
-              params:{
-                BioID:false,
+              screen: 'SignIn',
+              params: {
+                BioID: false,
               },
             });
-          }}
-        >
-        <Text style={styles.logoutText}>LOGOUT</Text>
-
+          }}>
+          <Text style={styles.logoutText}>LOGOUT</Text>
         </TouchableOpacity>
-      : null}
-    </ScrollView>;
+      ) : null}
+    </ScrollView>
+  );
 }
 
 module.exports = Sidebar;
-
 
 const styles = StyleSheet.create({
   sidebar: {
@@ -89,7 +104,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   closeButton: {
-    color: colors.headerText,
+    color: "white",
     fontSize: responsiveFontSize(3),
     marginVertical: responsiveWidth(4),
   },
@@ -133,19 +148,19 @@ const styles = StyleSheet.create({
     left: 30,
   },
   personText: {
-    color:colors.sidebarText,
-    fontSize:responsiveFontSize(1.9),
+    color: colors.sidebarText,
+    fontSize: responsiveFontSize(1.9),
     fontWeight: '200',
   },
   logoutText: {
-    color:colors.sidebarText,
+    color: colors.sidebarText,
     fontSize: responsiveFontSize(2),
   },
   versionText: {
-    position:'absolute',
+    position: 'absolute',
     bottom: 4,
-    right:responsiveWidth(20),
-    opacity:1,
+    right: responsiveWidth(20),
+    opacity: 1,
     color: colors.versionText,
   },
 });

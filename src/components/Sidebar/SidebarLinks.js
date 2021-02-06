@@ -2,13 +2,13 @@ const SidebarLinks = {
   Account: {
     text: 'MY ACCOUNT',
     route: 'Account',
-    icon: 'menu',
+    icon: 'w-watermark',
     type: 'profile',
   },
   Details: {
     text: 'MY DETAILS',
     route: 'Details',
-    icon: 'menu',
+    icon: 'w-watermark',
     type: 'profile',
   },
   OpenDraws: {

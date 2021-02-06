@@ -164,6 +164,13 @@ const styles = keyboard => {
       //fontFamily: 'Adelle',
       zIndex: 9,
     },
+    codeInputStyle: {
+      textAlign: 'left',
+      fontSize: responsiveHeight(2.5),
+      padding: responsiveHeight(2.5),
+      marginTop: responsiveHeight(0),
+      letterSpacing: responsiveWidth(12.5),
+    },
     inputStyle: {
       textAlign: 'left',
       fontSize: responsiveHeight(2.5),
@@ -376,7 +383,17 @@ const styles = keyboard => {
       width: responsiveWidth(100),
       height: responsiveWidth(100),
       marginBottom: responsiveWidth(3),
-    }
+    },
+    cellStyle: {
+      borderBottomWidth: 2,
+      borderColor: 'gray',
+    },
+    cellStyleFocused: {
+      borderColor: 'black',
+    },
+    cellInputStyle: {
+      marginBottom: responsiveWidth(5),
+    },
   });
 };
 export default styles;

@@ -120,7 +120,7 @@ const RootStack = () => {
           changedTheme.hiddenFooter = false;
         }
       }
-      if (routeName == 'LotteriesList' && navState.params?.status == 'all') {
+      if (routeName === 'Chat') {
         changedTheme.hiddenBack = true;
       } else {
         changedTheme.hiddenBack = false;
