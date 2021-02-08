@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>684342741259-q40nq7cj61q836sroviu0vjg7rfjt0gi.apps.googleusercontent.com</string>
+	<string>684342741259-2u47ftcjaplp7pg3fg1mt55q9k41ov92.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.684342741259-q40nq7cj61q836sroviu0vjg7rfjt0gi</string>
+	<string>com.googleusercontent.apps.684342741259-2u47ftcjaplp7pg3fg1mt55q9k41ov92</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCnf5K1EyVJbeAw26fhueqTwIdxqVS2oiQ</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.vividunity.weviveapp</string>
+	<string>com.wevive.weviveapp</string>
 	<key>PROJECT_ID</key>
 	<string>wevive-app</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:684342741259:ios:13e2ddf4a50c304426fa0e</string>
+	<string>1:684342741259:ios:b88fcc9b9c20d96426fa0e</string>
 </dict>
 </plist>
