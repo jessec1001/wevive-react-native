@@ -9,10 +9,8 @@ import {
 } from 'react-native-responsive-dimensions';
 import ChatModule, {ChatPlugin} from 'react-native-chat-plugin';
 import contentStyles from '../../styles/content';
-const chat_url = 'http://192.168.1.45:3000/';
-const token =
-  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjEyMzc3NTY1LCJqdGkiOiI1NTRhMDRjN2E3YjI0NDA4YmQ1YjE3MjI0NmRlNDJkYiIsInVzZXJfaWQiOiJtc3Ryb2tpbkBnbWFpbC5jb20ifQ.Bg935s79B9rq5kYTe58HCNGm3Yhvnk4-ownxio0XN54';
-
+const chat_url = 'https://chat.wevive.co.uk/';
+const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjEyODg5MzMyLCJqdGkiOiIxYjgzYjhjMDFiZTQ0Yzk0ODQ3Yzg1NzkzOGI0MWQzZiIsInVzZXJfaWQiOiJtaWNoYWlsQG91cmVuZ2luZXJvb20uY29tIn0.ziXt7OFOEKk-1uRpg6-dx5j1aAFvWn3zlfi32lQQ9os";
 export default class About extends Component {
   state = {
     contentStyles: contentStyles(),
@@ -20,7 +18,7 @@ export default class About extends Component {
   };
   render() {
     return (
-        <ChatModule socketIoUrl={chat_url} options={{token}} />
+      <ChatModule socketIoUrl={chat_url} options={{token}} />
     );
   }
 }

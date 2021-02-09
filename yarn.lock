@@ -1015,6 +1015,11 @@
     "@nodelib/fs.scandir" "2.1.4"
     fastq "^1.6.0"
 
+"@react-native-clipboard/clipboard@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@react-native-clipboard/clipboard/-/clipboard-1.6.0.tgz#27d7a6751bca44c5cee06744e093a891374960f7"
+  integrity sha512-WiD3bK8+b4k4aVMQ0AzPGlJG6Y/8tMq/nkBUdmoMFOBa6bByoE2jfSCLkObDWZG6Ig0F0zBz082FFyNrSZ9QNA==
+
 "@react-native-community/async-storage@^1.12.1":
   version "1.12.1"
   resolved "https://registry.yarnpkg.com/@react-native-community/async-storage/-/async-storage-1.12.1.tgz#25f821b4f6b13abe005ad67e47c6f1cee9f27b24"
@@ -6539,16 +6544,20 @@ react-native-cache-store@^1.0.2:
   integrity sha1-MkVYyfq3zZjvyXWtoAzm4VM3N+E=
 
 "react-native-chat-plugin@git+ssh://git@gitlab.com/wevive/chat-plugin#master":
-  version "0.0.17"
-  resolved "git+ssh://git@gitlab.com/wevive/chat-plugin#89141c3007443f43302384579ea992b9f1d90d12"
+  version "0.0.18"
+  resolved "git+ssh://git@gitlab.com/wevive/chat-plugin#a308b000371d5ab906aef9d560c6c45b2d27366d"
   dependencies:
+    "@react-native-clipboard/clipboard" "^1.6.0"
     "@react-native-community/masked-view" "0.1.10"
     "@react-navigation/native" "^5.9.2"
     "@react-navigation/stack" "^5.14.1"
     prop-types "^15.7.2"
     react-dom "~17.0.1"
+    react-native-image-picker "^3.1.4"
     react-native-linear-gradient "^2.5.6"
+    react-native-recording "^0.5.1"
     react-native-swipe-list-view "^3.2.5"
+    react-native-webview "^11.2.1"
     socket.io-client "^3.1.0"
 
 react-native-collapsible@^1.5.3:
@@ -6647,6 +6656,11 @@ react-native-image-crop-picker@^0.35.3:
   version "0.35.3"
   resolved "https://registry.yarnpkg.com/react-native-image-crop-picker/-/react-native-image-crop-picker-0.35.3.tgz#cc9ae109ae5ac2d0877a0c5ac51935421a3651d8"
   integrity sha512-JMBmtfdJvxvPNTjSmiqNaBuEAqwwzyYvgvwiOU8ikIE113RD6hPV+wpxGFCqGJPzJF/JO6uEzpDOcFCfHZbmtQ==
+
+react-native-image-picker@^3.1.4:
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/react-native-image-picker/-/react-native-image-picker-3.1.4.tgz#99cd18074fbfe1d70e8281040df201d31005577d"
+  integrity sha512-5pRmrBx+vZcf/UH6n95gxnBq5B7tRDZWIDnhvM4JxlthOChuvEEiShN+MMs7ue+lK26RXws5BOgKGd6MtQI/LQ==
 
 react-native-inappbrowser-reborn@^3.5.1:
   version "3.5.1"
@@ -6778,6 +6792,11 @@ react-native-reanimated@^1.13.2:
   integrity sha512-O+WhgxSjOIzcVdAAvx+h2DY331Ek1knKlaq+jsNLpC1fhRy9XTdOObovgob/aF2ve9uJfPEawCx8381g/tUJZQ==
   dependencies:
     fbjs "^1.0.0"
+
+react-native-recording@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/react-native-recording/-/react-native-recording-0.5.1.tgz#80adb9940921389c68a32b30d45c2acbece5d887"
+  integrity sha512-rn7hgFs/2wlLDIMuvytYFofv53yQT/1CfhFqeSkFBO051UmnW5IF5B1stqpbRuABu+eimPV53bOiQmf6G0O1vg==
 
 react-native-render-html@^5.0.1:
   version "5.0.1"
