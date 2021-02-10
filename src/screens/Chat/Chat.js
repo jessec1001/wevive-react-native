@@ -11,7 +11,7 @@ import ChatModule, {ChatPlugin} from 'react-native-chat-plugin';
 import contentStyles from '../../styles/content';
 import Icon from '../../components/Icon';
 const chat_url = 'https://chat.wevive.co.uk/';
-const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjEyODg5MzMyLCJqdGkiOiIxYjgzYjhjMDFiZTQ0Yzk0ODQ3Yzg1NzkzOGI0MWQzZiIsInVzZXJfaWQiOiJtaWNoYWlsQG91cmVuZ2luZXJvb20uY29tIn0.ziXt7OFOEKk-1uRpg6-dx5j1aAFvWn3zlfi32lQQ9os";
+const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjEzMDEyNjYzLCJqdGkiOiJlYzM1MjljOWM5NmQ0MjMzYTE0ODAwOWQ4ZWNjN2MwMiIsInVzZXJfaWQiOiJwaGlsbGlwK2NoYXRAb3VyZW5naW5lcm9vbS5jb20ifQ.QGR-UgImYZ8Cv9zFiWqlqFRW_lB6aYiyT1BZ1qVdZ3Q";
 export default class About extends Component {
   state = {
     contentStyles: contentStyles(),
