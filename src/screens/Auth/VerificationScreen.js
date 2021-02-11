@@ -24,6 +24,9 @@ export default class VerificationScreen extends Component {
       }),
     );
   };
+  handleBack = () => {
+    this.props.navigation.goBack();
+  };
   render() {
     const {navigate} = this.props.navigation;
     return (
@@ -37,24 +40,23 @@ export default class VerificationScreen extends Component {
           }}
           onSubmit={async (values, actions) => {
             global.appIsLoading();
-            const phone_number = await AsyncStorage.getItem('phoneNumber');
-            const session_token = await AsyncStorage.getItem('sessionToken');
             APIService('users/phone_sign_in/', {
-              phone_number: phone_number,
+              phone_number:
+                this.props.route.params.countryCode +
+                this.props.route.params.phoneNumber,
               security_code: values.pin,
               remember_me: 1,
-              session_token: session_token,
+              session_token: this.props.route.params.sessionToken,
             }).then((result) => {
               global.appIsNotLoading();
-              this.navigateSuccess();
               if (result) {
                 if (result.access_token) {
                   AsyncStorage.setItem('userToken', result.access_token);
                   AsyncStorage.setItem('refreshToken', result.refresh_token);
+                  this.navigateSuccess();
                 } else {
-                  actions.setFieldError('pin', JSON.stringify(result));
+                  actions.setFieldError('pin', result.non_field_errors[0]);
                 }
-                this.navigateSuccess();
               } else {
                 actions.setFieldError(
                   'pin',
@@ -81,7 +83,7 @@ export default class VerificationScreen extends Component {
                 Security Verification
               </Text>
               <Text style={styles.pageTextStyle}>An SMS has been sent to:</Text>
-              <Text style={styles.pageTextStyleBold}>+44 7760235520</Text>
+              <Text style={styles.pageTextStyleBold}>{this.props.route.params.countryCode} {this.props.route.params.phoneNumber}</Text>
               <Text style={styles.pageTextStyle}>
                 Please enter the code below:
               </Text>

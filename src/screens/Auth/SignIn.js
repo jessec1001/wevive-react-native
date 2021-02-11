@@ -52,6 +52,17 @@ Object.keys(allCountries)
 const googleLogin = false;
 const appleLogin = false;
 import {AuthContext} from '../../context/AuthContext';
+import {ClientContext} from '../../context/ClientContext';
+const getCountryPhoneCode = (country) => {
+  if (!country || !phoneCodes[country]) {
+    return;
+  }
+  if (Array.isArray(phoneCodes[country])) {
+    return `+${phoneCodes[country][0]}`;
+  } else {
+    return `+${phoneCodes[country]}`;
+  }
+};
 const countryPhoneCode = (country) => {
   if (!country || !phoneCodes[country]) {
     return;
@@ -59,13 +70,13 @@ const countryPhoneCode = (country) => {
   if (Array.isArray(phoneCodes[country])) {
     return (
       <View style={styles.countryCodeBox}>
-        <Text style={styles.countryCode}>+{phoneCodes[country][0]}</Text>
+        <Text style={styles.countryCode}>{getCountryPhoneCode(country)}</Text>
       </View>
     );
   } else {
     return (
       <View style={styles.countryCodeBox}>
-        <Text style={styles.countryCode}>+{phoneCodes[country]}</Text>
+        <Text style={styles.countryCode}>{getCountryPhoneCode(country)}</Text>
       </View>
     );
   }
@@ -75,12 +86,22 @@ export default class SignIn extends Component {
     email: null,
     bioAccessToken: null,
     avatarImage: null,
+    phoneNumber: null,
   };
-  navigateSuccess = () => {
+  navigateSuccess = (countryCode, phoneNumber, sessionToken) => {
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: 'VerificationScreen'}],
+        routes: [
+          {
+            name: 'VerificationScreen',
+            params: {
+              countryCode,
+              phoneNumber,
+              sessionToken,
+            },
+          },
+        ],
       }),
     );
   };
@@ -88,6 +109,15 @@ export default class SignIn extends Component {
     AsyncStorage.getItem('email').then((email) => {
       this.setState({email});
     });
+    AsyncStorage.multiGet(['countryCode', 'phoneNumber', 'sessionToken']).then(
+      (items) => {
+        const k = {};
+        items.map((i) => (k[i[0]] = i[1]));
+        if (k.countryCode && k.phoneNumber && k.sessionToken) {
+          this.navigateSuccess(k.countryCode, k.phoneNumber, k.sessionToken);
+        }
+      },
+    );
     AsyncStorage.getItem('bioAccessToken').then((bioAccessToken) => {
       this.setState({bioAccessToken});
     });
@@ -146,69 +176,77 @@ export default class SignIn extends Component {
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <BioIDContext.Consumer>
-        {({available, keysExist, signMessage, toggleBioID}) => (
-          <AuthView
-            headline={'Register'}
-            route={this.props.route}
-            bioLoginFunction={this.bioLoginFunction.bind(this)}
-            signMessage={available ? signMessage : false}
-            navigation={this.props.navigation}>
-            {this.props.route.params?.message ? (
-              <Text style={styles.headlineStyle}>
-                {this.props.route.params.message}
-              </Text>
-            ) : null}
-            <Formik
-              initialValues={{
-                phone_number: this.props.route.params?.phone_number,
-              }}
-              onSubmit={(values, actions) => {
-                global.appIsLoading();
-                APIService('phone/register', {
-                  phone_number: values.phone_number,
-                }).then((result) => {
-                  global.appIsNotLoading();
-                  if (result) {
-                    if (result.session_token) {
-                      AsyncStorage.setItem('phoneNumber', values.phone_number);
-                      AsyncStorage.setItem(
-                        'sessionToken',
-                        result.session_token,
-                      );
-                      this.navigateSuccess();
-                    } else {
-                      Object.keys(result).forEach((key) => {
-                        if (key === 'detail') {
-                          actions.setFieldError('email', result[key]);
+      <ClientContext.Consumer>
+        {({geo}) => (
+          <BioIDContext.Consumer>
+            {({available, keysExist, signMessage, toggleBioID}) => (
+              <AuthView
+                headline={'Register'}
+                route={this.props.route}
+                bioLoginFunction={this.bioLoginFunction.bind(this)}
+                signMessage={available ? signMessage : false}
+                navigation={this.props.navigation}>
+                {this.props.route.params?.message ? (
+                  <Text style={styles.headlineStyle}>
+                    {this.props.route.params.message}
+                  </Text>
+                ) : null}
+                <Formik
+                  initialValues={{
+                    country: geo && geo.geo ? geo.geo.country_code : "GB",
+                    phone:
+                      this.state.phoneNumber ||
+                      this.props.route.params?.phone_number,
+                  }}
+                  onSubmit={(values, actions) => {
+                    global.appIsLoading();
+                    const phone_number =
+                      getCountryPhoneCode(values.country) + values.phone;
+                    APIService('phone/register/', {
+                      phone_number,
+                    }).then((result) => {
+                      global.appIsNotLoading();
+                      if (result) {
+                        if (result.session_token) {
+                          AsyncStorage.setItem(
+                            'countryCode',
+                            getCountryPhoneCode(values.country),
+                          );
+                          AsyncStorage.setItem('phoneNumber', values.phone);
+                          AsyncStorage.setItem(
+                            'sessionToken',
+                            result.session_token,
+                          );
+                          this.navigateSuccess(
+                            getCountryPhoneCode(values.country),
+                            values.phone,
+                            result.session_token,
+                          );
                         } else {
-                          actions.setFieldError(key, result[key]);
+                          Object.keys(result).forEach((key) => {
+                            if (key === 'detail') {
+                              actions.setFieldError('email', result[key]);
+                            } else {
+                              actions.setFieldError(key, result[key]);
+                            }
+                          });
+                          //TODO: Scroll to error;
                         }
-                      });
-                      //TODO: Scroll to error;
-                    }
-                  } else {
-                    actions.setFieldError('phone_number', 'Please try later');
-                  }
-                });
-              }}
-              validationSchema={yup.object().shape({
-                //email: yup.string().email().required(),
-                //password: yup.string().min(3).required(),
-              })}>
-              {({
-                values,
-                handleChange,
-                errors,
-                setFieldTouched,
-                touched,
-                isValid,
-                handleSubmit,
-                setFieldValue,
-              }) => (
-                <AuthContext.Provider
-                  value={{
-                    styles: styles,
+                      } else {
+                        actions.setFieldError('phone', 'Please try later');
+                      }
+                    });
+                  }}
+                  validationSchema={yup.object().shape({
+                    phone: yup
+                      .number()
+                      .min(3)
+                      .required('Enter valid phone number')
+                      .typeError('Enter valid phone number'),
+                    //email: yup.string().email().required(),
+                    //password: yup.string().min(3).required(),
+                  })}>
+                  {({
                     values,
                     handleChange,
                     errors,
@@ -217,120 +255,136 @@ export default class SignIn extends Component {
                     isValid,
                     handleSubmit,
                     setFieldValue,
-                  }}>
-                  <View>
-                    <Text style={styles.pageHeadlineStyle}>
-                      Enter your phone number
-                    </Text>
-                    <View>
-                      <FormInput
-                        type="select"
-                        values={sortedCountries}
-                        name="country"
-                        label={trans('auth.country')}
-                      />
-                      {values.country && (
-                        <ImageBackground
-                          source={getFlag(values.country)}
-                          style={styles.countryFlag}
-                          resizeMode={'contain'}
-                        />
-                      )}
-                    </View>
-                    <View style={styles.inputContainerStyle}>
+                  }) => (
+                    <AuthContext.Provider
+                      value={{
+                        styles: styles,
+                        values,
+                        handleChange,
+                        errors,
+                        setFieldTouched,
+                        touched,
+                        isValid,
+                        handleSubmit,
+                        setFieldValue,
+                      }}>
                       <View>
-                        {countryPhoneCode(values.country)}
-                        <TextInput
-                          value={values.phone}
-                          onChangeText={(phone) =>
-                            setFieldValue('phone', phone.trim())
-                          }
-                          onBlur={() => setFieldTouched('phone')}
-                          placeholder="Phone"
-                          style={styles.inputStyle}
-                          name="phone"
-                          placeholderTextColor={styles.inputStyle.color}
-                          autoCapitalize="none"
-                          testID="phone"
-                          accessibilityLabel="phone"
-                          accessible
-                          textContentType="telephoneNumber"
-                        />
-                      </View>
-                    </View>
-                    {touched.phone && errors.phone && (
-                      <Text style={styles.errorStyle}>{errors.phone}</Text>
-                    )}
-                    <Text style={styles.checkboxTextStyle}>
-                      Are you under the age of 16?
-                      <FormInput
-                        type="checkbox"
-                        name="over16"
-                        label={trans('auth.over16')}
-                      />
-                    </Text>
-                    <View style={styles.buttonContainerStyle}>
-                      <Button onPress={handleSubmit} title="NEXT" />
-                    </View>
-                    {this.state.email && keysExist && (
-                      <View style={styles.buttonContainerStyle}>
-                        <TouchableOpacity
-                          onPress={() => {
-                            signMessage(':biometric_login', 'Sign in?').then(
-                              (success) => {
-                                this.bioLoginFunction({success});
-                              },
-                            );
-                          }}
-                          title="Login automatically">
-                          <Image
-                            source={require('../../images/PNG/finger.png')}
-                            style={{
-                              width: 40,
-                              height: 40,
-                              tintColor: 'rgba(230,60,60,0.9)',
-                            }}
+                        <Text style={styles.pageHeadlineStyle}>
+                          Enter your phone number
+                        </Text>
+                        <View>
+                          <FormInput
+                            type="select"
+                            value={values.country}
+                            values={sortedCountries}
+                            name="country"
+                            label={trans('auth.country')}
                           />
-                        </TouchableOpacity>
+                          {values.country && (
+                            <ImageBackground
+                              source={getFlag(values.country)}
+                              style={styles.countryFlag}
+                              resizeMode={'contain'}
+                            />
+                          )}
+                        </View>
+                        <View style={styles.inputContainerStyle}>
+                          <View>
+                            {countryPhoneCode(values.country)}
+                            <TextInput
+                              value={values.phone}
+                              onChangeText={(phone) =>
+                                setFieldValue('phone', phone.trim())
+                              }
+                              onBlur={() => setFieldTouched('phone')}
+                              placeholder="Phone"
+                              style={styles.inputStyle}
+                              name="phone"
+                              placeholderTextColor={styles.inputStyle.color}
+                              autoCapitalize="none"
+                              testID="phone"
+                              accessibilityLabel="phone"
+                              accessible
+                              textContentType="telephoneNumber"
+                            />
+                          </View>
+                        </View>
+                        {touched.phone && errors.phone && (
+                          <Text style={styles.errorStyle}>{errors.phone}</Text>
+                        )}
+                        <Text style={styles.checkboxTextStyle}>
+                          Are you under the age of 16?
+                          <FormInput
+                            type="checkbox"
+                            name="over16"
+                            label={trans('auth.over16')}
+                          />
+                        </Text>
+                        <View style={styles.buttonContainerStyle}>
+                          <Button onPress={handleSubmit} title="NEXT" />
+                        </View>
+                        {this.state.email && keysExist && (
+                          <View style={styles.buttonContainerStyle}>
+                            <TouchableOpacity
+                              onPress={() => {
+                                signMessage(
+                                  ':biometric_login',
+                                  'Sign in?',
+                                ).then((success) => {
+                                  this.bioLoginFunction({success});
+                                });
+                              }}
+                              title="Login automatically">
+                              <Image
+                                source={require('../../images/PNG/finger.png')}
+                                style={{
+                                  width: 40,
+                                  height: 40,
+                                  tintColor: 'rgba(230,60,60,0.9)',
+                                }}
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        )}
                       </View>
-                    )}
-                  </View>
-                </AuthContext.Provider>
-              )}
-            </Formik>
+                    </AuthContext.Provider>
+                  )}
+                </Formik>
 
-            {googleLogin ? (
-              <Text
-                onPress={() =>
-                  OAuth('google').then((res) => {
-                    if (res) {
-                      AsyncStorage.setItem('userToken', '1');
-                      this.navigateSuccess();
+                {googleLogin ? (
+                  <Text
+                    onPress={() =>
+                      OAuth('google').then((res) => {
+                        if (res) {
+                          AsyncStorage.setItem('userToken', '1');
+                          this.navigateSuccess();
+                        }
+                      })
                     }
-                  })
-                }
-                style={styles.linkStyle}>
-                Sign up with Google
-              </Text>
-            ) : null}
-            {appleLogin && Platform.OS === 'ios' ? (
-              <>
-                <AppleButton
-                  buttonStyle={AppleButton.Style.BLACK}
-                  buttonType={AppleButton.Type.SIGN_IN}
-                  style={{
-                    width: responsiveWidth(45),
-                    height: responsiveHeight(5),
-                    marginTop: responsiveHeight(1),
-                    marginBottom: responsiveHeight(1),
-                  }}
-                  onPress={() => this.onAppleButtonPress()}
-                />
-              </>
-            ) : null}
-          </AuthView>
+                    style={styles.linkStyle}>
+                    Sign up with Google
+                  </Text>
+                ) : null}
+                {appleLogin && Platform.OS === 'ios' ? (
+                  <>
+                    <AppleButton
+                      buttonStyle={AppleButton.Style.BLACK}
+                      buttonType={AppleButton.Type.SIGN_IN}
+                      style={{
+                        width: responsiveWidth(45),
+                        height: responsiveHeight(5),
+                        marginTop: responsiveHeight(1),
+                        marginBottom: responsiveHeight(1),
+                      }}
+                      onPress={() => this.onAppleButtonPress()}
+                    />
+                  </>
+                ) : null}
+              </AuthView>
+            )}
+          </BioIDContext.Consumer>
         )}
-      </BioIDContext.Consumer>
+      </ClientContext.Consumer>
     );
   }
 }

@@ -26,7 +26,7 @@ const APIService = async (endpoint, data, cache_time) => {
       'Content-Type': 'application/json',
     };
     if (userToken) {
-      headers = {...headers,Authorization: 'Bearer ' + userToken};
+      headers = {...headers, Authorization: 'Bearer ' + userToken};
     }
     var method = requestData ? 'POST' : 'GET';
     if (url.indexOf('users/me/') > 0 && method === 'POST') {

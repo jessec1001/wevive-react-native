@@ -1,6 +1,14 @@
 //import CodePush from 'react-native-code-push';
 import React, {Component} from 'react';
-import {ActivityIndicator, BackHandler, UIManager, View, Platform, Dimensions, StyleSheet} from 'react-native';
+import {
+  ActivityIndicator,
+  BackHandler,
+  UIManager,
+  View,
+  Platform,
+  Dimensions,
+  StyleSheet,
+} from 'react-native';
 
 UIManager.setLayoutAnimationEnabledExperimental &&
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -20,43 +28,48 @@ import * as RNLocalize from 'react-native-localize';
 import bootstrap from './src/utils/bootstrap';
 import i18n from './i18n';
 
-
-NetInfo.fetch().then(state => {
+NetInfo.fetch().then((state) => {
   global.isInternetReachable = state.isInternetReachable;
 });
 
-const netinfo_unsubscribe = NetInfo.addEventListener(state => {
+const netinfo_unsubscribe = NetInfo.addEventListener((state) => {
   global.isInternetReachable = state.isInternetReachable;
 });
 
 import RootStack from './src/navigation/RootStack';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BioID} from './src/utils/BioAuth';
-import { ClientContext } from './src/context/ClientContext';
+import {ClientContext} from './src/context/ClientContext';
 import APIService from './src/service/APIService';
 class AppContainer extends Component {
   setDimensionsIos = (dim) => {
-    const { screen: { height: screenHeight, width: screenWidth },
-      window: { height: windowHeight, width: windowWidth },
+    const {
+      screen: {height: screenHeight, width: screenWidth},
+      window: {height: windowHeight, width: windowWidth},
     } = dim;
 
     if (screenHeight === windowWidth && screenWidth === windowHeight) {
-      setTimeout(() => Dimensions.set({ 'window': dim.screen }), 0);
+      setTimeout(() => Dimensions.set({window: dim.screen}), 0);
     }
-  }
+  };
 
   dimensionListener = (args) => {
-    if (Platform.OS === 'ios') {this.setDimensionsIos(args);}
+    if (Platform.OS === 'ios') {
+      this.setDimensionsIos(args);
+    }
   };
   updateClient() {
-    APIService('clients/current/',null,60).then((client)=>{
+    APIService('clients/current/', null, 60).then((client) => {
       this.setState({client});
     });
   }
   componentDidMount() {
     bootstrap();
+    APIService('users/geoip/', null, 60).then((geo) => {
+      this.setState({geo});
+    });
     this.updateClient();
-    setInterval(()=>{
+    setInterval(() => {
       this.updateClient();
     }, 30000);
     if (Platform.OS === 'android') {
@@ -67,10 +80,14 @@ class AppContainer extends Component {
     }
 
     Dimensions.removeEventListener('change', this.dimensionListener);
-    global.appIsLoading = () => {this.setState({isLoading:true});};
-    global.appIsNotLoading = () => {this.setState({isLoading:false});};
+    global.appIsLoading = () => {
+      this.setState({isLoading: true});
+    };
+    global.appIsNotLoading = () => {
+      this.setState({isLoading: false});
+    };
     //Geolocation.setRNConfiguration( { authorizationLevel: 'whenInUse' } );
-    RNLocalize.addEventListener( 'change', this.handleLocalizationChange );
+    RNLocalize.addEventListener('change', this.handleLocalizationChange);
   }
 
   componentWillUnmount() {
@@ -83,38 +100,38 @@ class AppContainer extends Component {
   }
 
   handleLocalizationChange = () => {
-    const fallback = { languageTag: 'en' };
-    const { languageTag } = RNLocalize.getLocales()[0] || fallback;
+    const fallback = {languageTag: 'en'};
+    const {languageTag} = RNLocalize.getLocales()[0] || fallback;
     i18n.locale = languageTag;
   };
 
   state = {
     isLoading: false,
     client: null,
+    geo: null,
   };
 
   render() {
-    return <>
-      <SafeAreaProvider>
-        <ClientContext.Provider value={{client:this.state.client}}>
-          <BioID>
-            <RootStack />
-          </BioID>
-        </ClientContext.Provider>
-      </SafeAreaProvider>
-    {this.state.isLoading ?
+    return (
       <>
-        <View style={styles.loadingBackground} >
-        </View>
-        <View style={styles.loadingIndicator}>
-          <ActivityIndicator
-            color={'white'}
-            size={'large'}
-          />
-        </View>
+        <SafeAreaProvider>
+          <ClientContext.Provider
+            value={{client: this.state.client, geo: this.state.geo}}>
+            <BioID>
+              <RootStack />
+            </BioID>
+          </ClientContext.Provider>
+        </SafeAreaProvider>
+        {this.state.isLoading ? (
+          <>
+            <View style={styles.loadingBackground} />
+            <View style={styles.loadingIndicator}>
+              <ActivityIndicator color={'white'} size={'large'} />
+            </View>
+          </>
+        ) : null}
       </>
-     : null}
-    </>;
+    );
   }
 }
 
@@ -129,14 +146,13 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     position: 'absolute',
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     flex: 1,
     height: '100%',
     width: responsiveWidth(100),
   },
-}
-);
+});
 //let codePushOptions = {checkFrequency: CodePush.CheckFrequency.ON_APP_RESUME};
 Orientation.lockToPortrait();
 export default AppContainer; //CodePush(codePushOptions)(AppContainer);
