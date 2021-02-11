@@ -7,7 +7,7 @@ import authStyles from '../../styles/auth';
 
 import APIService from '../../service/APIService';
 import AuthView from '../../views/AuthView';
-
+import AsyncStorage from '@react-native-community/async-storage';
 import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 export default class VerificationScreen extends Component {
@@ -35,20 +35,31 @@ export default class VerificationScreen extends Component {
           initialValues={{
             pin: '',
           }}
-          onSubmit={(values, actions) => {
+          onSubmit={async (values, actions) => {
             global.appIsLoading();
-            APIService('users/sign_in/', {
-              email: values.email,
-              password: values.password,
+            const phone_number = await AsyncStorage.getItem('phoneNumber');
+            const session_token = await AsyncStorage.getItem('sessionToken');
+            APIService('users/phone_sign_in/', {
+              phone_number: phone_number,
+              security_code: values.pin,
               remember_me: 1,
-              is_staff: false,
+              session_token: session_token,
             }).then((result) => {
               global.appIsNotLoading();
               this.navigateSuccess();
               if (result) {
+                if (result.access_token) {
+                  AsyncStorage.setItem('userToken', result.access_token);
+                  AsyncStorage.setItem('refreshToken', result.refresh_token);
+                } else {
+                  actions.setFieldError('pin', JSON.stringify(result));
+                }
                 this.navigateSuccess();
               } else {
-                actions.setFieldError('password', 'Wrong password.');
+                actions.setFieldError(
+                  'pin',
+                  'Server error. Please try again later.',
+                );
               }
             });
           }}
@@ -85,11 +96,11 @@ export default class VerificationScreen extends Component {
               {touched.pin && errors.pin && (
                 <Text style={styles.errorStyle}>{errors.pin}</Text>
               )}
-              {!errors.pin && values.pin.length > 0 &&
+              {!errors.pin && values.pin.length > 0 && (
                 <View style={styles.buttonContainerStyle}>
                   <Button onPress={handleSubmit} title="NEXT" />
                 </View>
-              }
+              )}
             </View>
           )}
         </Formik>

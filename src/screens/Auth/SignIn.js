@@ -161,32 +161,21 @@ export default class SignIn extends Component {
             ) : null}
             <Formik
               initialValues={{
-                email: this.props.route.params?.email,
-                password: '',
+                phone_number: this.props.route.params?.phone_number,
               }}
               onSubmit={(values, actions) => {
                 global.appIsLoading();
-                APIService('users/sign_in/', {
-                  email: values.email,
-                  password: values.password,
-                  remember_me: 1,
-                  is_staff: false,
+                APIService('phone/register', {
+                  phone_number: values.phone_number,
                 }).then((result) => {
                   global.appIsNotLoading();
-                  this.navigateSuccess();
                   if (result) {
-                    if (result.access_token) {
-                      AsyncStorage.setItem('userToken', result.access_token);
+                    if (result.session_token) {
+                      AsyncStorage.setItem('phoneNumber', values.phone_number);
                       AsyncStorage.setItem(
-                        'refreshToken',
-                        result.refresh_token,
+                        'sessionToken',
+                        result.session_token,
                       );
-                      const passwordSHA512 = CryptoJS.SHA512(
-                        values.password,
-                      ).toString(CryptoJS.enc.Hex);
-                      AsyncStorage.setItem('email', values.email);
-                      AsyncStorage.setItem('password_sha512', passwordSHA512);
-                      available && !keysExist && toggleBioID();
                       this.navigateSuccess();
                     } else {
                       Object.keys(result).forEach((key) => {
@@ -199,7 +188,7 @@ export default class SignIn extends Component {
                       //TODO: Scroll to error;
                     }
                   } else {
-                    actions.setFieldError('password', 'Wrong password.');
+                    actions.setFieldError('phone_number', 'Please try later');
                   }
                 });
               }}
