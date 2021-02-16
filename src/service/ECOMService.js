@@ -4,7 +4,7 @@ import CacheStore from 'react-native-cache-store';
 import {parse_str,urlencode} from '../utils/helpers';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const ECOMService = async (data) => {
   let params = {};
   params.customerEmail = await AsyncStorage.getItem('email');

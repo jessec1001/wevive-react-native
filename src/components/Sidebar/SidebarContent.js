@@ -10,7 +10,7 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import defaultSidebarLinks from './SidebarLinks';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { redirectToNewParams } from '../../utils/helpers';
 const backButton = null;

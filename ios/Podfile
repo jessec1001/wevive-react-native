@@ -1,7 +1,7 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '10.0'
+platform :ios, '11.0'
 pre_install do |installer|
   def installer.verify_no_static_framework_transitive_dependencies; end
   installer.pod_targets.each do |pod|
@@ -32,6 +32,28 @@ target 'WeviveRN' do
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable these next few lines.
   #use_flipper!
+
+  pod 'react-native-background-timer', :path => '../node_modules/react-native-background-timer'
+  #pod 'react-native-calendar-events', :path => '../node_modules/react-native-calendar-events'
+  pod 'react-native-keep-awake', :path => '../node_modules/react-native-keep-awake'
+  pod 'react-native-netinfo', :path => '../node_modules/@react-native-community/netinfo'
+  pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
+  pod 'react-native-webview', :path => '../node_modules/react-native-webview'
+  pod 'react-native-webrtc', :path => '../node_modules/react-native-webrtc'
+  pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
+  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-async-storage/async-storage'
+  pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
+  #pod 'RNGoogleSignin', :path => '../node_modules/@react-native-community/google-signin'
+  pod 'RNSound', :path => '../node_modules/react-native-sound'
+  pod 'RNSVG', :path => '../node_modules/react-native-svg'
+  #pod 'RNWatch', :path => '../node_modules/react-native-watch-connectivity'
+  pod 'RNDefaultPreference', :path => '../node_modules/react-native-default-preference'
+
+  # Native pod dependencies
+  #
+
+  pod 'CocoaLumberjack', '~>3.5.3'
+  pod 'ObjectiveDropboxOfficial', '~> 3.9.4'
 
   use_native_modules!
   config = use_native_modules!

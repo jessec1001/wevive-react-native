@@ -34,7 +34,7 @@ import {getUniqueId} from 'react-native-device-info';
 
 import {PushNotificationsService} from './service/PushNotificationsService';
 
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from './service/APIService';
 
 const contentFooter = null;

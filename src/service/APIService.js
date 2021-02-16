@@ -1,6 +1,6 @@
 import CryptoJS from 'crypto-js';
 import {debug, api_url, api_hmac_secret, public_key} from './../../app.json';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CookieManager from 'react-native-cookies';
 import {Buffer} from 'buffer';
 

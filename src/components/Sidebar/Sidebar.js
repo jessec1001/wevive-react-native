@@ -15,7 +15,7 @@ import {
 import SidebarContent from './SidebarContent';
 const socialIconSize = 5.5;
 import Icon from '../Icon';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {getAppVersion} from './../CodePushVersion';
 import {colors} from './../../../app.json';

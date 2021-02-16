@@ -5,7 +5,7 @@ import WebUI from '../screens/WebUI/WebUI';
 import About from '../screens/About/About';
 
 import Chat from '../screens/Chat/Chat';
-
+import VideoCalls from '../screens/VideoCalls/VideoCalls';
 const TransitionScreen = {
   gestureDirection: 'horizontal',
   transitionSpec: {
@@ -63,6 +63,12 @@ const AppNavigator = () => (
     <Stack.Screen
       name="Chat"
       component={Chat}
+      options={defaultConfig}
+      initialParams={{type: 'all', status: 'live'}}
+    />
+    <Stack.Screen
+      name="VideoCalls"
+      component={VideoCalls}
       options={defaultConfig}
       initialParams={{type: 'all', status: 'live'}}
     />

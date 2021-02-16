@@ -23,7 +23,7 @@ import {
 
 import { AuthContext } from '../../context/AuthContext';
 import form_styles from '../../styles/forms';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from '../../service/APIService';
 import { parse, format, parseISO } from 'date-fns';
 import { UserContext } from '../../context/UserContext';

@@ -7,7 +7,7 @@ import authStyles from '../../styles/auth';
 
 import APIService from '../../service/APIService';
 import AuthView from '../../views/AuthView';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 export default class VerificationScreen extends Component {

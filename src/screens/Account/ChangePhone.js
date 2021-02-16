@@ -20,7 +20,7 @@ import DetailsNavigator from '../../components/DetailsNavigator';
 import { AuthContext } from '../../context/AuthContext';
 import form_styles from '../../styles/forms';
 import P from '../../components/P';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from '../../service/APIService';
 import { UserContext } from '../../context/UserContext';
 const validationSchema = {

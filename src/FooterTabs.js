@@ -8,12 +8,21 @@ import {
 } from 'react-native-responsive-dimensions';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useRoute} from '@react-navigation/native';
+import {useRoute, CommonActions} from '@react-navigation/native';
 import {redirectToNewParams} from './utils/helpers';
 const iconSize = 3;
 
 import {colors} from './../app.json';
+
 export default function FooterTabs(props) {
+  const navigateToChat = (routeName, params = {}) => {
+    /*global.chatNavigator.dispatch(
+      CommonActions.navigate({
+        routeName,
+        params,
+      }),
+    );*/
+  };
   const route = props.route;
   return (
     <SafeAreaView edges={['bottom']} style={styles.footerBackground}>
@@ -22,7 +31,8 @@ export default function FooterTabs(props) {
           <TouchableOpacity
             style={styles.footerButton}
             onPress={() => {
-              props.navigation.push('Chat');
+              props.navigation.navigate("VideoCalls");
+              //navigateToChat('ContactsScreen');
             }}>
             <Icon
               name="wetalk"
@@ -36,7 +46,7 @@ export default function FooterTabs(props) {
           <TouchableOpacity
             style={styles.footerButton}
             onPress={() => {
-              props.navigation.push('Chat');
+              navigateToChat('ContactsScreen',{filter:"calls"});
             }}>
             <Icon
               name="calls"
@@ -50,7 +60,7 @@ export default function FooterTabs(props) {
           <TouchableOpacity
             style={styles.footerButton}
             onPress={() => {
-              props.navigation.push('Chat');
+              navigateToChat("PhoneContactsScreen")
             }}>
             <Icon
               name="add-new"
@@ -64,7 +74,7 @@ export default function FooterTabs(props) {
           <TouchableOpacity
             style={styles.footerButton}
             onPress={() => {
-              props.navigation.push('Chat');
+              navigateToChat('ContactsScreen',{filter:"chats"});
             }}>
             <Icon
               name="chats"
@@ -78,7 +88,7 @@ export default function FooterTabs(props) {
           <TouchableOpacity
             style={styles.footerButton}
             onPress={() => {
-              props.toggleDrawer('menu');
+              navigateToChat('ContactsScreen',{filter:"groups"});
             }}>
             <Icon
               name="groups"
@@ -97,7 +107,7 @@ const styles = StyleSheet.create({
   footerBackground: {
     backgroundColor: colors.footer,
     borderTopWidth: 1,
-    borderTopColor: "rgb(190,190,190)",
+    borderTopColor: 'rgb(190,190,190)',
   },
   footer: {
     flexDirection: 'row',

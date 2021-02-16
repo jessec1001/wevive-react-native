@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import { createContext, useContext, useState, useEffect } from 'react';
 import APIService from '../service/APIService';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const BioIDContext = createContext();
 

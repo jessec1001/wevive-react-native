@@ -22,7 +22,7 @@ import { AuthContext } from '../../context/AuthContext';
 import form_styles from '../../styles/forms';
 import {BioIDContext} from '../../utils/BioAuth';
 import APIService from '../../service/APIService';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const validationSchema = {
     new_password: yup
       .string()

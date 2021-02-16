@@ -24,7 +24,7 @@ import H1 from '../../components/H1';
 import P from '../../components/P';
 import PaymentHistory from '../../components/Account/PaymentHistory';
 import UserBalance from '../../components/Account/UserBalance';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from '../../service/APIService';
 import {colors, ecom_website} from "../../../app.json";
 import InAppBrowser from 'react-native-inappbrowser-reborn';

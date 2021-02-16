@@ -66,7 +66,7 @@ const linking = {
 import {StackActions} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import APIService from '../service/APIService';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RootStack = () => {
   let goBackFunction = () => {
