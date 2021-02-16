@@ -10,7 +10,7 @@ import {
 import ChatModule, {ChatPlugin} from 'react-native-chat-plugin';
 import contentStyles from '../../styles/content';
 import Icon from '../../components/Icon';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const chat_url = 'https://chat.wevive.co.uk/';
 export default class About extends Component {
   state = {
@@ -20,6 +20,7 @@ export default class About extends Component {
   };
   componentDidMount() {
     AsyncStorage.getItem('userToken').then((userToken) => {
+      console.error(userToken);
       this.setState({userToken});
     });
   }
