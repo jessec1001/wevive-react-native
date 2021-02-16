@@ -20,7 +20,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {UIManager, LayoutAnimation, Linking, Platform} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {ScrollContext} from '../context/ScrollContext';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AppThemeContext} from '../context/UserContext';
 
 const logo = require('../images/PNG/wetalk_logo.png');

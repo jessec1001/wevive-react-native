@@ -1,3 +1,5 @@
+import 'node_modules/jtsi-meet/react/features/mobile/polyfills';
+
 //import CodePush from 'react-native-code-push';
 import React, {Component} from 'react';
 import {
