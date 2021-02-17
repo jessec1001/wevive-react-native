@@ -20,7 +20,6 @@ export default class About extends Component {
   };
   componentDidMount() {
     AsyncStorage.getItem('userToken').then((userToken) => {
-      console.error(userToken);
       this.setState({userToken});
     });
   }

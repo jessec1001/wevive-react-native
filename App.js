@@ -93,7 +93,7 @@ class AppContainer extends Component {
   }
 
   componentWillUnmount() {
-    netinfo_unsubscribe();
+    //netinfo_unsubscribe();
     Dimensions.removeEventListener('change', this.dimensionListener);
     RNLocalize.removeEventListener('change', this.handleLocalizationChange);
     if (Platform.OS === 'android') {
@@ -114,6 +114,7 @@ class AppContainer extends Component {
   };
 
   render() {
+    console.log('a');
     return (
       <>
         <SafeAreaProvider>

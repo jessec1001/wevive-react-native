@@ -22,8 +22,7 @@
 #import "JitsiMeetView+Private.h"
 #import "RCTBridgeWrapper.h"
 #import "ReactUtils.h"
-#import "RNSplashScreen.h"
-
+@import Firebase;
 #import <WebRTC/RTCLogging.h>
 
 
@@ -69,7 +68,7 @@
 
 -             (BOOL)application:(UIApplication *)application
   didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
+    [FIRApp configure];
     _launchOptions = [launchOptions copy];
 
     [Dropbox setAppKey];
@@ -175,10 +174,6 @@
     }
 
     return nil;
-}
-
-- (void)showSplashScreen:(UIView*)rootView {
-    [RNSplashScreen showSplash:@"LaunchScreen" inRootView:rootView];
 }
 
 #pragma mark - Property getter / setters
