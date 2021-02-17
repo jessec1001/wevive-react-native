@@ -30,13 +30,13 @@ import * as RNLocalize from 'react-native-localize';
 import bootstrap from './src/utils/bootstrap';
 import i18n from './i18n';
 
-NetInfo.fetch().then((state) => {
+/*NetInfo.fetch().then((state) => {
   global.isInternetReachable = state.isInternetReachable;
 });
 
 const netinfo_unsubscribe = NetInfo.addEventListener((state) => {
   global.isInternetReachable = state.isInternetReachable;
-});
+});*/
 
 import RootStack from './src/navigation/RootStack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';

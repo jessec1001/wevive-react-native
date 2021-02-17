@@ -355,7 +355,7 @@ PODS:
     - React
   - react-native-webrtc (1.87.3):
     - React-Core
-  - react-native-webview (11.2.2):
+  - react-native-webview (11.2.3):
     - React-Core
   - React-RCTActionSheet (0.61.5-jitsi.2):
     - React-Core/RCTActionSheetHeaders (= 0.61.5-jitsi.2)
@@ -851,7 +851,7 @@ SPEC CHECKSUMS:
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
   react-native-view-shot: 4475fde003fe8a210053d1f98fb9e06c1d834e1c
   react-native-webrtc: dc1208bdca2c4d091f7b57859e69332bff6f1986
-  react-native-webview: 74db71e90242a241259232952ccf9baed7acc6e8
+  react-native-webview: 6520e3e7b4933de76b95ef542c8d7115cf45b68e
   React-RCTActionSheet: bcbc311dc3b47bc8efb2737ff0940239a45789a9
   React-RCTAnimation: 65f61080ce632f6dea23d52e354ffac9948396c6
   React-RCTBlob: 70d88f7b68b5c44953cdb286ac2e36a7a509a97e
@@ -898,6 +898,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   Yoga: 96b469c5e81ff51b917b92e8c3390642d4ded30c
 
-PODFILE CHECKSUM: 7d81768cb4f341d2893f88641d7269f12102f94b
+PODFILE CHECKSUM: bfe70baaf6607b8820d65076dcdb2b6b778f887f
 
 COCOAPODS: 1.10.1
