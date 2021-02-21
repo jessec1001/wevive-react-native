@@ -1,5 +1,5 @@
 // @flow
-
+import {Dimensions} from 'react-native';
 import { ColorSchemeRegistry, schemeColor } from '../../../base/color-scheme';
 import { BoxModel, ColorPalette } from '../../../base/styles';
 
@@ -75,6 +75,7 @@ const styles = {
         flexDirection: 'row',
         flexGrow: 0,
         justifyContent: 'center',
+        bottom: 0,
         marginBottom: BoxModel.margin / 2,
         paddingHorizontal: BoxModel.margin
     },

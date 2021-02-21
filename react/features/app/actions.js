@@ -27,7 +27,7 @@ import {
 import { isVpaasMeeting } from '../billing-counter/functions';
 import { clearNotifications, showNotification } from '../notifications';
 import { setFatalError } from '../overlay';
-
+import {StackActions} from '@react-navigation/native';
 import {
     getDefaultURL,
     getName
@@ -48,6 +48,11 @@ declare var interfaceConfig: Object;
  * @returns {Function}
  */
 export function appNavigate(uri: ?string) {
+    console.log(uri);
+    const disconnected = uri === 'disconnect';
+    if (uri === 'disconnect') {
+        uri = undefined;
+    }
     return async (dispatch: Dispatch<any>, getState: Function) => {
         let location = parseURIString(uri);
 
@@ -70,7 +75,8 @@ export function appNavigate(uri: ?string) {
                 location = defaultLocation;
             }
         }
-
+        
+        //location.room = getState()['features/base/flags'].room;
         location.protocol || (location.protocol = 'https:');
         const { contextRoot, host, room } = location;
         const locationURL = new URL(location.toString());
@@ -79,8 +85,11 @@ export function appNavigate(uri: ?string) {
         // FIXME: unify with web.
         if (navigator.product === 'ReactNative') {
             dispatch(disconnect());
+            if (disconnected) {
+                global.navigation.dispatch(StackActions.pop());
+            }
         }
-
+        
         // There are notifications now that gets displayed after we technically left
         // the conference, but we're still on the conference screen.
         dispatch(clearNotifications());
@@ -132,10 +141,13 @@ export function appNavigate(uri: ?string) {
 
             return;
         }
-
+        if (disconnected) {
+            global.disconnected = true;
+        }
         dispatch(setLocationURL(locationURL));
-        dispatch(setConfig(config));
         dispatch(setRoom(room));
+        dispatch(setConfig(config));
+        
 
         // FIXME: unify with web, currently the connection and track creation happens in conference.js.
         if (room && navigator.product === 'ReactNative') {

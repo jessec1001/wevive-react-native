@@ -16,12 +16,12 @@ import {colors} from './../app.json';
 
 export default function FooterTabs(props) {
   const navigateToChat = (routeName, params = {}) => {
-    /*global.chatNavigator.dispatch(
-      CommonActions.navigate({
-        routeName,
-        params,
-      }),
-    );*/
+    props.navigation.navigate('App', {
+      screen: routeName,
+      params: {
+        BioID: false,
+      },
+    });
   };
   const route = props.route;
   return (
@@ -31,15 +31,14 @@ export default function FooterTabs(props) {
           <TouchableOpacity
             style={styles.footerButton}
             onPress={() => {
-              props.navigation.navigate("VideoCalls");
-              //navigateToChat('ContactsScreen');
+              props.navigate("VideoCalls");
             }}>
             <Icon
               name="wetalk"
               size={responsiveHeight(iconSize)}
               color={colors.footerIcons}
             />
-            <Text style={styles.footerText}>Wetalk</Text>
+            <Text style={styles.footerText}>Contacts</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.footerItem}>
@@ -106,8 +105,6 @@ export default function FooterTabs(props) {
 const styles = StyleSheet.create({
   footerBackground: {
     backgroundColor: colors.footer,
-    borderTopWidth: 1,
-    borderTopColor: 'rgb(190,190,190)',
   },
   footer: {
     flexDirection: 'row',
@@ -115,10 +112,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: responsiveWidth(3),
     alignItems: 'flex-start',
     marginVertical: 0,
-    height: responsiveHeight(6),
-
+    height: responsiveHeight(8),
     paddingTop: responsiveHeight(0.5),
-    marginBottom: responsiveWidth(2),
+    marginBottom: responsiveWidth(3),
   },
   footerItem: {
     alignItems: 'center',

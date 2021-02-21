@@ -36,21 +36,7 @@ export default class VerificationSuccess extends Component {
             pin: '',
           }}
           onSubmit={(values, actions) => {
-            global.appIsLoading();
-            APIService('users/sign_in/', {
-              email: values.email,
-              password: values.password,
-              remember_me: 1,
-              is_staff: false,
-            }).then((result) => {
-              global.appIsNotLoading();
-              this.navigateSuccess();
-              if (result) {
-                this.navigateSuccess();
-              } else {
-                actions.setFieldError('password', 'Wrong password.');
-              }
-            });
+            this.navigateSuccess();
           }}
           validationSchema={yup.object().shape({
             //email: yup.string().email().required(),

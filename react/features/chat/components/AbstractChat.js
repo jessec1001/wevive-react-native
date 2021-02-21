@@ -111,6 +111,6 @@ export function _mapStateToProps(state: Object) {
             : window.innerWidth <= DESKTOP_SMALL_WIDTH_THRESHOLD,
         _isOpen: isOpen,
         _messages: messages,
-        _showNamePrompt: !_localParticipant.name
+        _showNamePrompt: !_localParticipant || !_localParticipant.name
     };
 }

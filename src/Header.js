@@ -21,7 +21,7 @@ export default function Header(props) {
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar
-        backgroundColor="rgba(0,56,104,0)"
+        backgroundColor="white"
         translucent={true}
         barStyle="dark-content"
       />
@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    backgroundColor: "white",
   },
   left: {
     flex: 1,

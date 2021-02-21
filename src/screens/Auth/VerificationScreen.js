@@ -10,17 +10,27 @@ import AuthView from '../../views/AuthView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
+
+import {
+  UserContext,
+} from '../../context/UserContext';
 export default class VerificationScreen extends Component {
   state = {
     email: null,
     bioAccessToken: null,
     avatarImage: null,
   };
-  navigateSuccess = () => {
+  navigateSuccess = (user) => {
+    let screen = 'VerificationSuccess';
+    if (user.new) {
+      screen = 'VerificationSuccess';
+    } else {
+      screen = 'PINScreen';
+    }
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: 'VerificationSuccess'}],
+        routes: [{name: screen}],
       }),
     );
   };
@@ -30,83 +40,96 @@ export default class VerificationScreen extends Component {
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <AuthView
-        headline={'Verify your phone number'}
-        route={this.props.route}
-        navigation={this.props.navigation}>
-        <Formik
-          initialValues={{
-            pin: '',
-          }}
-          onSubmit={async (values, actions) => {
-            global.appIsLoading();
-            APIService('users/phone_sign_in/', {
-              phone_number:
-                this.props.route.params.countryCode +
-                this.props.route.params.phoneNumber,
-              security_code: values.pin,
-              remember_me: 1,
-              session_token: this.props.route.params.sessionToken,
-            }).then((result) => {
-              global.appIsNotLoading();
-              if (result) {
-                if (result.access_token) {
-                  AsyncStorage.setItem('userToken', result.access_token);
-                  AsyncStorage.setItem('refreshToken', result.refresh_token);
-                  this.navigateSuccess();
-                } else {
-                  actions.setFieldError('pin', result.non_field_errors[0]);
-                }
-              } else {
-                actions.setFieldError(
-                  'pin',
-                  'Server error. Please try again later.',
-                );
-              }
-            });
-          }}
-          validationSchema={yup.object().shape({
-            pin: yup.string().min(6).required(),
-          })}>
-          {({
-            values,
-            handleChange,
-            errors,
-            setFieldTouched,
-            touched,
-            isValid,
-            handleSubmit,
-            setFieldValue,
-          }) => (
-            <View>
-              <Text style={styles.pageHeadlineStyle}>
-                Security Verification
-              </Text>
-              <Text style={styles.pageTextStyle}>An SMS has been sent to:</Text>
-              <Text style={styles.pageTextStyleBold}>{this.props.route.params.countryCode} {this.props.route.params.phoneNumber}</Text>
-              <Text style={styles.pageTextStyle}>
-                Please enter the code below:
-              </Text>
-              <SmoothPinCodeInput
-                codeLength={6}
-                containerStyle={styles.cellInputStyle}
-                cellStyle={styles.cellStyle}
-                cellStyleFocused={styles.cellStyleFocused}
-                value={values.pin}
-                onTextChange={handleChange('pin')}
-              />
-              {touched.pin && errors.pin && (
-                <Text style={styles.errorStyle}>{errors.pin}</Text>
-              )}
-              {!errors.pin && values.pin.length > 0 && (
-                <View style={styles.buttonContainerStyle}>
-                  <Button onPress={handleSubmit} title="NEXT" />
+      <UserContext.Consumer>
+        {({setAuthData}) => (
+          <AuthView
+            headline={'Verify your phone number'}
+            route={this.props.route}
+            navigation={this.props.navigation}>
+            <Formik
+              initialValues={{
+                pin: '',
+              }}
+              onSubmit={async (values, actions) => {
+                global.appIsLoading();
+                APIService('users/phone_sign_in/', {
+                  phone_number:
+                    this.props.route.params.countryCode +
+                    this.props.route.params.phoneNumber,
+                  security_code: values.pin,
+                  remember_me: 1,
+                  session_token: this.props.route.params.sessionToken,
+                }).then((result) => {
+                  global.appIsNotLoading();
+                  if (result) {
+                    if (result.access_token) {
+                      setAuthData(result);
+                      AsyncStorage.setItem('userToken', result.access_token);
+                      AsyncStorage.setItem(
+                        'refreshToken',
+                        result.refresh_token,
+                      );
+                      this.navigateSuccess(result);
+                    } else {
+                      actions.setFieldError('pin', result.non_field_errors[0]);
+                    }
+                  } else {
+                    actions.setFieldError(
+                      'pin',
+                      'Server error. Please try again later.',
+                    );
+                  }
+                });
+              }}
+              validationSchema={yup.object().shape({
+                pin: yup.string().min(6).required(),
+              })}>
+              {({
+                values,
+                handleChange,
+                errors,
+                setFieldTouched,
+                touched,
+                isValid,
+                handleSubmit,
+                setFieldValue,
+              }) => (
+                <View>
+                  <Text style={styles.pageHeadlineStyle}>
+                    Security Verification
+                  </Text>
+                  <Text style={styles.pageTextStyle}>
+                    An SMS has been sent to:
+                  </Text>
+                  <Text style={styles.pageTextStyleBold}>
+                    {this.props.route.params.countryCode}{' '}
+                    {this.props.route.params.phoneNumber}
+                  </Text>
+                  <Text style={styles.pageTextStyle}>
+                    Please enter the code below:
+                  </Text>
+                  <SmoothPinCodeInput
+                    codeLength={6}
+                    containerStyle={styles.cellInputStyle}
+                    cellStyle={styles.cellStyle}
+                    cellStyleFocused={styles.cellStyleFocused}
+                    value={values.pin}
+                    onTextChange={handleChange('pin')}
+                  />
+                  {touched.pin && errors.pin && (
+                    <Text style={styles.errorStyle}>{errors.pin}</Text>
+                  )}
+                  {!errors.pin && values.pin.length > 0 && (
+                    <View style={styles.buttonContainerStyle}>
+                      <Button onPress={handleSubmit} title="NEXT" />
+                    </View>
+                  )}
                 </View>
               )}
-            </View>
-          )}
-        </Formik>
-      </AuthView>
+            </Formik>
+          </AuthView>
+        )}
+      </UserContext.Consumer>
     );
   }
 }

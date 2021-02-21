@@ -8,17 +8,21 @@ import {
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 
-import App from '../../../node_modules/jtsi-meet/react/features/app/components';
-
-
-const Jitsi = () => {
-
-}
+import {App} from '../../../react/features/app/components';
 
 export default class VideoCalls extends Component {
   render() {
     return (
-      <Jitsi />
+      <>
+        <App
+          flags={{
+            "room": "WeviveRoom",
+            "ios.recording.enabled": 0,
+            "pip.enabled": 0,
+            resolution: 720,
+            "welcomepage.enabled": 1,
+        }} serverURL={"https://webrtc.wevive.com"} config={{}} url={{serverURL: "https://webrtc.wevive.com", config:{}}} />
+      </>
     );
   }
 }

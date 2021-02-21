@@ -10,7 +10,6 @@ import { KICK_OUT_ENABLED, getFeatureFlag } from '../../../base/flags';
 import { getParticipantDisplayName } from '../../../base/participants';
 import { connect } from '../../../base/redux';
 import { StyleType } from '../../../base/styles';
-import { PrivateMessageButton } from '../../../chat';
 import { hideRemoteVideoMenu } from '../../actions';
 
 import ConnectionStatusButton from './ConnectionStatusButton';
@@ -105,7 +104,6 @@ class RemoteVideoMenu extends PureComponent<Props> {
                 { !_disableKick && <KickButton { ...buttonProps } /> }
                 <GrantModeratorButton { ...buttonProps } />
                 <PinButton { ...buttonProps } />
-                <PrivateMessageButton { ...buttonProps } />
                 <MuteEveryoneElseButton { ...buttonProps } />
                 <ConnectionStatusButton { ...buttonProps } />
             </BottomSheet>

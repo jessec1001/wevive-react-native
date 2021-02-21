@@ -11,7 +11,7 @@ import ChatModule, {ChatPlugin} from 'react-native-chat-plugin';
 import contentStyles from '../../styles/content';
 import Icon from '../../components/Icon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const chat_url = 'https://chat.wevive.co.uk/';
+const chat_url = 'https://chat.wevive.com/';
 export default class About extends Component {
   state = {
     contentStyles: contentStyles(),

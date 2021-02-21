@@ -109,7 +109,7 @@ const RootStack = () => {
       }
     } else {
       const routeName = navState.name;
-      if (routeName == 'Panorama' || routeName == 'ViroAR') {
+      if (routeName == 'VideoCalls') {
         if (!themeSettings.hiddenHeader) {
           changedTheme.hiddenHeader = true;
           changedTheme.hiddenFooter = true;
@@ -137,6 +137,7 @@ const RootStack = () => {
 
   const routeNameRef = React.useRef();
   const navigationRef = React.useRef();
+  global.navigation = navigationRef.current;
   const [authData, setAuthData] = useState(null);
   const updateMe = () => {
     APIService('users/me/', null, 5)

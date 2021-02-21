@@ -54,27 +54,44 @@ const Stack = createStackNavigator();
 const forFade = ({current}) => ({
   cardStyle: {opacity: current.progress},
 });
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ChatModule, {ChatPlugin} from 'react-native-chat-plugin';
+import Icon from '../components/Icon';
+const chat_url = 'https://chat.wevive.com/';
 
-const AppNavigator = () => (
-  <Stack.Navigator
-    initialRouteName="Chat"
-    mode="card"
-    screenOptions={{gestureEnabled: false}}>
-    <Stack.Screen
-      name="Chat"
-      component={Chat}
-      options={defaultConfig}
-      initialParams={{type: 'all', status: 'live'}}
-    />
-    <Stack.Screen
-      name="VideoCalls"
-      component={VideoCalls}
-      options={defaultConfig}
-      initialParams={{type: 'all', status: 'live'}}
-    />
-    <Stack.Screen name="About" component={About} options={defaultConfig} />
-    <Stack.Screen name="WebUI" component={WebUI} options={defaultConfig} />
-  </Stack.Navigator>
-);
+const AppNavigator = () => {
+  const [userToken, setUserToken] = React.useState(false);
+  AsyncStorage.getItem('userToken').then((userToken) => {
+    //console.error(userToken);
+    setUserToken(userToken);
+  });
+  return (
+    <Stack.Navigator
+      initialRouteName="About"
+      mode="card"
+      screenOptions={{gestureEnabled: false}}>
+      <Stack.Screen
+        name="VideoCalls"
+        component={VideoCalls}
+        options={defaultConfig}
+        initialParams={{type: 'all', status: 'live'}}
+      />
+      <Stack.Screen name="About" component={About} options={defaultConfig} />
+      <Stack.Screen name="WebUI" component={WebUI} options={defaultConfig} />
+      {userToken && userToken.length > 0 && <Stack.Screen
+        name="Chat"
+        initialParams={{
+          socketIoUrl: chat_url,
+          options: {
+            token: userToken,
+          },
+          icon: Icon,
+        }}
+        component={ChatModule}
+        options={defaultConfig}
+      />}
+    </Stack.Navigator>
+  );
+};
 
 export default AppNavigator;

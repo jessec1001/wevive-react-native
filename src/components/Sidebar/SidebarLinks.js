@@ -1,76 +1,46 @@
 const SidebarLinks = {
   Account: {
     text: 'MY ACCOUNT',
-    route: 'Account',
+    route: 'About',
     icon: 'w-watermark',
     type: 'profile',
   },
   Details: {
     text: 'MY DETAILS',
-    route: 'Details',
+    route: 'About',
     icon: 'w-watermark',
     type: 'profile',
-  },
-  OpenDraws: {
-    text: 'OPEN DRAWS',
-    route: 'LotteriesList',
-    icon: 'draw',
-    type: 'menu',
-    routeParams: {
-      status: 'live',
-      type: 'all',
-    },
-  },
-  PendingDraws: {
-    text: 'PENDING DRAWS',
-    route: 'LotteriesList',
-    icon: 'draw',
-    type: 'menu',
-    routeParams: {
-      status: 'ready',
-      type: 'all',
-    },
-  },
-  ClosedDraws: {
-    text: 'CLOSED DRAWS',
-    route: 'LotteriesList',
-    icon: 'draw',
-    type: 'menu',
-    routeParams: {
-      status: 'closed',
-      type: 'all',
-    },
   },
   Documents: {
     text: 'Documents',
     accordion: [
       {
         text: 'ACCESSIBILITY',
-        route: 'Accessibility',
+        route: 'About',
       },
       {
         text: 'COMPLAINTS',
-        route: 'Complaints',
+        route: 'About',
       },
       {
         text: 'GDPR',
-        route: 'GDPR',
+        route: 'About',
       },
       {
         text: 'T & C\'s',
-        route: 'Terms',
+        route: 'About',
       },
       {
         text: 'PRIVACY POLICY',
-        route: 'Privacy',
+        route: 'About',
       },
       {
         text: 'ABOUT THE APP',
         route: 'About',
       },
     ],
-    type: 'menu',
-    icon: 'docs',
+    type: 'profile',
+    icon: 'w-watermark',
   },
   Contact: {
     text: 'CONTACT US',

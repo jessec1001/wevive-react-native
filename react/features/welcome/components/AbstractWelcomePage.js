@@ -9,7 +9,7 @@ import { appNavigate } from '../../app/actions';
 import isInsecureRoomName from '../../base/util/isInsecureRoomName';
 import { isCalendarEnabled } from '../../calendar-sync';
 import { isRecentListEnabled } from '../../recent-list/functions';
-
+import {getFeatureFlag} from '../../base/flags/functions';
 /**
  * {@code AbstractWelcomePage}'s React {@code Component} prop types.
  */
@@ -109,6 +109,9 @@ export class AbstractWelcomePage extends Component<Props, *> {
         this._onRoomChange = this._onRoomChange.bind(this);
         this._renderInsecureRoomNameWarning = this._renderInsecureRoomNameWarning.bind(this);
         this._updateRoomname = this._updateRoomname.bind(this);
+
+        //console.error(getFeatureFlag("room"));
+        
     }
 
     /**
@@ -119,7 +122,12 @@ export class AbstractWelcomePage extends Component<Props, *> {
      */
     componentDidMount() {
         this._mounted = true;
-        sendAnalytics(createWelcomePageEvent('viewed', undefined, { value: 1 }));
+        console.warn(global.disconnected);
+        if (!global.disconnected) {
+            this._onJoin();
+        } else {
+            global.disconnected = false;
+        }
     }
 
     /**
@@ -129,6 +137,7 @@ export class AbstractWelcomePage extends Component<Props, *> {
      * @inheritdoc
      */
     componentWillUnmount() {
+        global.disconnected = false;
         this._clearTimeouts();
         this._mounted = false;
     }
@@ -190,8 +199,8 @@ export class AbstractWelcomePage extends Component<Props, *> {
      * @returns {void}
      */
     _onJoin() {
-        const room = "qwerty";this.state.room || this.state.generatedRoomname;
-
+        const room = this.state.room || this.state.generatedRoomname;
+        //console.error(room);
         sendAnalytics(
             createWelcomePageEvent('clicked', 'joinButton', {
                 isGenerated: !this.state.room,
@@ -282,7 +291,7 @@ export function _mapStateToProps(state: Object) {
         _enableInsecureRoomNameWarning: state['features/base/config'].enableInsecureRoomNameWarning || false,
         _moderatedRoomServiceUrl: state['features/base/config'].moderatedRoomServiceUrl,
         _recentListEnabled: isRecentListEnabled(),
-        _room: state['features/base/conference'].room,
+        _room: state['features/base/flags'].room,
         _settings: state['features/base/settings']
     };
 }

@@ -145,7 +145,7 @@ export default class Main extends Component {
   };
   navigate = (route, routeParams) => {
     this.closeDrawer();
-    if (route == 'ViroAR' || route == 'Panorama') {
+    if (route == 'VideoCalls' || route == 'Panorama') {
       var hiddenHeader = true;
       var hiddenFooter = true;
     } else {
@@ -227,6 +227,7 @@ export default class Main extends Component {
                 <>
                   <FooterTabs
                     toggleDrawer={this.toggleDrawer.bind(this)}
+                    navigate={this.navigate}
                     navigation={this.props.navigation}
                     route={this.props.route}
                   />

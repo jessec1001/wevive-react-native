@@ -301,8 +301,6 @@ class Conference extends AbstractConference<Props, *> {
                         <DisplayNameLabel participantId = { _largeVideoParticipantId } />
                     </Container> }
 
-                    <LonelyMeetingExperience />
-
                     {/*
                       * The Toolbox is in a stacking layer below the Filmstrip.
                       */}
