@@ -9,22 +9,30 @@ import {
 } from 'react-native-responsive-dimensions';
 
 import {App} from '../../../react/features/app/components';
+import { UserContext } from '../../context/UserContext';
 
-export default class VideoCalls extends Component {
-  render() {
-    return (
-      <>
-        <App
-          flags={{
-            "room": "WeviveRoom",
-            "ios.recording.enabled": 0,
-            "pip.enabled": 0,
-            resolution: 720,
-            "welcomepage.enabled": 1,
-        }} serverURL={"https://webrtc.wevive.com"} config={{}} url={{serverURL: "https://webrtc.wevive.com", config:{}}} />
-      </>
-    );
-  }
+export default function VideoCalls() {
+  const {authData} = React.useContext(UserContext);
+  return (
+    <>
+      <App
+        flags={{
+          room: 'WeviveRoomDev',
+          'ios.recording.enabled': 0,
+          'pip.enabled': 0,
+          resolution: 720,
+          'welcomepage.enabled': 1,
+        }}
+        serverURL={'https://webrtc.wevive.com'}
+        config={{}}
+        url={{serverURL: 'https://webrtc.wevive.com', config: {}}}
+        userInfo={{
+          displayName: authData.id,
+          avatarURL: "https://cataas.com/cat"
+        }}
+      />
+    </>
+  );
 }
 
 const styles = StyleSheet.create({

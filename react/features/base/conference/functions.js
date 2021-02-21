@@ -321,7 +321,6 @@ export function sendLocalParticipant(
         features,
         name
     } = getLocalParticipant(stateful);
-
     avatarURL && conference.sendCommand(AVATAR_URL_COMMAND, {
         value: avatarURL
     });
