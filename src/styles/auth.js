@@ -62,6 +62,7 @@ const styles = keyboard => {
       marginTop: responsiveWidth(1),
       marginBottom: responsiveWidth(2.5),
       fontSize: responsiveFontSize(1.8),
+      paddingHorizontal: responsiveWidth(10),
       textAlign: 'center',
     },
     checkboxTextStyle: {
