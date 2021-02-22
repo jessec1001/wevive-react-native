@@ -18,6 +18,8 @@ android {
 
     packagingOptions {
         exclude 'lib/*/libhermes*.so'
+        pickFirst 'lib/armeabi-v7a/libsodium.so'
+        pickFirst 'lib/*/libsqlcipher.so'
     }
 
     defaultConfig {

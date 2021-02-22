@@ -59,20 +59,6 @@ dependencies {
         implementation project(':react-native-device-info')
     }
 
-    //implementation project(':react-native-async-storage')
-    implementation project(':react-native-background-timer')
-    implementation project(':react-native-calendar-events')
-    implementation project(':react-native-community_netinfo')
-    implementation project(':react-native-default-preference')
-    implementation project(':react-native-immersive')
-    implementation project(':react-native-keep-awake')
-    implementation project(':react-native-linear-gradient')
-    implementation project(':react-native-sound')
-    implementation project(':react-native-svg')
-    implementation project(':react-native-webrtc')
-    implementation project(':react-native-webview')
-    implementation project(':react-native-splash-screen')
-
     testImplementation 'junit:junit:4.12'
 }
 
@@ -235,3 +221,5 @@ publishing {
         }
     }
 }
+
+apply from: file("./native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

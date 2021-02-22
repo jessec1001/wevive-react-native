@@ -19,7 +19,6 @@ package org.jitsi.meet.sdk;
 import android.app.Activity;
 
 import androidx.annotation.Nullable;
-
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
@@ -34,7 +33,6 @@ import com.facebook.soloader.SoLoader;
 import com.oney.WebRTCModule.RTCVideoViewManager;
 import com.oney.WebRTCModule.WebRTCModule;
 
-import org.devio.rn.splashscreen.SplashScreenModule;
 import org.webrtc.SoftwareVideoDecoderFactory;
 import org.webrtc.SoftwareVideoEncoderFactory;
 import org.webrtc.audio.AudioDeviceModule;
@@ -68,7 +66,6 @@ class ReactInstanceManagerHolder {
                 new JavaScriptSandboxModule(reactContext),
                 new LocaleDetector(reactContext),
                 new LogBridgeModule(reactContext),
-                new SplashScreenModule(reactContext),
                 new PictureInPictureModule(reactContext),
                 new ProximityModule(reactContext),
                 new WiFiStatsModule(reactContext),
@@ -173,24 +170,106 @@ class ReactInstanceManagerHolder {
         if (reactInstanceManager != null) {
             return;
         }
-
+    
         SoLoader.init(activity, /* native exopackage */ false);
-
-        List<ReactPackage> packages
-            = new ArrayList<>(Arrays.asList(
-                new com.BV.LinearGradient.LinearGradientPackage(),
-                new com.calendarevents.CalendarEventsPackage(),
-                new com.corbt.keepawake.KCKeepAwakePackage(),
-                new com.facebook.react.shell.MainReactPackage(),
-                new com.horcrux.svg.SvgPackage(),
-                new com.kevinresol.react_native_default_preference.RNDefaultPreferencePackage(),
-                new com.learnium.RNDeviceInfo.RNDeviceInfo(),
-                new com.ocetnik.timer.BackgroundTimerPackage(),
+        List<ReactPackage> packages = (new ArrayList<>(Arrays.asList(
+                // @invertase/react-native-apple-authentication
+                new com.RNAppleAuthentication.AppleAuthenticationAndroidPackage(),
+                // @react-native-async-storage/async-storage
                 new com.reactnativecommunity.asyncstorage.AsyncStoragePackage(),
+                // @react-native-clipboard/clipboard
+                new com.reactnativecommunity.clipboard.ClipboardPackage(),
+                // @react-native-community/checkbox
+                new com.reactnativecommunity.checkbox.ReactCheckBoxPackage(),
+                // @react-native-community/datetimepicker
+                new com.reactcommunity.rndatetimepicker.RNDateTimePickerPackage(),
+                // @react-native-community/masked-view
+                new org.reactnative.maskedview.RNCMaskedViewPackage(),
+                // @react-native-community/netinfo
                 new com.reactnativecommunity.netinfo.NetInfoPackage(),
-                new com.reactnativecommunity.webview.RNCWebViewPackage(),
+                // @react-native-community/picker
+                new com.reactnativecommunity.picker.RNCPickerPackage(),
+                // @react-native-firebase/app
+                new io.invertase.firebase.app.ReactNativeFirebaseAppPackage(),
+                // @react-native-firebase/messaging
+                new io.invertase.firebase.messaging.ReactNativeFirebaseMessagingPackage(),
+                // react-native-appearance
+                new io.expo.appearance.RNCAppearancePackage(),
+                // react-native-background-timer
+                new com.ocetnik.timer.BackgroundTimerPackage(),
+                // react-native-biometrics
+                new com.rnbiometrics.ReactNativeBiometricsPackage(),
+                // react-native-calendar-events
+                new com.calendarevents.CalendarEventsPackage(),
+                // react-native-chat-plugin
+                new com.ourengineroom.rnchatplugin.ChatPluginPackage(),
+                // react-native-contacts
+                new com.rt2zz.reactnativecontacts.ReactNativeContacts(),
+                // react-native-cookies
+                new com.psykar.cookiemanager.CookieManagerPackage(),
+                // react-native-default-preference
+                new com.kevinresol.react_native_default_preference.RNDefaultPreferencePackage(),
+                // react-native-device-info
+                new com.learnium.RNDeviceInfo.RNDeviceInfo(),
+                // react-native-fast-image
+                new com.dylanvann.fastimage.FastImageViewPackage(),
+                // react-native-gesture-handler
+                new com.swmansion.gesturehandler.react.RNGestureHandlerPackage(),
+                // react-native-get-random-values
+                new org.linusu.RNGetRandomValuesPackage(),
+                // react-native-haptic-feedback
+                new com.mkuczera.RNReactNativeHapticFeedbackPackage(),
+                // react-native-image-crop-picker
+                new com.reactnative.ivpusic.imagepicker.PickerPackage(),
+                // react-native-image-picker
+                new com.imagepicker.ImagePickerPackage(),
+                // react-native-immersive
                 new com.rnimmersive.RNImmersivePackage(),
+                // react-native-inappbrowser-reborn
+                new com.proyecto26.inappbrowser.RNInAppBrowserPackage(),
+                // react-native-keep-awake
+                new com.corbt.keepawake.KCKeepAwakePackage(),
+                // react-native-libsodium
+                new com.ourengineroom.rnlibsodium.RnLibSodiumPackage(),
+                // react-native-linear-gradient
+                new com.BV.LinearGradient.LinearGradientPackage(),
+                // react-native-localize
+                new com.zoontek.rnlocalize.RNLocalizePackage(),
+                // react-native-navigation-bar-color
+                new com.thebylito.navigationbarcolor.NavigationBarColorPackage(),
+                // react-native-open-settings
+                new com.opensettings.OpenSettingsPackage(),
+                // react-native-orientation-locker
+                new org.wonday.orientation.OrientationPackage(),
+                // react-native-permissions
+                new com.zoontek.rnpermissions.RNPermissionsPackage(),
+                // react-native-reanimated
+                new com.swmansion.reanimated.ReanimatedPackage(),
+                // react-native-safe-area-context
+                new com.th3rdwave.safeareacontext.SafeAreaContextPackage(),
+                // react-native-screens
+                new com.swmansion.rnscreens.RNScreensPackage(),
+                // react-native-share
+                new cl.json.RNSharePackage(),
+                // react-native-sms
+                new com.tkporter.sendsms.SendSMSPackage(),
+                // react-native-sound
                 new com.zmxv.RNSound.RNSoundPackage(),
+                // react-native-sqlite-storage
+                new org.pgsqlite.SQLitePluginPackage(),
+                // react-native-svg
+                new com.horcrux.svg.SvgPackage(),
+                // react-native-vector-icons
+                new com.oblador.vectoricons.VectorIconsPackage(),
+                // react-native-version-number
+                new com.apsl.versionnumber.RNVersionNumberPackage(),
+                // react-native-view-shot
+                new fr.greweb.reactnativeviewshot.RNViewShotPackage(),
+                // react-native-webrtc
+                //new com.oney.WebRTCModule.WebRTCModulePackage(),
+                // react-native-webview
+                new com.reactnativecommunity.webview.RNCWebViewPackage(),
+                new com.facebook.react.shell.MainReactPackage(),
                 new ReactPackageAdapter() {
                     @Override
                     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
@@ -200,7 +279,8 @@ class ReactInstanceManagerHolder {
                     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
                         return ReactInstanceManagerHolder.createViewManagers(reactContext);
                     }
-                }));
+                }))
+        );
 
         try {
             Class<?> googlePackageClass = Class.forName("co.apptailor.googlesignin.RNGoogleSigninPackage");

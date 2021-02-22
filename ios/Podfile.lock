@@ -1,13 +1,7 @@
 PODS:
-  - AppAuth (1.4.0):
-    - AppAuth/Core (= 1.4.0)
-    - AppAuth/ExternalUserAgent (= 1.4.0)
-  - AppAuth/Core (1.4.0)
-  - AppAuth/ExternalUserAgent (1.4.0)
   - boost-for-react-native (1.63.0)
   - BVLinearGradient (2.5.6):
     - React
-  - CardIO (5.4.1)
   - CocoaLumberjack (3.5.3):
     - CocoaLumberjack/Core (= 3.5.3)
   - CocoaLumberjack/Core (3.5.3)
@@ -97,10 +91,6 @@ PODS:
     - nanopb (~> 2.30907.0)
   - GoogleDataTransport (8.2.0):
     - nanopb (~> 2.30907.0)
-  - GoogleSignIn (5.0.2):
-    - AppAuth (~> 1.2)
-    - GTMAppAuth (~> 1.0)
-    - GTMSessionFetcher/Core (~> 1.1)
   - GoogleUtilities/AppDelegateSwizzler (7.2.2):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
@@ -120,14 +110,6 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (7.2.2):
     - GoogleUtilities/Logger
-  - GTMAppAuth (1.1.0):
-    - AppAuth/Core (~> 1.4)
-    - GTMSessionFetcher (~> 1.4)
-  - GTMSessionFetcher (1.5.0):
-    - GTMSessionFetcher/Full (= 1.5.0)
-  - GTMSessionFetcher/Core (1.5.0)
-  - GTMSessionFetcher/Full (1.5.0):
-    - GTMSessionFetcher/Core (= 1.5.0)
   - IQKeyboardManager (4.0.13)
   - libwebp (1.1.0):
     - libwebp/demux (= 1.1.0)
@@ -337,10 +319,6 @@ PODS:
     - React
   - react-native-orientation-locker (1.2.0):
     - React
-  - react-native-pdf (6.2.2):
-    - React-Core
-  - react-native-recording (0.5.1):
-    - React
   - react-native-safe-area-context (3.1.9):
     - React-Core
   - react-native-sms (1.11.0):
@@ -419,9 +397,6 @@ PODS:
     - SDWebImageWebPCoder
   - RNAppleAuthentication (2.1.0):
     - React-Core
-  - RNAwesomeCardIO (0.9.0):
-    - CardIO
-    - React
   - RNCAsyncStorage (1.13.4):
     - React-Core
   - RNCCheckbox (0.5.7):
@@ -451,9 +426,6 @@ PODS:
     - RNFBApp
   - RNGestureHandler (1.10.0):
     - React-Core
-  - RNGoogleSignin (3.0.1):
-    - GoogleSignIn (~> 5.0.0)
-    - React
   - RNImageCropPicker (0.35.3):
     - React-Core
     - React-RCTImage
@@ -542,8 +514,6 @@ DEPENDENCIES:
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-open-settings (from `../node_modules/react-native-open-settings`)
   - react-native-orientation-locker (from `../node_modules/react-native-orientation-locker`)
-  - react-native-pdf (from `../node_modules/react-native-pdf`)
-  - react-native-recording (from `../node_modules/react-native-recording/lib/ios`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sms (from `../node_modules/react-native-sms`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
@@ -564,7 +534,6 @@ DEPENDENCIES:
   - ReactNativeKeyboardManager (from `../node_modules/react-native-keyboard-manager`)
   - ReactNativeWebPFormat (from `../node_modules/react-native-webp-format`)
   - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
-  - RNAwesomeCardIO (from `../node_modules/react-native-awesome-card-io`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCCheckbox (from `../node_modules/@react-native-community/checkbox`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
@@ -577,7 +546,6 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
-  - "RNGoogleSignin (from `../node_modules/@react-native-community/google-signin`)"
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - RNInAppBrowser (from `../node_modules/react-native-inappbrowser-reborn`)
   - RNLocalize (from `../node_modules/react-native-localize`)
@@ -595,9 +563,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - AppAuth
     - boost-for-react-native
-    - CardIO
     - CocoaLumberjack
     - Firebase
     - FirebaseAnalytics
@@ -610,10 +576,7 @@ SPEC REPOS:
     - FirebaseMessaging
     - GoogleAppMeasurement
     - GoogleDataTransport
-    - GoogleSignIn
     - GoogleUtilities
-    - GTMAppAuth
-    - GTMSessionFetcher
     - IQKeyboardManager
     - libwebp
     - nanopb
@@ -684,10 +647,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-open-settings"
   react-native-orientation-locker:
     :path: "../node_modules/react-native-orientation-locker"
-  react-native-pdf:
-    :path: "../node_modules/react-native-pdf"
-  react-native-recording:
-    :path: "../node_modules/react-native-recording/lib/ios"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sms:
@@ -728,8 +687,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-webp-format"
   RNAppleAuthentication:
     :path: "../node_modules/@invertase/react-native-apple-authentication"
-  RNAwesomeCardIO:
-    :path: "../node_modules/react-native-awesome-card-io"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCCheckbox:
@@ -754,8 +711,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/messaging"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
-  RNGoogleSignin:
-    :path: "../node_modules/@react-native-community/google-signin"
   RNImageCropPicker:
     :path: "../node_modules/react-native-image-crop-picker"
   RNInAppBrowser:
@@ -786,10 +741,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BVLinearGradient: e3aad03778a456d77928f594a649e96995f1c872
-  CardIO: 56983b39b62f495fc6dae9ad7cf875143df06443
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
   FBLazyVector: ca7f56c8ff6cd8590f7a673d7903b06019805581
@@ -807,10 +760,7 @@ SPEC CHECKSUMS:
   glog: 1f3da668190260b06b429bb211bfbee5cd790c28
   GoogleAppMeasurement: c542a2feaac9ab98fd074e8f1a02c3585bbfbd47
   GoogleDataTransport: 1024b1a4dfbd7a0e92cb20d7e0a6f1fb66b449a4
-  GoogleSignIn: 7137d297ddc022a7e0aa4619c86d72c909fa7213
   GoogleUtilities: 31c5b01f978a70c6cff2afc6272b3f1921614b43
-  GTMAppAuth: 197a8dabfea5d665224aa00d17f164fc2248dab9
-  GTMSessionFetcher: b3503b20a988c4e20cc189aa798fd18220133f52
   IQKeyboardManager: 8eab4d8111418414619d1df8e4779ce5d0f8d7e2
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   nanopb: 59221d7f958fb711001e6a449489542d92ae113e
@@ -839,8 +789,6 @@ SPEC CHECKSUMS:
   react-native-netinfo: ddaca8bbb9e6e914b1a23787ccb879bc642931c9
   react-native-open-settings: b002d750697429e0aff0ba083ca6fb2d73138f7a
   react-native-orientation-locker: 47aaa55d59bfc1613804dc22f159e6bb1cca5f30
-  react-native-pdf: 4b5a9e4465a6a3b399e91dc4838eb44ddf716d1f
-  react-native-recording: fc58c7855b624abb9c94aaabed7554d0e51ee9ca
   react-native-safe-area-context: b6e0e284002381d2ff29fa4fff42b4d8282e3c94
   react-native-sms: 31fbb9d6ebb565ad32e409eaf9dc70329936a129
   react-native-sqlite-storage: cd80d46253cfb38a31eb83c67681502d4c4295df
@@ -861,7 +809,6 @@ SPEC CHECKSUMS:
   ReactNativeKeyboardManager: d0e285b82ef60a861d71834d8e996fbc09607a67
   ReactNativeWebPFormat: 4275844b80c2c385a10ab64f50264d720f2d691c
   RNAppleAuthentication: 46cbc67739bae83ca229497f9b0038f3f5431443
-  RNAwesomeCardIO: 4d837a700916725bf9fe60fe49896ad2861f1b55
   RNCAsyncStorage: 44539979e1f234262d64d3ce86ec21cceb1b2c5e
   RNCCheckbox: d1749e6a92178ce5dbc31e63becd1f34f0c76bbd
   RNCClipboard: c9cf8b4eba73c55aa9726ed3536e05503bef441d
@@ -874,7 +821,6 @@ SPEC CHECKSUMS:
   RNFBApp: d75aa9756bca20df2c902a3f7e11bc276f03c65b
   RNFBMessaging: f44e16c7bef577cd9803d53fdce4656280b1ccc4
   RNGestureHandler: 03f587ba19a7e2d9fe48fb9aa6e33ace5fd07dd5
-  RNGoogleSignin: 39336070b35fc4cea6a98cf111e00480317be0ae
   RNImageCropPicker: 08ba3a2e2f4f8833d606f01906c371e382c4dea9
   RNInAppBrowser: 48b95ba7a4eaff5cc223bca338d3e319561dbd1b
   RNLocalize: 41026b7c14878f1a1b381bc79f668f1fbf841adb
@@ -894,6 +840,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   Yoga: 96b469c5e81ff51b917b92e8c3390642d4ded30c
 
-PODFILE CHECKSUM: d7ce88455f92533deaa33a8e380075f757b4ff79
+PODFILE CHECKSUM: e0d81c0eb41bb44938922a06407c40200afaebe2
 
 COCOAPODS: 1.10.1
