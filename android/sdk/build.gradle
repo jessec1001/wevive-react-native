@@ -57,13 +57,9 @@ dependencies {
         }
     } else {
         implementation project(':react-native-device-info')
-        implementation(project(":react-native-google-signin")) {
-            exclude group: 'com.google.android.gms'
-            exclude group: 'androidx'
-        }
     }
 
-    implementation project(':react-native-async-storage')
+    //implementation project(':react-native-async-storage')
     implementation project(':react-native-background-timer')
     implementation project(':react-native-calendar-events')
     implementation project(':react-native-community_netinfo')
