@@ -94,7 +94,7 @@ android.libraryVariants.all { def variant ->
     def jsBundleDir = file("$buildDir/generated/assets/react/${targetPath}")
     def resourcesDir = file("$buildDir/generated/res/react/${targetPath}")
 
-    def jsBundleFile = file("$jsBundleDir/index.android.bundle")
+    def jsBundleFile = file("$jsBundleDir/index.bundle")
 
     def currentBundleTask = tasks.create(
             name: "bundle${targetName}JsAndAssets",
