@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text, StyleSheet, View} from 'react-native';
+import {Text, StyleSheet, View, Share, Platform} from 'react-native';
 import Icon from './components/Icon';
 import {
   responsiveHeight,
@@ -12,6 +12,9 @@ import {useRoute, CommonActions} from '@react-navigation/native';
 import {redirectToNewParams} from './utils/helpers';
 const iconSize = 3;
 
+import SendSMS from 'react-native-sms'
+
+
 import {colors} from './../app.json';
 
 export default function FooterTabs(props) {
@@ -22,6 +25,40 @@ export default function FooterTabs(props) {
         BioID: false,
       },
     });
+  };
+  const onShare = async () => {
+  
+    SendSMS.send({
+      body: 'Hey {Name} - Join Wevive, a social network for doing good. Here is the link - https://wevive.com',
+      recipients: ['+79210696694'],
+      successTypes: ['sent', 'queued'],
+      allowAndroidSendWithoutReadPermission: true,
+    }, (completed, cancelled, error) => {
+  
+      console.warn('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
+  
+    });
+  }
+  const onShare2 = async () => {
+    try {
+      const result = await Share.share({
+        message:
+          'Hey {Name} - Join Wevive, a social network for doing good.' + (Platform.OS == 'android' ? "Here is the link - https://wevive.com" : ""),
+        url:
+          'https://wevive.com'
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      alert(error.message);
+    }
   };
   const route = props.route;
   return (
@@ -45,7 +82,8 @@ export default function FooterTabs(props) {
           <TouchableOpacity
             style={styles.footerButton}
             onPress={() => {
-              navigateToChat('ContactsScreen',{filter:"calls"});
+              onShare();
+              //navigateToChat('ContactsScreen',{filter:"calls"});
             }}>
             <Icon
               name="calls"

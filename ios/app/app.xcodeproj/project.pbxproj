@@ -211,7 +211,6 @@
 				0BB7DA181EC9E695007AAE98 /* Adjust ATS */,
 				DEF4813D224925A2002AD03A /* Copy Google Plist file */,
 				DE11877A21EE09640078D059 /* Setup Google reverse URL handler */,
-				DE4F6D6E22005C0400DE699E /* Setup Dropbox */,
 				0BEA5C491F7B8F73000D0AB4 /* Embed Watch Content */,
 				BC06270062C99EFF8099F740 /* [CP] Embed Pods Frameworks */,
 				8D8CE6EC2AE33F962C615ECB /* [CP] Copy Pods Resources */,
@@ -434,24 +433,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "INFO_PLIST=\"$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH\"\nGOOGLE_PLIST=\"$PROJECT_DIR/GoogleService-Info.plist\"\n\nif [[ -f $GOOGLE_PLIST ]]; then\n    REVERSED_CLIENT_ID=$(/usr/libexec/PlistBuddy -c \"Print :REVERSED_CLIENT_ID:\" $GOOGLE_PLIST)\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleURLTypes:1:CFBundleURLSchemes:0 $REVERSED_CLIENT_ID\" $INFO_PLIST\nfi\n";
-		};
-		DE4F6D6E22005C0400DE699E /* Setup Dropbox */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Setup Dropbox";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "INFO_PLIST=\"$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH\"\nDROPBOX_KEY_FILE=\"$PROJECT_DIR/dropbox.key\"\n\nif [[ -f $DROPBOX_KEY_FILE ]]; then\n    /usr/libexec/PlistBuddy -c \"Delete :LSApplicationQueriesSchemes\" $INFO_PLIST\n    /usr/libexec/PlistBuddy -c \"Add :LSApplicationQueriesSchemes array\" $INFO_PLIST\n    /usr/libexec/PlistBuddy -c \"Add :LSApplicationQueriesSchemes:0 string 'dbapi-2'\" $INFO_PLIST\n    /usr/libexec/PlistBuddy -c \"Add :LSApplicationQueriesSchemes:1 string 'dbapi-8-emm'\" $INFO_PLIST\n\n    DROPBOX_KEY=$(head -n 1 $DROPBOX_KEY_FILE)\n    /usr/libexec/PlistBuddy -c \"Add :CFBundleURLTypes:2:CFBundleURLName string dropbox\" $INFO_PLIST\n    /usr/libexec/PlistBuddy -c \"Add :CFBundleURLTypes:2:CFBundleURLSchemes array\" $INFO_PLIST\n    /usr/libexec/PlistBuddy -c \"Add :CFBundleURLTypes:2:CFBundleURLSchemes:0 string $DROPBOX_KEY\" $INFO_PLIST\nfi\n";
 		};
 		DEF4813D224925A2002AD03A /* Copy Google Plist file */ = {
 			isa = PBXShellScriptBuildPhase;

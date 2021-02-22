@@ -79,6 +79,7 @@
     "js-md5": "0.6.1",
     "jtsi-meet": "https://github.com/jitsi/jitsi-meet",
     "jwt-decode": "2.2.0",
+
     "lib-jitsi-meet": "github:jitsi/lib-jitsi-meet#d1f0ab4d5a691f438f7d4c7446f29273b1b8fcdc",
     "libflacjs": "github:mmig/libflac.js#93d37e7f811f01cf7d8b6a603e38bd3c3810907d",
     "lodash": "4.17.19",
@@ -148,6 +149,7 @@
     "react-native-share": "^5.1.1",
     "react-native-simple-radio-button": "^2.7.4",
     "react-native-smooth-pincode-input": "^1.0.9",
+    "react-native-sms": "^1.11.0",
     "react-native-sound": "^0.11.0",
     "react-native-sqlite-storage": "git+ssh://git@gitlab.com/wevive/react-native-sqlite-storage#master",
     "react-native-store-review": "^0.1.5",
