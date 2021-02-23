@@ -6,11 +6,8 @@ if (googleServicesEnabled) {
     apply plugin: 'com.google.firebase.crashlytics'
 }
 
-// Use the number of seconds/10 since Jan 1 2019 as the versionCode.
-// This lets us upload a new build at most every 10 seconds for the
-// next ~680 years.
-// https://stackoverflow.com/a/38643838
-def vcode = (int) (((new Date().getTime() / 1000) - 1546297200) / 10)
+// Use the number of seconds/60 since Jan 1 2021 as the versionCode.
+def vcode = (int) (((new Date().getTime() / 1000) - 1609459200) / 60)
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -58,8 +55,7 @@ android {
             buildConfigField "boolean", "LIBRE_BUILD", "${rootProject.ext.libreBuild}"
         }
         release {
-            // Uncomment the following line for singing a test release build.
-            //signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules-release.pro'
             buildConfigField "boolean", "GOOGLE_SERVICES_ENABLED", "${googleServicesEnabled}"
@@ -185,4 +181,4 @@ if (googleServicesEnabled) {
     apply plugin: 'com.google.gms.google-services'
 }
 
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+//apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
