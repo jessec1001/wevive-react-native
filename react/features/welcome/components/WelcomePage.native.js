@@ -23,7 +23,7 @@ import {
     destroyLocalTracks
 } from '../../base/tracks';
 import { HelpView } from '../../help';
-//import { DialInSummary } from '../../invite';
+import { DialInSummary } from '../../invite';
 import { SettingsView } from '../../settings';
 import { setSideBarVisible } from '../actions';
 
@@ -342,6 +342,9 @@ class WelcomePage extends AbstractWelcomePage {
      */
     _renderWelcomePageModals() {
         return [
+            <HelpView key = 'helpView' />,
+            <DialInSummary key = 'dialInSummary' />,
+            <SettingsView key = 'settings' />
         ];
     }
 }

@@ -24,10 +24,8 @@ export default class VerificationScreen extends Component {
     let screen = 'VerificationSuccess';
     if (user.new) {
       screen = 'VerificationSuccess';
-    } else if (user.pinSet) {
-      screen = 'PINScreen';
     } else {
-      screen = 'PINVerificationScreen';
+      screen = 'PINScreen';
     }
     this.props.navigation.dispatch(
       CommonActions.reset({

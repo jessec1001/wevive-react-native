@@ -2,6 +2,7 @@
 
 import { getFeatureFlag, TILE_VIEW_ENABLED } from '../base/flags';
 import { getPinnedParticipant, getParticipantCount } from '../base/participants';
+import { CHAT_SIZE } from '../chat/constants';
 import {
     ASPECT_RATIO_BREAKPOINT,
     DEFAULT_MAX_COLUMNS,
@@ -9,6 +10,7 @@ import {
     SINGLE_COLUMN_BREAKPOINT,
     TWO_COLUMN_BREAKPOINT
 } from '../filmstrip/constants';
+import { isYoutubeVideoPlaying } from '../youtube-player/functions';
 
 import { LAYOUTS } from './constants';
 
@@ -46,6 +48,11 @@ export function getMaxColumnCount(state: Object) {
         const { clientWidth } = state['features/base/responsive-ui'];
         let availableWidth = clientWidth;
         const participantCount = getParticipantCount(state);
+        const { isOpen } = state['features/chat'];
+
+        if (isOpen) {
+            availableWidth -= CHAT_SIZE;
+        }
 
         // If there are just two participants in a conference, enforce single-column view for mobile size.
         if (participantCount === 2 && availableWidth < ASPECT_RATIO_BREAKPOINT) {
@@ -137,11 +144,17 @@ export function shouldDisplayTileView(state: Object = {}) {
 
         // Reasons for normal mode:
 
+        // Editing etherpad
+        state['features/etherpad']?.editing
+
         // We pinned a participant
-        getPinnedParticipant(state)
+        || getPinnedParticipant(state)
 
         // It's a 1-on-1 meeting
         || participantCount < 3
+
+        // There is a shared YouTube video in the meeting
+        || isYoutubeVideoPlaying(state)
 
         // We want jibri to use stage view by default
         || iAmRecorder

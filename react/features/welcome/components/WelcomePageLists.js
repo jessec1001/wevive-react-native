@@ -6,6 +6,8 @@ import { translate } from '../../base/i18n';
 import { IconEventNote, IconRestore } from '../../base/icons';
 import { PagedList } from '../../base/react';
 import { connect } from '../../base/redux';
+import { CalendarList, isCalendarEnabled } from '../../calendar-sync';
+import { RecentList } from '../../recent-list';
 import { setWelcomePageListsDefaultPage } from '../actions';
 
 /**
@@ -68,7 +70,22 @@ class WelcomePageLists extends Component<Props> {
         }
 
         const pages = [
+            {
+                component: RecentList,
+                icon: IconRestore,
+                title: t('welcomepage.recentList')
+            }
         ];
+
+        if (_calendarEnabled) {
+            pages.push(
+                {
+                    component: CalendarList,
+                    icon: IconEventNote,
+                    title: t('welcomepage.calendar')
+                }
+            );
+        }
 
         return (
             <PagedList
@@ -114,7 +131,7 @@ function _mapStateToProps(state: Object) {
     }
 
     return {
-        _calendarEnabled: false,
+        _calendarEnabled: isCalendarEnabled(state),
         _defaultPage: defaultPage
     };
 }

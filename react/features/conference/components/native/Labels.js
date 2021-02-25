@@ -6,6 +6,10 @@ import { TouchableOpacity, View } from 'react-native';
 import { JitsiRecordingConstants } from '../../../base/lib-jitsi-meet';
 import { connect } from '../../../base/redux';
 import { ASPECT_RATIO_WIDE } from '../../../base/responsive-ui/constants';
+import {
+    RecordingExpandedLabel
+} from '../../../recording';
+import { TranscribingExpandedLabel } from '../../../transcribing';
 import { VideoQualityExpandedLabel } from '../../../video-quality';
 import { shouldDisplayNotifications } from '../../functions';
 import AbstractLabels, {
@@ -84,6 +88,19 @@ const LABEL_ID_INSECURE_ROOM_NAME = 'insecure-room-name';
  */
 const EXPANDED_LABELS = {
     quality: VideoQualityExpandedLabel,
+    recording: {
+        component: RecordingExpandedLabel,
+        props: {
+            mode: JitsiRecordingConstants.mode.FILE
+        }
+    },
+    streaming: {
+        component: RecordingExpandedLabel,
+        props: {
+            mode: JitsiRecordingConstants.mode.STREAM
+        }
+    },
+    transcribing: TranscribingExpandedLabel,
     'insecure-room-name': InsecureRoomNameExpandedLabel
 };
 

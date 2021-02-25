@@ -56,6 +56,7 @@ const APIService = async (endpoint, data, cache_time) => {
     } else {
       options.body = requestData;
     }
+    console.error(options);
     return fetch(url, options)
       .then((response) => {
         return response.json();
@@ -68,7 +69,7 @@ const APIService = async (endpoint, data, cache_time) => {
       })
       .catch((error) => {
         if (debug) {
-          console.log(error);
+          console.error(error);
         }
       });
   };

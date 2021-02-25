@@ -235,7 +235,7 @@ function _user2participant({ avatar, avatarUrl, email, id, name }) {
         participant.id = id.trim();
     }
     if (typeof name === 'string') {
-        participant.name = name && name.trim();
+        participant.name = name.trim();
     }
 
     return Object.keys(participant).length ? participant : undefined;

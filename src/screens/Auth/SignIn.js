@@ -312,17 +312,14 @@ export default class SignIn extends Component {
                         {touched.phone && errors.phone && (
                           <Text style={styles.errorStyle}>{errors.phone}</Text>
                         )}
-                        <View style={styles.checkboxBoxStyle}>
-                          <Text style={styles.checkboxTextStyle}>
-                            Are you under the age of 16?
-                          </Text>
+                        <Text style={styles.checkboxTextStyle}>
+                          Are you under the age of 16?
                           <FormInput
-                              style={styles.checkbox16Style}
-                              type="checkbox"
-                              name="over16"
-                              label={trans('auth.over16')}
-                            />
-                        </View>
+                            type="checkbox"
+                            name="over16"
+                            label={trans('auth.over16')}
+                          />
+                        </Text>
                         <View style={styles.buttonContainerStyle}>
                           <Button onPress={handleSubmit} title="NEXT" />
                         </View>

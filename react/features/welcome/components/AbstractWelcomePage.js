@@ -7,7 +7,8 @@ import type { Dispatch } from 'redux';
 import { createWelcomePageEvent, sendAnalytics } from '../../analytics';
 import { appNavigate } from '../../app/actions';
 import isInsecureRoomName from '../../base/util/isInsecureRoomName';
-//import { isRecentListEnabled } from '../../recent-list/functions';
+import { isCalendarEnabled } from '../../calendar-sync';
+import { isRecentListEnabled } from '../../recent-list/functions';
 import {getFeatureFlag} from '../../base/flags/functions';
 /**
  * {@code AbstractWelcomePage}'s React {@code Component} prop types.
@@ -286,10 +287,10 @@ export class AbstractWelcomePage extends Component<Props, *> {
  */
 export function _mapStateToProps(state: Object) {
     return {
-        _calendarEnabled: false,
+        _calendarEnabled: isCalendarEnabled(state),
         _enableInsecureRoomNameWarning: state['features/base/config'].enableInsecureRoomNameWarning || false,
         _moderatedRoomServiceUrl: state['features/base/config'].moderatedRoomServiceUrl,
-        _recentListEnabled: false,
+        _recentListEnabled: isRecentListEnabled(),
         _room: state['features/base/flags'].room,
         _settings: state['features/base/settings']
     };
