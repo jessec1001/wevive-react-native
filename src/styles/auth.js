@@ -70,6 +70,11 @@ const styles = keyboard => {
       marginBottom: responsiveWidth(8.5),
       fontSize: responsiveFontSize(1.8),
       textAlign: 'center',
+      width: responsiveWidth(100),
+      height: responsiveWidth(5),
+    },
+    checkbox16Style: {
+
     },
     dropdownIcon: {
       top: 5,
@@ -192,10 +197,11 @@ const styles = keyboard => {
       flexDirection: "column",
       alignSelf: "center",
     },
+    checkboxBoxStyle: {
+      flexDirection: "row",
+    },
     checkboxContainerStyle: {
-      top: responsiveWidth(2),
-      marginLeft: responsiveWidth(4),
-      marginTop: responsiveWidth(3)
+      left: -responsiveWidth(15),
     },
     buttonContainerStyle: {
       marginTop: responsiveHeight(0),
@@ -345,8 +351,8 @@ const styles = keyboard => {
       width: responsiveWidth(14.5),
       height: responsiveWidth(6),
       position: "absolute",
-      top: responsiveWidth(5),
-      left: -responsiveWidth(2.5),
+      top: responsiveWidth(4.5),
+      left: responsiveWidth(8.5),
     },
     countryCode: {
       alignSelf:"center",

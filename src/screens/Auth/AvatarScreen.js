@@ -14,7 +14,7 @@ import Icon from '../../components/Icon';
 import {
   responsiveHeight,
   responsiveWidth,
-  responsiveFontSize
+  responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 const defaultAvatar = require('../../images/PNG/wewelogo.png');
 export default class AvatarScreen extends Component {
@@ -22,6 +22,8 @@ export default class AvatarScreen extends Component {
     email: null,
     bioAccessToken: null,
     avatarImage: null,
+    filename: null,
+    mime: null,
   };
   pickImage = () => {
     ImagePicker.openPicker({
@@ -31,8 +33,11 @@ export default class AvatarScreen extends Component {
       cropperCircleOverlay: true,
       avoidEmptySpaceAroundImage: true,
     }).then((image) => {
-      this.setState({avatarImage: image.path});
-      console.log(image.path);
+      this.setState({
+        avatarImage: image.path,
+        avatarFile: image.filename,
+        avatarMime: image.mime,
+      });
     });
   };
   navigateSuccess = () => {
@@ -56,16 +61,15 @@ export default class AvatarScreen extends Component {
           }}
           onSubmit={(values, actions) => {
             global.appIsLoading();
-            APIService('users/sign_in/', {
-              email: values.email,
-              password: values.password,
-              remember_me: 1,
-              is_staff: false,
+            APIService('user-photo/update_photo/', {
+              photo: this.state.avatarImage,
+              filename: this.state.avatarFile,
+              mime: this.state.avatarMime,
+              name: 'name',
             }).then((result) => {
               global.appIsNotLoading();
-              this.navigateSuccess();
+              console.error(result);
               if (result) {
-                this.navigateSuccess();
               } else {
                 actions.setFieldError('password', 'Wrong password.');
               }
@@ -107,7 +111,7 @@ export default class AvatarScreen extends Component {
                       source={defaultAvatar}
                       name="plus-icon"
                       size={responsiveHeight(8)}
-                      color={"white"}
+                      color={'white'}
                       style={styles.defaultAvatarImageIcon}
                     />
                   </View>
