@@ -9,7 +9,6 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import OAuth from '../../utils/OAuth';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import Button from '../../components/Button';
@@ -20,12 +19,6 @@ import AuthView from '../../views/AuthView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CryptoJS from 'crypto-js';
 
-import appleAuth, {
-  AppleButton,
-  AppleAuthRequestOperation,
-  AppleAuthRequestScope,
-  AppleAuthCredentialState,
-} from '@invertase/react-native-apple-authentication';
 import {Buffer} from 'buffer';
 import {
   responsiveWidth,
@@ -353,36 +346,6 @@ export default class SignIn extends Component {
                     </AuthContext.Provider>
                   )}
                 </Formik>
-
-                {googleLogin ? (
-                  <Text
-                    onPress={() =>
-                      OAuth('google').then((res) => {
-                        if (res) {
-                          AsyncStorage.setItem('userToken', '1');
-                          this.navigateSuccess();
-                        }
-                      })
-                    }
-                    style={styles.linkStyle}>
-                    Sign up with Google
-                  </Text>
-                ) : null}
-                {appleLogin && Platform.OS === 'ios' ? (
-                  <>
-                    <AppleButton
-                      buttonStyle={AppleButton.Style.BLACK}
-                      buttonType={AppleButton.Type.SIGN_IN}
-                      style={{
-                        width: responsiveWidth(45),
-                        height: responsiveHeight(5),
-                        marginTop: responsiveHeight(1),
-                        marginBottom: responsiveHeight(1),
-                      }}
-                      onPress={() => this.onAppleButtonPress()}
-                    />
-                  </>
-                ) : null}
               </AuthView>
             )}
           </BioIDContext.Consumer>

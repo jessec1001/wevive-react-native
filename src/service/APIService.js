@@ -52,13 +52,17 @@ const APIService = async (endpoint, data, cache_time) => {
         type: data.mime,
         name: data.filename,
       });
-      options.data = formData;
+      options.body = formData;
     } else {
       options.body = requestData;
     }
     return fetch(url, options)
       .then((response) => {
-        return response.json();
+        if (headers['Content-Type'] === 'multipart/form-data') {
+          return response.text();
+        } else {
+          return response.json();
+        }
       })
       .then((responseJson) => {
         if (cache_time !== undefined && cache_time > 0) {
@@ -68,7 +72,7 @@ const APIService = async (endpoint, data, cache_time) => {
       })
       .catch((error) => {
         if (debug) {
-          console.log(error);
+          console.error(error);
         }
       });
   };

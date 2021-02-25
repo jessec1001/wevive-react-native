@@ -5,6 +5,8 @@ import 'react-native-url-polyfill/auto'; // Complete URL polyfill.
 
 import Storage from './Storage';
 
+import {RTCPeerConnection} from 'react-native-webrtc';
+
 /**
  * Gets the first common prototype of two specified Objects (treating the
  * objects themselves as prototypes as well).
@@ -376,12 +378,42 @@ function _visitNode(node, callback) {
     // WebRTC
     require('./webrtc');
 
-    // CallStats
-    //
-    // Required by:
-    // - lib-jitsi-meet
-    require('react-native-callstats/csio-polyfill');
-    global.callstats = require('react-native-callstats/callstats');
+    
+   
+
+    window.csioReactNative = true;
+
+    if (!window.RTCPeerConnection) {
+        window.RTCPeerConnection = RTCPeerConnection;
+    }
+
+    if (!window.webkitRTCPeerConnection) {
+        window.webkitRTCPeerConnection = RTCPeerConnection;
+    }
+
+    if (!window.performance) {
+        window.performance = {};
+    }
+
+    if (!window.performance.timing) {
+    window.performance.timing = {};
+    window.performance.timing.navigationStart = 0;
+    }
+
+    Date.now = (Date.now || function() {
+    return new Date().getTime();
+    });
+
+    if (!window.performance.now) {
+    window.performance.now = function now() {
+        return Date.now();
+    };
+    }
+
+    if (!window.location) {
+    window.location = {};
+    window.location.href = 'react-native';
+    }
 
     // XMLHttpRequest
     if (global.XMLHttpRequest) {
