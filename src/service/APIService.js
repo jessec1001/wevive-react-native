@@ -29,6 +29,9 @@ const APIService = async (endpoint, data, cache_time) => {
       headers = {...headers, Authorization: 'Bearer ' + userToken};
     }
     var method = requestData ? 'POST' : 'GET';
+    if (url.indexOf('user-photo/update_photo/') > 0) {
+      headers['Content-Type'] = 'multipart/form-data';
+    }
     if (url.indexOf('users/me/') > 0 && method === 'POST') {
       method = 'PUT';
     }
@@ -41,8 +44,18 @@ const APIService = async (endpoint, data, cache_time) => {
     const options = {
       method,
       headers,
-      body: requestData ,
     };
+    if (headers['Content-Type'] === 'multipart/form-data') {
+      const formData = new FormData();
+      formData.append('photo', {
+        uri: data.photo,
+        type: data.mime,
+        name: data.filename,
+      });
+      options.data = formData;
+    } else {
+      options.body = requestData;
+    }
     return fetch(url, options)
       .then((response) => {
         return response.json();
@@ -55,7 +68,7 @@ const APIService = async (endpoint, data, cache_time) => {
       })
       .catch((error) => {
         if (debug) {
-          console.error(error);
+          console.log(error);
         }
       });
   };
