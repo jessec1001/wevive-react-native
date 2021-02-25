@@ -49,24 +49,6 @@ class Root extends PureComponent<Props> {
 // Initialize logging.
 _initLogging();
 
-// HORRIBLE HACK ALERT! React Native logs the initial props with `console.log`. Here we are quickly patching it
-// to avoid logging potentially sensitive information.
-if (!__DEV__) {
-    /* eslint-disable */
-
-    const __orig_console_log = console.log;
-    const __orig_appregistry_runapplication = AppRegistry.runApplication;
-
-    AppRegistry.runApplication = (...args) => {
-        // $FlowExpectedError
-        console.log = () => {};
-        __orig_appregistry_runapplication(...args);
-        // $FlowExpectedError
-        console.log = __orig_console_log;
-    };
-
-    /* eslint-enable */
-}
 
 
 // Register the main/root Component of JitsiMeetView.

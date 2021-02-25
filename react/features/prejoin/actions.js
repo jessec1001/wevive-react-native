@@ -14,7 +14,7 @@ import {
     replaceLocalTrack
 } from '../base/tracks';
 import { openURLInBrowser } from '../base/util';
-import { executeDialOutRequest, executeDialOutStatusRequest, getDialInfoPageURL } from '../invite/functions';
+//import { executeDialOutRequest, executeDialOutStatusRequest, getDialInfoPageURL } from '../invite/functions';
 import { showErrorNotification } from '../notifications';
 
 import {
@@ -145,45 +145,7 @@ function pollForStatus(
  * @returns {Function}
  */
 export function dialOut(onSuccess: Function, onFail: Function) {
-    return async function(dispatch: Function, getState: Function) {
-        const state = getState();
-        const reqId = uuid.v4();
-        const url = getDialOutUrl(state);
-        const conferenceUrl = getDialOutConferenceUrl(state);
-        const phoneNumber = getFullDialOutNumber(state);
-        const countryCode = getDialOutCountry(state).code.toUpperCase();
-
-        const body = {
-            conferenceUrl,
-            countryCode,
-            name: phoneNumber,
-            phoneNumber
-        };
-
-        try {
-            await executeDialOutRequest(url, body, reqId);
-
-            dispatch(pollForStatus(reqId, onSuccess, onFail));
-        } catch (err) {
-            const notification = {
-                titleKey: 'prejoin.errorDialOut',
-                titleArguments: undefined
-            };
-
-            if (err.status) {
-                if (err.messageKey === 'validation.failed') {
-                    notification.titleKey = 'prejoin.errorValidation';
-                } else {
-                    notification.titleKey = 'prejoin.errorStatusCode';
-                    notification.titleArguments = { status: err.status };
-                }
-            }
-
-            dispatch(showErrorNotification(notification));
-            logger.error('Error dialing out', err);
-            onFail();
-        }
-    };
+    onFail();
 }
 
 /**
