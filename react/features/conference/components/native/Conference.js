@@ -10,7 +10,7 @@ import { Container, LoadingIndicator, TintedView } from '../../../base/react';
 import { connect } from '../../../base/redux';
 import { ASPECT_RATIO_NARROW } from '../../../base/responsive-ui/constants';
 import { TestConnectionInfo } from '../../../base/testing';
-import { ConferenceNotification, isCalendarEnabled } from '../../../calendar-sync';
+//import { ConferenceNotification, isCalendarEnabled } from '../../../calendar-sync';
 import { Chat } from '../../../chat';
 import { DisplayNameLabel } from '../../../display-name';
 import { SharedDocument } from '../../../etherpad';
@@ -217,10 +217,7 @@ class Conference extends AbstractConference<Props, *> {
     _renderConferenceNotification() {
         const { _calendarEnabled, _reducedUI } = this.props;
 
-        return (
-            _calendarEnabled && !_reducedUI
-                ? <ConferenceNotification />
-                : undefined);
+        return undefined;
     }
 
     /**
