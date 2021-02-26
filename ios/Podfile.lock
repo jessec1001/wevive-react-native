@@ -307,6 +307,8 @@ PODS:
     - React
   - react-native-get-random-values (1.5.1):
     - React-Core
+  - react-native-heic-converter (1.3.0):
+    - React
   - react-native-keep-awake (4.0.0):
     - React
   - react-native-libsodium (1.0.0):
@@ -502,6 +504,7 @@ DEPENDENCIES:
   - react-native-contacts (from `../node_modules/react-native-contacts`)
   - react-native-cookies (from `../node_modules/react-native-cookies/ios`)
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
+  - react-native-heic-converter (from `../node_modules/react-native-heic-converter`)
   - react-native-keep-awake (from `../node_modules/react-native-keep-awake`)
   - react-native-libsodium (from `../node_modules/react-native-libsodium`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
@@ -626,6 +629,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-cookies/ios"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
+  react-native-heic-converter:
+    :path: "../node_modules/react-native-heic-converter"
   react-native-keep-awake:
     :path: "../node_modules/react-native-keep-awake"
   react-native-libsodium:
@@ -768,6 +773,7 @@ SPEC CHECKSUMS:
   react-native-contacts: f97ea51a576325eade1c1e6a9e3be224ccbd466d
   react-native-cookies: 854d59c4135c70b92a02ca4930e68e4e2eb58150
   react-native-get-random-values: 41f0c91ac0da870e47b307e07752e9e54bc2dc7e
+  react-native-heic-converter: dab6fa746df207995c145cdd3cebb989ca799a1b
   react-native-keep-awake: afad8a51dfef9fe9655a6344771be32c8596d774
   react-native-libsodium: dd8ef5c485a8b1a8eb9efc5d10348424d0eb5fa7
   react-native-netinfo: ddaca8bbb9e6e914b1a23787ccb879bc642931c9

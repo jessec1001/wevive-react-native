@@ -58,20 +58,11 @@ class AppContainer extends Component {
       this.setDimensionsIos(args);
     }
   };
-  updateClient() {
-    APIService('clients/current/', null, 60).then((client) => {
-      this.setState({client});
-    });
-  }
   componentDidMount() {
     bootstrap();
     APIService('users/geoip/', null, 60).then((geo) => {
       this.setState({geo});
     });
-    this.updateClient();
-    setInterval(() => {
-      this.updateClient();
-    }, 30000);
     if (Platform.OS === 'android') {
       changeNavigationBarColor('#000000', false, false);
     }

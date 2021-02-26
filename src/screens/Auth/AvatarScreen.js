@@ -1,3 +1,5 @@
+import RNHeicConverter from 'react-native-heic-converter';
+
 import React, {Fragment, Component, useContext} from 'react';
 import {Text, TextInput, View, TouchableOpacity, Image} from 'react-native';
 import * as yup from 'yup';
@@ -16,6 +18,7 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const defaultAvatar = require('../../images/PNG/wewelogo.png');
 export default class AvatarScreen extends Component {
   state = {
@@ -33,11 +36,25 @@ export default class AvatarScreen extends Component {
       cropperCircleOverlay: true,
       avoidEmptySpaceAroundImage: true,
     }).then((image) => {
-      this.setState({
-        avatarImage: image.path,
-        avatarFile: image.filename,
-        avatarMime: image.mime,
-      });
+      let imageFilename = image.filename.toLowerCase();
+      if (imageFilename.indexOf('.heic')) {
+        RNHeicConverter.convert({
+          path: image.path,
+        }).then((result) => {
+          imageFilename = imageFilename.replace(/\.heic$/, '.jpg');
+          this.setState({
+            avatarImage: result.path,
+            avatarFile: imageFilename,
+            avatarMime: image.mime,
+          });
+        });
+      } else {
+        this.setState({
+          avatarImage: image.path,
+          avatarFile: imageFilename,
+          avatarMime: image.mime,
+        });
+      }
     });
   };
   navigateSuccess = () => {
@@ -65,13 +82,15 @@ export default class AvatarScreen extends Component {
               photo: this.state.avatarImage,
               filename: this.state.avatarFile,
               mime: this.state.avatarMime,
-              name: 'name',
+              name: values.name,
             }).then((result) => {
               global.appIsNotLoading();
-              console.error(result);
               if (result) {
+                AsyncStorage.setItem('avatarUrl', result);
+                AsyncStorage.setItem('userName', values.name);
+                this.navigateSuccess();
               } else {
-                actions.setFieldError('password', 'Wrong password.');
+                actions.setFieldError('name', 'Failed to upload.');
               }
             });
           }}
