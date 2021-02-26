@@ -37,27 +37,16 @@ export default class AvatarScreen extends Component {
       avoidEmptySpaceAroundImage: true,
     }).then((image) => {
       let imageFilename = image.filename.toLowerCase();
-      if (imageFilename.indexOf('.heic')) {
-        RNHeicConverter.convert({
-          path: image.path,
-        }).then((result) => {
-          imageFilename = imageFilename.replace(/\.heic$/, '.jpg');
-          this.setState({
-            avatarImage: result.path,
-            avatarFile: imageFilename,
-            avatarMime: image.mime,
-          });
-        });
-      } else {
-        this.setState({
-          avatarImage: image.path,
-          avatarFile: imageFilename,
-          avatarMime: image.mime,
-        });
-      }
+      imageFilename = imageFilename.replace(/\.heic$/, '.jpg');
+      this.setState({
+        avatarImage: image.path,
+        avatarFile: imageFilename,
+        avatarMime: image.mime,
+      });
     });
   };
   navigateSuccess = () => {
+
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
