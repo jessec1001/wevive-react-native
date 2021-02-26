@@ -1,5 +1,5 @@
 import React, {Fragment, Component, useContext} from 'react';
-import {Text, TextInput, View, ImageBackground} from 'react-native';
+import {Text, TextInput, View, Switch, ImageBackground} from 'react-native';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import Button from '../../components/Button';
@@ -79,6 +79,19 @@ export default class NotificationsScreen extends Component {
                 style={styles.notificationDemo}
                 resizeMode="contain"
               />
+              <View style={styles.toggleContainerStyle}>
+                <Text style={styles.toggleLabel}>Enable notifications?</Text>
+                <Switch
+                    trackColor={{true: '#2bbb50', false: '#bababa'}}
+                    thumbColor="#ffffff"
+                    value={values.giftaid}
+                    style={styles.switchStyle}
+                    accessibilityRole="button"
+                    onValueChange={(value) =>
+                      setFieldValue('giftaid', value)
+                    }
+                />
+              </View>
               <View style={styles.buttonContainerStyle}>
                 <Button onPress={handleSubmit} title="NEXT" />
               </View>

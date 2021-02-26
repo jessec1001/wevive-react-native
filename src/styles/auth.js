@@ -212,6 +212,24 @@ const styles = keyboard => {
       position: 'relative',
       zIndex: 9,
     },
+    toggleContainerStyle: {
+      backgroundColor: "white",
+      width: responsiveWidth(80),
+      height: responsiveWidth(13),
+      alignSelf: "center",
+      padding: responsiveWidth(2),
+      marginBottom: responsiveWidth(3),
+      justifyContent: "center",
+      flexDirection: "row",
+    },
+    toggleLabel: {
+      justifyContent: "center",
+      alignSelf: "center",
+      fontSize: responsiveFontSize(2),
+      top: 2,
+      marginRight: responsiveWidth(15),
+
+    },
     footerText: {
       color: '#dbdbdb',
       //fontFamily: 'Adelle',
@@ -396,9 +414,10 @@ const styles = keyboard => {
       top: responsiveWidth(17.5),
     },
     notificationDemo: {
-      width: responsiveWidth(100),
-      height: responsiveWidth(100),
-      marginBottom: responsiveWidth(3),
+      alignSelf: "center",
+      width: responsiveWidth(80),
+      height: responsiveWidth(80),
+      marginVertical: responsiveWidth(4),
     },
     cellStyle: {
       borderBottomWidth: 2,
