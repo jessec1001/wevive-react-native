@@ -36,6 +36,10 @@ import {PushNotificationsService} from './service/PushNotificationsService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from './service/APIService';
+import ChatModule from 'react-native-chat-plugin';
+
+import Icon from './components/Icon';
+const chat_url = 'https://chat.wevive.com/';
 
 const contentFooter = null;
 
@@ -76,10 +80,15 @@ export default class Main extends Component {
         }
       });*/
     }
+    AsyncStorage.getItem('userToken').then((userToken) => {
+      //console.error(userToken);
+      this.setState({userToken});
+    });
     global.toggleDonationModal = this.toggleDonationModal;
   }
 
   state = {
+    userToken: null,
     drawerType: 'profile',
     isDonationModalVisible: false,
     sidebarLinks: defaultSidebarLinks,
@@ -148,48 +157,52 @@ export default class Main extends Component {
 
   render() {
     const {navigate} = this.props.navigation;
-    return (
-      <ImageBackground
-        resizeMode="cover"
-        imageStyle={this.state.styles.contentBgImage}
-        style={this.state.styles.contentBg}>
-        <AppThemeContext.Consumer>
-          {({themeSettings, goBack, insets}) => (
-            <>
-              {!themeSettings.hiddenHeader ? (
-                <Header
-                  themeSettings={themeSettings}
-                  navigation={this.props.navigation}
-                  toggleDrawer={this.toggleDrawer.bind(this)}
-                  hiddenBack={themeSettings.hiddenBack}
-                  goBack={goBack}
-                />
-              ) : null}
-              <AppNavigator />
-              {!themeSettings.hiddenFooter ? (
-                <>
-                  <FooterTabs
-                    toggleDrawer={this.toggleDrawer.bind(this)}
-                    navigate={this.navigate}
+    return (this.state.userToken &&
+      <ChatModule options={{token: this.state.userToken}}
+      socketIoUrl={chat_url}
+      icon={Icon}>
+        <ImageBackground
+          resizeMode="cover"
+          imageStyle={this.state.styles.contentBgImage}
+          style={this.state.styles.contentBg}>
+          <AppThemeContext.Consumer>
+            {({themeSettings, goBack, insets}) => (
+              <>
+                {!themeSettings.hiddenHeader ? (
+                  <Header
+                    themeSettings={themeSettings}
                     navigation={this.props.navigation}
-                    route={this.props.route}
+                    toggleDrawer={this.toggleDrawer.bind(this)}
+                    hiddenBack={themeSettings.hiddenBack}
+                    goBack={goBack}
                   />
-                  <Image
-                    source={contentFooter}
-                    style={{
-                      position: 'absolute',
-                      marginBottom: 0,
-                      bottom: responsiveHeight(9),
-                      height: 15,
-                      width: '100%',
-                    }}
-                  />
-                </>
-              ) : null}
-            </>
-          )}
-        </AppThemeContext.Consumer>
-      </ImageBackground>
+                ) : null}
+                <AppNavigator />
+                {!themeSettings.hiddenFooter ? (
+                  <>
+                    <FooterTabs
+                      toggleDrawer={this.toggleDrawer.bind(this)}
+                      navigate={this.navigate}
+                      navigation={this.props.navigation}
+                      route={this.props.route}
+                    />
+                    <Image
+                      source={contentFooter}
+                      style={{
+                        position: 'absolute',
+                        marginBottom: 0,
+                        bottom: responsiveHeight(9),
+                        height: 15,
+                        width: '100%',
+                      }}
+                    />
+                  </>
+                ) : null}
+              </>
+            )}
+          </AppThemeContext.Consumer>
+        </ImageBackground>
+      </ChatModule>
     );
   }
 }

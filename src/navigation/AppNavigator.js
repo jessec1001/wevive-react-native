@@ -54,23 +54,8 @@ const Stack = createStackNavigator();
 const forFade = ({current}) => ({
   cardStyle: {opacity: current.progress},
 });
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import ChatModule, {ChatPlugin} from 'react-native-chat-plugin';
-import Icon from '../components/Icon';
-const chat_url = 'https://chat.wevive.com/';
-
+import ChatNavigator from '../../node_modules/react-native-chat-plugin/ChatNavigator';
 const AppNavigator = () => {
-  const [userToken, setUserToken] = React.useState(false);
-  AsyncStorage.getItem('userToken').then((userToken) => {
-    //console.error(userToken);
-    setUserToken(userToken);
-  });
-  const Chat2 = (props) => (<ChatModule
-    {...props}
-    options={{token: userToken}}
-    socketIoUrl={chat_url}
-    icon={Icon}
-  />);
   return (
     <Stack.Navigator
       initialRouteName="About"
@@ -84,9 +69,7 @@ const AppNavigator = () => {
       />
       <Stack.Screen name="About" component={About} options={defaultConfig} />
       <Stack.Screen name="WebUI" component={WebUI} options={defaultConfig} />
-      {userToken && userToken.length > 0 && (
-        <Stack.Screen name="Chat" options={defaultConfig} component={Chat2} />
-      )}
+      <Stack.Screen name="Chat" options={defaultConfig} component={ChatNavigator} />
     </Stack.Navigator>
   );
 };

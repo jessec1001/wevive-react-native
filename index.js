@@ -1,6 +1,6 @@
 import './react/features/mobile/polyfills';
-if(__DEV__) {
-//  import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
+if (__DEV__) {
+  //  import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
 }
 //import messaging from '@react-native-firebase/messaging';
 //messaging().setBackgroundMessageHandler(async remoteMessage => {
@@ -9,20 +9,19 @@ if(__DEV__) {
 import React from 'react';
 import {AppRegistry} from 'react-native';
 import App from './App';
-import { name as appName } from './app.json';
+import {enableScreens} from 'react-native-screens';
+enableScreens();
+//import { _initLogging } from './react/features/base/logging/functions';
+import {IncomingCallApp} from './react/features/mobile/incoming-call';
 
-
-import { _initLogging } from './react/features/base/logging/functions';
-import { IncomingCallApp } from './react/features/mobile/incoming-call';
-
-function HeadlessCheck({ isHeadless, url }) {
+function HeadlessCheck({isHeadless, url}) {
   //console.error(isHeadless, url);
   if (isHeadless) {
-      return null;
+    return null;
   }
-  return <App url={url} isHeadless={isHeadless}/>;
+  return <App url={url} isHeadless={isHeadless} />;
 }
-_initLogging();
+//_initLogging();
 
 AppRegistry.registerComponent('App', () => HeadlessCheck);
 // Register the main/root Component of IncomingCallView.

@@ -1,3 +1,99 @@
+diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
+index c0d4abb..77f5a5d 100644
+--- a/node_modules/react-native-chat-plugin/ChatContainer.js
++++ b/node_modules/react-native-chat-plugin/ChatContainer.js
+@@ -2,20 +2,12 @@ import React from "react";
+ import PropTypes from "prop-types";
+ import { View, Text, StyleSheet, Alert } from "react-native";
+ 
+-import PhoneContactsScreen from "./PhoneContactsScreen/PhoneContactsScreen";
+-import ContactsScreen from "./ContactsScreen/ContactsScreen";
+-import { NavigationContainer } from "@react-navigation/native";
+-import { createStackNavigator } from "@react-navigation/stack";
+ import { ChatContext } from "./ChatContext";
+ import { getSocket } from "./utils/SocketIOClient";
+-import ChatScreen from "./ChatScreen/ChatScreen";
+-import SearchContactsScreen from "./SearchContactsScreen/SearchContactsScreen";
+ import PillButton from "./Components/PillButton";
+ import Colors from "./constants/Colors";
+ import { getEncryptionKeys } from "./utils/SQLCipherClient";
+ import { decryptConversations, decryptEvents, recreateEncryptionKeys, resendEncryptionKeys} from "./utils/ChatEncryption";
+-
+-const Stack = createStackNavigator();
+ const styles = StyleSheet.create({
+   errorView: {
+     flex: 1,
+@@ -35,7 +27,7 @@ const defaultOptions = {
+   },
+ };
+ 
+-export default function ChatContainer({ options }) {
++export default function ChatContainer({ options, children }) {
+   const ctx = React.useContext(ChatContext);
+   const socket = getSocket();
+   const [retry, setRetry] = React.useState(false);
+@@ -154,16 +146,7 @@ export default function ChatContainer({ options }) {
+     );
+   }
+ 
+-  return (
+-    <NavigationContainer independent={true}>
+-      <Stack.Navigator>
+-        <Stack.Screen component={ContactsScreen} name={"ContactsScreen"} options={defaultOptions} />
+-        <Stack.Screen component={PhoneContactsScreen} name={"PhoneContactsScreen"} options={defaultOptions} />
+-        <Stack.Screen component={ChatScreen} name={"ChatScreen"} options={defaultOptions} />
+-        <Stack.Screen component={SearchContactsScreen} name={"SearchContactsScreen"} options={defaultOptions} />
+-      </Stack.Navigator>
+-    </NavigationContainer>
+-  );
++  return (children);
+ }
+ 
+ ChatContainer.propTypes = {
+diff --git a/node_modules/react-native-chat-plugin/ChatNavigation.js b/node_modules/react-native-chat-plugin/ChatNavigation.js
+new file mode 100644
+index 0000000..871a1d3
+--- /dev/null
++++ b/node_modules/react-native-chat-plugin/ChatNavigation.js
+@@ -0,0 +1,8 @@
++import * as React from 'react';
++
++export const navigationRef = React.createRef();
++
++export function navigate(name, params) {
++  //console.warn(navigationRef.current);
++  navigationRef.current?.navigate(name, params);
++}
+\ No newline at end of file
+diff --git a/node_modules/react-native-chat-plugin/ChatNavigator.js b/node_modules/react-native-chat-plugin/ChatNavigator.js
+new file mode 100644
+index 0000000..8c0ca8f
+--- /dev/null
++++ b/node_modules/react-native-chat-plugin/ChatNavigator.js
+@@ -0,0 +1,22 @@
++import PhoneContactsScreen from "./PhoneContactsScreen/PhoneContactsScreen";
++import ContactsScreen from "./ContactsScreen/ContactsScreen";
++import { NavigationContainer } from "@react-navigation/native";
++import { createStackNavigator } from "@react-navigation/stack";
++
++import ChatScreen from "./ChatScreen/ChatScreen";
++import SearchContactsScreen from "./SearchContactsScreen/SearchContactsScreen";
++
++import navigationRef from './ChatNavigation';
++
++const Stack = createStackNavigator();
++
++export default function ChatNavigator() {
++    <NavigationContainer independent={true} ref={navigationRef}>
++      <Stack.Navigator>
++        <Stack.Screen component={ContactsScreen} name={"ContactsScreen"} options={defaultOptions} />
++        <Stack.Screen component={PhoneContactsScreen} name={"PhoneContactsScreen"} options={defaultOptions} />
++        <Stack.Screen component={ChatScreen} name={"ChatScreen"} options={defaultOptions} />
++        <Stack.Screen component={SearchContactsScreen} name={"SearchContactsScreen"} options={defaultOptions} />
++      </Stack.Navigator>
++    </NavigationContainer>
++}
+\ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 index 5388ef0..b03d399 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
@@ -20,3 +116,94 @@ index 5388ef0..b03d399 100644
  
    const [audioWebview, setWebView] = React.useState(false);
    const [audioLoaded, setAudioLoaded] = React.useState(false);
+diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
+index bbdff8a..e6401aa 100644
+--- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
++++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
+@@ -106,8 +106,7 @@ export default function ChatScreen({ navigation, route }) {
+   let offset = 30 + insets.top;
+   return (
+     <>
+-      <KeyboardAvoidingView  keyboardVerticalOffset={offset} style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height" }>
+-        <Header
++       <Header
+           left={<PillButton text="Back" onPress={() => navigation.goBack()} />}
+           title={conversation.name || "Chat"} />
+         <View style={styles.inner}>
+@@ -125,7 +124,6 @@ export default function ChatScreen({ navigation, route }) {
+             </ImageBackground>
+           </View>
+         </View>
+-      </KeyboardAvoidingView>
+     </>
+   );
+ }
+diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
+index 50d322e..4d9ff7d 100644
+--- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
++++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
+@@ -274,12 +274,12 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
+         <Text style={styles.deliveryIndicator}>
+           <Icon name="ticks" color={"rgb(228,140,58)"} />
+         </Text>
+-        <Pressable style={styles.likeIndicatorBox} onPress={()=>sendLike(event)} onLongPress={()=>sendDislike(event)}>
++        <TouchableOpacity style={styles.likeIndicatorBox} onPress={()=>sendLike(event)} onLongPress={()=>sendDislike(event)}>
+           <>
+             <Icon name={likes > 0 ? "heart" : "ei-heart"} color={"#f44"} style={likes > 0 ? styles.likeIndicator : styles.emptyLikeIndicator} />
+             {likes > 0 && <Text style={styles.likeText}>{likes}</Text>}
+           </>
+-        </Pressable>
++        </TouchableOpacity>
+         {menu && Menu({event, isOwn, Icon, setShowMenu, viewRef})}
+       </>
+     </TouchableHighlight>
+diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
+index fa4d21e..e770774 100644
+--- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
++++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
+@@ -197,7 +197,7 @@ export default function ConversationList({ navigation }) {
+           renderItem={({item}) => renderConversation(item, onPress)}
+           renderHiddenItem={({item}) => renderHiddenItem(item, ctx)}
+           disableLeftSwipe={false}
+-          disableRightSwipe={true}
++          disableRightSwipe={false}
+           recalculateHiddenLayout={false}
+           rightOpenValue={-120}
+           closeOnRowBeginSwipe={true}
+diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
+index 0d59b81..04c8f16 100644
+--- a/node_modules/react-native-chat-plugin/index.js
++++ b/node_modules/react-native-chat-plugin/index.js
+@@ -12,7 +12,7 @@ export const { ChatPlugin } = NativeModules;
+ import Contacts from 'react-native-contacts';
+ 
+ 
+-export default function ChatModule({ socketIoUrl, options, icon }) {
++export default function ChatModule({ socketIoUrl, options, icon, children }) {
+   const [contacts, setContacts] = React.useState([]);
+   const db = React.useMemo(()=> {
+     const getDB = async () => {
+@@ -29,7 +29,9 @@ export default function ChatModule({ socketIoUrl, options, icon }) {
+   initSocket(socketIoUrl);
+   return (
+     <ChatContextProvider options={options} socketIoUrl={socketIoUrl} db={db} icon={icon} contacts={contacts}>
+-      <ChatContainer options={options} />
++      <ChatContainer options={options}>
++        {children}
++      </ChatContainer>
+     </ChatContextProvider>
+   );
+ }
+diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
+index 8cb4565..81b8351 100644
+--- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
++++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
+@@ -146,7 +146,7 @@ export function SQLCipherClient(options) {
+   return new Promise((resolve, reject) => {
+     if (!db) {
+       SQLite.openDatabase({
+-        name: "chat_" + options.token.substring(0,4) + "_" + db_version + ".db",
++        name: "chat_" + db_version + ".db",
+         location: "default",
+         key: options.token,
+       }).then(

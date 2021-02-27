@@ -65,7 +65,7 @@
 		</dict>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>See your scheduled meetings in the app.</string>
+	<string>See your scheduled calls in the app.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Send photos and videos to your contacts.</string>
 	<key>NSContactsUsageDescription</key>
