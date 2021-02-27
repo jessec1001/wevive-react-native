@@ -65,10 +65,16 @@ const AppNavigator = () => {
     //console.error(userToken);
     setUserToken(userToken);
   });
+  const Chat2 = (props) => (<ChatModule
+    {...props}
+    options={{token: userToken}}
+    socketIoUrl={chat_url}
+    icon={Icon}
+  />);
   return (
     <Stack.Navigator
       initialRouteName="About"
-      mode="card"
+      mode="modal"
       screenOptions={{gestureEnabled: false}}>
       <Stack.Screen
         name="VideoCalls"
@@ -78,18 +84,9 @@ const AppNavigator = () => {
       />
       <Stack.Screen name="About" component={About} options={defaultConfig} />
       <Stack.Screen name="WebUI" component={WebUI} options={defaultConfig} />
-      {userToken && userToken.length > 0 && <Stack.Screen
-        name="Chat"
-        initialParams={{
-          socketIoUrl: chat_url,
-          options: {
-            token: userToken,
-          },
-          icon: Icon,
-        }}
-        component={ChatModule}
-        options={defaultConfig}
-      />}
+      {userToken && userToken.length > 0 && (
+        <Stack.Screen name="Chat" options={defaultConfig} component={Chat2} />
+      )}
     </Stack.Navigator>
   );
 };

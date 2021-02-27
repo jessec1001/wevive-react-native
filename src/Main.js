@@ -68,25 +68,6 @@ export default class Main extends Component {
       this.onNotification,
       this.onOpenNotification,
     );
-    /*
-    const title = 'Test Event';
-    const eventConfig = {
-      title,
-      // and other options
-    };
-    AddCalendarEvent.presentEventCreatingDialog(eventConfig)
-      .then((eventInfo) => {
-        // handle success - receives an object with `calendarItemIdentifier` and `eventIdentifier` keys, both of type string.
-        // These are two different identifiers on iOS.
-        // On Android, where they are both equal and represent the event id, also strings.
-        // when { action: 'CANCELED' } is returned, the dialog was dismissed
-        console.error(JSON.stringify(eventInfo));
-      })
-      .catch((error) => {
-        // handle error such as when user rejected permissions
-        console.error(error);
-      });
-    */
 
     if (global.isInternetReachable) {
       /*APIService('content/sidebar', {}, false, 60 * 4).then(result => {
@@ -145,16 +126,12 @@ export default class Main extends Component {
   };
   navigate = (route, routeParams) => {
     this.closeDrawer();
-    if (route == 'VideoCalls' || route == 'Panorama') {
+    if (route == 'VideoCalls') {
       var hiddenHeader = true;
       var hiddenFooter = true;
     } else {
       var hiddenHeader = false;
       var hiddenFooter = false;
-    }
-    if (route == 'Donate') {
-      this.toggleDonationModal();
-      return true;
     }
     if (this.state.hiddenHeader && !hiddenHeader) {
       this.setState({hiddenHeader: false});
@@ -179,50 +156,16 @@ export default class Main extends Component {
         <AppThemeContext.Consumer>
           {({themeSettings, goBack, insets}) => (
             <>
-              <Drawer
-                ref={(ref) => {
-                  this.drawer = ref;
-                }}
-                type={'overlay'}
-                content={
-                  <Sidebar
-                    sidebarLinks={this.state.sidebarLinks}
-                    closeDrawer={this.closeDrawer}
-                    navigation={this.props.navigation}
-                    route={this.props.route}
-                    drawerType={this.state.drawerType}
-                  />
-                }
-                onClose={() => this.closeDrawer()}
-                side="right"
-                styles={{
-                  drawer: {
-                    shadowColor: '#000000',
-                    marginTop: responsiveHeight(8.5) + insets.top,
-                    backgroundColor: 'rgba(0,0,0,0)',
-                  },
-                  mainOverlay: {
-                    backgroundColor: 'rgba(0,0,0,0)',
-                    opacity: 0,
-                    marginTop: responsiveHeight(8.5) + insets.top,
-                    position: 'absolute',
-                  },
-                }}
-                tweenDuration={300}
-                tweenHandler={(ratio) => ({
-                  mainOverlay: {opacity: ratio},
-                })}>
-                {!themeSettings.hiddenHeader ? (
-                  <Header
-                    themeSettings={themeSettings}
-                    navigation={this.props.navigation}
-                    toggleDrawer={this.toggleDrawer.bind(this)}
-                    hiddenBack={themeSettings.hiddenBack}
-                    goBack={goBack}
-                  />
-                ) : null}
-                <AppNavigator />
-              </Drawer>
+              {!themeSettings.hiddenHeader ? (
+                <Header
+                  themeSettings={themeSettings}
+                  navigation={this.props.navigation}
+                  toggleDrawer={this.toggleDrawer.bind(this)}
+                  hiddenBack={themeSettings.hiddenBack}
+                  goBack={goBack}
+                />
+              ) : null}
+              <AppNavigator />
               {!themeSettings.hiddenFooter ? (
                 <>
                   <FooterTabs
