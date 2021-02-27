@@ -16,8 +16,10 @@ import {
 } from 'react-native-responsive-dimensions';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors} from '../app.json';
+import { UserContext } from './context/UserContext';
 
 export default function Header(props) {
+  const ctx = React.useContext(UserContext);
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar
@@ -50,12 +52,8 @@ export default function Header(props) {
           />
         </View>
         <View style={styles.right}>
-          <TouchableOpacity onPress={() => props.toggleDrawer('profile')}>
-            <Icon
-              name="hamburger-icon"
-              size={responsiveFontSize(4)}
-              color={colors.headerText}
-            />
+          <TouchableOpacity onPress={() => props.navigate('Settings')}>
+            <Image resizeMode="cover" source={{uri: ctx.avatarUrl}} style={styles.headerProfileImage} />
           </TouchableOpacity>
         </View>
       </View>
@@ -98,4 +96,10 @@ const styles = StyleSheet.create({
   mainLogoImageStyle: {
     resizeMode: 'contain',
   },
+  headerProfileImage: {
+    width: responsiveWidth(12),
+    height: responsiveWidth(12),
+    borderRadius: responsiveWidth(12),
+    backgroundColor: "rgba(30,30,30,0.1)"
+  }
 });

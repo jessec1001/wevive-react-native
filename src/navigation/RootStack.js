@@ -154,7 +154,11 @@ const RootStack = () => {
         });
       });
   };
-  const appUserContextValue = {authData, setAuthData, updateMe};
+  const [avatarUrl, setAvatarUrl] = React.useState(false);
+  AsyncStorage.getItem('avatarUrl').then((avatarUrl) => {
+    setAvatarUrl(avatarUrl.slice(1, -1));
+  });
+  const appUserContextValue = {authData, setAuthData, updateMe, avatarUrl};
   const insets = useSafeAreaInsets();
   return (
     <AppUserContext.Provider value={appUserContextValue}>
