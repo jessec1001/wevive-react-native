@@ -10,14 +10,16 @@ import {
 
 import {App} from '../../../react/features/app/components';
 import { UserContext } from '../../context/UserContext';
+import { useRoute } from '@react-navigation/native';
 
-export default function VideoCalls() {
+export default function VideoCalls({callId}) {
   const {authData} = React.useContext(UserContext);
+  const r = useRoute();
   return (
     <>
       <App
         flags={{
-          room: 'WeviveRoomDev',
+          room: r.params.callId,
           'ios.recording.enabled': 0,
           'pip.enabled': 0,
           resolution: 720,

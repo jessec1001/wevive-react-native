@@ -175,6 +175,7 @@ export default class Main extends Component {
                     toggleDrawer={this.toggleDrawer.bind(this)}
                     hiddenBack={themeSettings.hiddenBack}
                     goBack={goBack}
+                    navigate={this.navigate}
                   />
                 ) : null}
                 <AppNavigator />
