@@ -75,7 +75,7 @@ index 0000000..871a1d3
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatNavigator.js b/node_modules/react-native-chat-plugin/ChatNavigator.js
 new file mode 100644
-index 0000000..a3f97a3
+index 0000000..d1dd902
 --- /dev/null
 +++ b/node_modules/react-native-chat-plugin/ChatNavigator.js
 @@ -0,0 +1,27 @@
@@ -104,11 +104,11 @@ index 0000000..a3f97a3
 +        <Stack.Screen component={PhoneContactsScreen} name={"PhoneContactsScreen"} options={defaultOptions} />
 +        <Stack.Screen component={ChatScreen} name={"ChatScreen"} options={defaultOptions} />
 +        <Stack.Screen component={SearchContactsScreen} name={"SearchContactsScreen"} options={defaultOptions} />
-+      </Stack.Navigator>
++    </Stack.Navigator>
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 5388ef0..b03d399 100644
+index 5388ef0..09bc59b 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -10,7 +10,7 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
@@ -120,7 +120,50 @@ index 5388ef0..b03d399 100644
  
  const sendButton = require("../images/sendbtn.png");
  const styles = StyleSheet.create({
-@@ -193,7 +193,7 @@ export default function ChatForm({ conversation }) {
+@@ -147,6 +147,8 @@ export default function ChatForm({ conversation }) {
+ 
+   const sendMessage = React.useCallback((contents) => {
+     const socket = getSocket();
++
++    console.error(success,error);
+     socket.emit("events:new_message", { conversationId: conversation.id, message: contents }, ({ success, error }) => {
+       if (!success && error) {
+         if (tries >= maxRetries) {
+@@ -158,17 +160,20 @@ export default function ChatForm({ conversation }) {
+             sendMessage(contents);
+           }, 1000 * (1+tries * 2));
+         }
++      } else {
++        setMessage("");
+       }
+     });
+   },[]);
+   const submit = React.useCallback(() => {
+-    setMessage("");
+     if (message) {
+       ctx.getDB().then((db)=> {
++        console.error(db);
+         db.executeSql(
+           "SELECT * FROM conversations WHERE group_id = ?",
+           [conversation.id],
+         ).then(([results])=> {
++          console.error(results);
+           const key = results.rows.length ? results.rows.item(0) : null;
+           if (key && key.group_key) {
+             encryptChatMessage(message, key.group_key).then((encrypted)=>{
+@@ -177,7 +182,11 @@ export default function ChatForm({ conversation }) {
+           } else {
+             sendMessage(message);
+           }
++        }).catch((e) => {
++          console.error(e);
+         });
++      }).catch((e)=>{
++        console.error(e);
+       });
+       
+       Keyboard.dismiss();
+@@ -193,7 +202,7 @@ export default function ChatForm({ conversation }) {
  
      });
    };
@@ -129,18 +172,40 @@ index 5388ef0..b03d399 100644
  
    const [audioWebview, setWebView] = React.useState(false);
    const [audioLoaded, setAudioLoaded] = React.useState(false);
+@@ -235,7 +244,7 @@ export default function ChatForm({ conversation }) {
+       <TextInput
+         textAlignVertical={"top"}
+         numberOfLines={5}
+-        multiline={true}
++        multiline={false}
+         value={message}
+         style={styles.txt}
+         onSubmitEditing={submit}
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index bbdff8a..3da9973 100644
+index bbdff8a..4a08b15 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-@@ -109,6 +109,7 @@ export default function ChatScreen({ navigation, route }) {
-       <KeyboardAvoidingView  keyboardVerticalOffset={offset} style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height" }>
+@@ -106,9 +106,9 @@ export default function ChatScreen({ navigation, route }) {
+   let offset = 30 + insets.top;
+   return (
+     <>
+-      <KeyboardAvoidingView  keyboardVerticalOffset={offset} style={styles.container} behavior={Platform.OS == "ios" ? "padding" : "height" }>
++      <View style={styles.container}>
          <Header
-           left={<PillButton text="Back" onPress={() => navigation.goBack()} />}
+-          left={<PillButton text="Back" onPress={() => navigation.goBack()} />}
 +          right={<PillButton text="Call" onPress={() => navigation.navigate("VideoCalls",{callId:conversation.id})} />}
            title={conversation.name || "Chat"} />
          <View style={styles.inner}>
            <View style={styles.list}>
+@@ -125,7 +125,7 @@ export default function ChatScreen({ navigation, route }) {
+             </ImageBackground>
+           </View>
+         </View>
+-      </KeyboardAvoidingView>
++      </View>
+     </>
+   );
+ }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 index 50d322e..4d9ff7d 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
@@ -160,6 +225,18 @@ index 50d322e..4d9ff7d 100644
          {menu && Menu({event, isOwn, Icon, setShowMenu, viewRef})}
        </>
      </TouchableHighlight>
+diff --git a/node_modules/react-native-chat-plugin/Components/PillButton.js b/node_modules/react-native-chat-plugin/Components/PillButton.js
+index 42efb16..f2714f7 100644
+--- a/node_modules/react-native-chat-plugin/Components/PillButton.js
++++ b/node_modules/react-native-chat-plugin/Components/PillButton.js
+@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
+     margin: 1,
+     paddingVertical: 10,
+     paddingHorizontal: 8,
++    right: 5,
+   },
+   buttonText: {
+     color: Colors.BACKGROUND,
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 index fa4d21e..a04c594 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
@@ -184,7 +261,7 @@ index fa4d21e..a04c594 100644
            rightOpenValue={-120}
            closeOnRowBeginSwipe={true}
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 731a30e..8fb152a 100644
+index 731a30e..57c577b 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 @@ -6,6 +6,9 @@ import { ChatContext } from "../ChatContext";
@@ -212,7 +289,7 @@ index 731a30e..8fb152a 100644
    headerStyle: {
      backgroundColor: "rgb(125,125,125)",
      padding: 20,
-@@ -114,20 +125,40 @@ const styles = StyleSheet.create({
+@@ -114,20 +125,42 @@ const styles = StyleSheet.create({
    }
  });
  
@@ -230,7 +307,7 @@ index 731a30e..8fb152a 100644
 -      </LinearGradient>
 -    </TouchableOpacity>
 -  );
-+const onShare = async (numbers) => {
++const onShare = async (numbers, navigation) => {
 +  
 +  SendSMS.send({
 +    body: 'Hey - Join Wevive, a social network for doing good. Here is the link - https://wevive.com',
@@ -238,8 +315,10 @@ index 731a30e..8fb152a 100644
 +    successTypes: ['sent', 'queued'],
 +    allowAndroidSendWithoutReadPermission: true,
 +  }, (completed, cancelled, error) => {
-+
-+    console.warn('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
++    if (completed) {
++      navigation.navigate('SearchContactsScreen');
++    }
++    //console.warn('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
 +
 +  });
 +}
@@ -266,7 +345,7 @@ index 731a30e..8fb152a 100644
  };
  
  const renderSectionHeader = (ctx, section) => {
-@@ -141,11 +172,36 @@ const renderSectionHeader = (ctx, section) => {
+@@ -141,28 +174,52 @@ const renderSectionHeader = (ctx, section) => {
  };
  
  export default function ConversationList({ navigation }) {
@@ -297,13 +376,13 @@ index 731a30e..8fb152a 100644
    const goBack = () => {
      navigation.goBack();
    };
+-  //console.error(contacts.length);
 +  const goNext = () => {
-+    onShare(selectedContacts);
++    onShare(selectedContacts, navigation);
 +  }
-   //console.error(contacts.length);
    return (
      <View style={styles.container}>
-@@ -153,16 +209,16 @@ export default function ConversationList({ navigation }) {
+       <View style={styles.headerStyle}>
          <TouchableOpacity onPress={goBack}>
            <Text style={styles.headerButtonStyle}>Cancel</Text>
          </TouchableOpacity>
@@ -323,20 +402,46 @@ index 731a30e..8fb152a 100644
          renderSectionHeader={(section) => renderSectionHeader(ctx, section)}
          letterItemStyle={styles.letterItemStyle}
        />
+diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
+index b708a42..c3cbf00 100644
+--- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
++++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
+@@ -129,13 +129,14 @@ export default function SearchContactsScreen({ navigation }) {
+         right={<PillButton text="Next" onPress={createChat} />}
+         title="Add participants" />
+ 
+-      <TextInput placeholder={"Search"} onChangeText={query => setQuery(query)} />
++     
+ 
+       <FlatList
+         style={styles.container}
+         data={state.contacts}
+         renderItem={({ item }) => renderContact(item, onPress)}
+         onEndReached={getMoreUsers} />
++         <TextInput multiline={true} placeholder={"Search"} onChangeText={query => setQuery(query)} />
+     </View>
+   );
+ }
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index 0d59b81..1106446 100644
+index 0d59b81..0d006f4 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
-@@ -12,7 +12,7 @@ export const { ChatPlugin } = NativeModules;
+@@ -12,24 +12,26 @@ export const { ChatPlugin } = NativeModules;
  import Contacts from 'react-native-contacts';
  
  
 -export default function ChatModule({ socketIoUrl, options, icon }) {
 +export default function ChatModule({ socketIoUrl, options, icon, children }) {
    const [contacts, setContacts] = React.useState([]);
++  const getDB = async () => {
++    const db = await SQLCipherClient(options);
++    return db.database;
++  };
    const db = React.useMemo(()=> {
-     const getDB = async () => {
-@@ -22,14 +22,16 @@ export default function ChatModule({ socketIoUrl, options, icon }) {
+-    const getDB = async () => {
+-      const db = await SQLCipherClient(options);
+-      return db.database;
+-    };
      return getDB();
    });
    React.useEffect(() => {
@@ -348,8 +453,9 @@ index 0d59b81..1106446 100644
    });
    initSocket(socketIoUrl);
    return (
-     <ChatContextProvider options={options} socketIoUrl={socketIoUrl} db={db} icon={icon} contacts={contacts}>
+-    <ChatContextProvider options={options} socketIoUrl={socketIoUrl} db={db} icon={icon} contacts={contacts}>
 -      <ChatContainer options={options} />
++    <ChatContextProvider options={options} socketIoUrl={socketIoUrl} db={getDB} icon={icon} contacts={contacts}>
 +      <ChatContainer options={options}>
 +        {children}
 +      </ChatContainer>
@@ -357,7 +463,7 @@ index 0d59b81..1106446 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
-index 8cb4565..9d099e0 100644
+index 8cb4565..0e12005 100644
 --- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 +++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 @@ -4,7 +4,7 @@ SQLite.DEBUG(false);
@@ -365,7 +471,7 @@ index 8cb4565..9d099e0 100644
  
  let db = null;
 -let db_version = 20;
-+let db_version = 28;
++let db_version = 29;
  export function getEncryptionKeys(context) {
    return new Promise((resolve, reject) => {
      context.getDB().then((db) => {
@@ -378,3 +484,19 @@ index 8cb4565..9d099e0 100644
          location: "default",
          key: options.token,
        }).then(
+@@ -165,13 +165,7 @@ export function SQLCipherClient(options) {
+         },
+       );
+     } else {
+-      createOrValidateDB(options.token).then(() => {
+-        resolve({database: db});
+-      }).catch(
+-        () => {
+-          reject("Failed to connect to DB");
+-        },
+-      );
++      resolve({database: db});
+     }
+   });
+ }
+\ No newline at end of file
