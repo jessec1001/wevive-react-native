@@ -29,7 +29,7 @@ export default function VideoCalls({callId}) {
         config={{}}
         url={{serverURL: 'https://webrtc.wevive.com', config: {}}}
         userInfo={{
-          displayName: String(1),
+          displayName: String(authData.id),
           avatarURL: "https://cataas.com/cat"
         }}
       />

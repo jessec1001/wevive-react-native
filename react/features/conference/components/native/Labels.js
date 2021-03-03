@@ -200,17 +200,6 @@ class Labels extends AbstractLabels<Props, State> {
                     </TouchableOpacity>
                     <TouchableOpacity
                         onLayout = {
-                            this._createOnLayout(LABEL_ID_INSECURE_ROOM_NAME)
-                        }
-                        onPress = {
-                            this._createOnPress(LABEL_ID_INSECURE_ROOM_NAME)
-                        } >
-                        {
-                            this._renderInsecureRoomNameLabel()
-                        }
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onLayout = {
                             this._createOnLayout(LABEL_ID_QUALITY) }
                         onPress = {
                             this._createOnPress(LABEL_ID_QUALITY) } >

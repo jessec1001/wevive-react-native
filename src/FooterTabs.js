@@ -92,7 +92,7 @@ export default function FooterTabs(props) {
               size={responsiveHeight(iconSize)}
               color={colors.footerIcons}
             />
-            <Text style={styles.footerText}>Groups</Text>
+            <Text style={styles.footerText}>About</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -119,27 +119,6 @@ class WelcomePage extends AbstractWelcomePage {
         return this._renderFullUI();
     }
 
-    /**
-     * Renders the insecure room name warning.
-     *
-     * @inheritdoc
-     */
-    _doRenderInsecureRoomNameWarning() {
-        return (
-            <View
-                style = { [
-                    styles.messageContainer,
-                    styles.insecureRoomNameWarningContainer
-                ] }>
-                <Icon
-                    src = { IconWarning }
-                    style = { styles.insecureRoomNameWarningIcon } />
-                <Text style = { styles.insecureRoomNameWarningText }>
-                    { this.props.t('security.insecureRoomNameWarning') }
-                </Text>
-            </View>
-        );
-    }
 
     /**
      * Constructs a style array to handle the hint box animation.
@@ -305,9 +284,6 @@ class WelcomePage extends AbstractWelcomePage {
                                 style = { styles.textInput }
                                 underlineColorAndroid = 'transparent'
                                 value = { this.state.room } />
-                            {
-                                this._renderInsecureRoomNameWarning()
-                            }
                             {
                                 this._renderHintBox()
                             }

@@ -13,8 +13,8 @@
             <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <imageView opaque="NO" userInteractionEnabled="NO" contentMode="center" image="volume.3" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="4B8-Xf-NDE">
-                    <rect key="frame" x="0.0" y="0.5" width="480" height="478.5"/>
+                <imageView opaque="NO" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="bg-layer-8" translatesAutoresizingMaskIntoConstraints="NO" id="4B8-Xf-NDE">
+                    <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
                 </imageView>
             </subviews>
             <color key="backgroundColor" red="0.090196078431372548" green="0.62745098039215685" blue="0.85882352941176465" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -30,6 +30,6 @@
         </view>
     </objects>
     <resources>
-        <image name="volume.3" catalog="system" width="128" height="86"/>
+        <image name="bg-layer-8" width="1125" height="2437"/>
     </resources>
 </document>

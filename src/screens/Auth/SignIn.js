@@ -46,6 +46,26 @@ const googleLogin = false;
 const appleLogin = false;
 import {AuthContext} from '../../context/AuthContext';
 import {ClientContext} from '../../context/ClientContext';
+const removeTrunkPrefix = (country, number) => {
+  const non_standard_prefixes = {
+    AZ: '8',
+    MX: '01',
+    MN: '01|02',
+    TM: '8',
+    UZ: '8',
+    KZ: '8',
+    RU: '8',
+    BY: '8',
+    HU: '06',
+    LT: '8',
+  };
+  let trunkPrefix = '0';
+  if (country && typeof non_standard_prefixes[country] !== 'undefined') {
+    trunkPrefix = non_standard_prefixes[country];
+  }
+  const trunkPrefixRegex = new RegExp(`^(${trunkPrefix})`, 'g');
+  return number.replace(trunkPrefixRegex, '');
+};
 const getCountryPhoneCode = (country) => {
   if (!country || !phoneCodes[country]) {
     return;
@@ -186,15 +206,19 @@ export default class SignIn extends Component {
                 ) : null}
                 <Formik
                   initialValues={{
-                    country: geo && geo.geo ? geo.geo.country_code : "GB",
+                    country: geo && geo.geo ? geo.geo.country_code : 'GB',
                     phone:
                       this.state.phoneNumber ||
                       this.props.route.params?.phone_number,
                   }}
                   onSubmit={(values, actions) => {
                     global.appIsLoading();
+                    const cleanedPhone = removeTrunkPrefix(
+                      values.country,
+                      values.phone,
+                    );
                     const phone_number =
-                      getCountryPhoneCode(values.country) + values.phone;
+                      getCountryPhoneCode(values.country) + cleanedPhone;
                     APIService('phone/register/', {
                       phone_number,
                     }).then((result) => {
@@ -205,14 +229,14 @@ export default class SignIn extends Component {
                             'countryCode',
                             getCountryPhoneCode(values.country),
                           );
-                          AsyncStorage.setItem('phoneNumber', values.phone);
+                          AsyncStorage.setItem('phoneNumber', cleanedPhone);
                           AsyncStorage.setItem(
                             'sessionToken',
                             result.session_token,
                           );
                           this.navigateSuccess(
                             getCountryPhoneCode(values.country),
-                            values.phone,
+                            cleanedPhone,
                             result.session_token,
                           );
                         } else {
@@ -310,11 +334,11 @@ export default class SignIn extends Component {
                             Are you under the age of 16?
                           </Text>
                           <FormInput
-                              style={styles.checkbox16Style}
-                              type="checkbox"
-                              name="over16"
-                              label={trans('auth.over16')}
-                            />
+                            style={styles.checkbox16Style}
+                            type="checkbox"
+                            name="over16"
+                            label={trans('auth.over16')}
+                          />
                         </View>
                         <View style={styles.buttonContainerStyle}>
                           <Button onPress={handleSubmit} title="NEXT" />
