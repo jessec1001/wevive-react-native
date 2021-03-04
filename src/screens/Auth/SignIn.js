@@ -1,11 +1,10 @@
-import React, {Fragment, Component, useContext} from 'react';
+import React, {Component} from 'react';
 import {
   Image,
   ImageBackground,
   Alert,
   Text,
   TextInput,
-  Platform,
   View,
   TouchableOpacity,
 } from 'react-native';
@@ -17,13 +16,6 @@ import authStyles from '../../styles/auth';
 import APIService from '../../service/APIService';
 import AuthView from '../../views/AuthView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CryptoJS from 'crypto-js';
-
-import {Buffer} from 'buffer';
-import {
-  responsiveWidth,
-  responsiveHeight,
-} from 'react-native-responsive-dimensions';
 
 import {BioIDContext} from '../../utils/BioAuth';
 
@@ -42,8 +34,6 @@ Object.keys(allCountries)
   .map((s) => {
     sortedCountries[s] = allCountries[s];
   });
-const googleLogin = false;
-const appleLogin = false;
 import {AuthContext} from '../../context/AuthContext';
 import {ClientContext} from '../../context/ClientContext';
 const removeTrunkPrefix = (country, number) => {
@@ -137,9 +127,6 @@ export default class SignIn extends Component {
   }
   bioLoginFunction = async (result) => {
     if (result.success) {
-      const email = await AsyncStorage.getItem('email');
-      const timestamp = result.success.payload.split(':')[0];
-
       const access_token = await AsyncStorage.getItem('bioAccessToken');
       const refresh_token = await AsyncStorage.getItem('bioRefreshToken');
 
@@ -161,33 +148,7 @@ export default class SignIn extends Component {
       Alert.alert('Error', 'No biometric data found');
     }
   };
-  onAppleButtonPress = async function () {
-    const appleAuthRequestResponse = await appleAuth.performRequest({
-      requestedOperation: AppleAuthRequestOperation.LOGIN,
-      requestedScopes: [
-        AppleAuthRequestScope.EMAIL,
-        AppleAuthRequestScope.FULL_NAME,
-      ],
-    });
-    const credentialState = await appleAuth.getCredentialStateForUser(
-      appleAuthRequestResponse.user,
-    );
-    if (credentialState === AppleAuthCredentialState.AUTHORIZED) {
-      const jwtBody = appleAuthRequestResponse.identityToken.split('.')[1];
-      const base64 = jwtBody.replace('-', '+').replace('_', '/');
-      const decodedJwt = Buffer.from(base64, 'base64');
-      const decodedJSON = JSON.parse(decodedJwt);
-      const emailSHA512 = await CryptoJS.SHA512(decodedJSON.email).toString(
-        CryptoJS.enc.Hex,
-      );
-      AsyncStorage.setItem('userToken', '1');
-      AsyncStorage.setItem('email', decodedJSON.email);
-      AsyncStorage.setItem('password_sha512', emailSHA512);
-      this.navigateSuccess();
-    }
-  };
   render() {
-    const {navigate} = this.props.navigation;
     return (
       <ClientContext.Consumer>
         {({geo}) => (
@@ -357,11 +318,7 @@ export default class SignIn extends Component {
                               title="Login automatically">
                               <Image
                                 source={require('../../images/PNG/finger.png')}
-                                style={{
-                                  width: 40,
-                                  height: 40,
-                                  tintColor: 'rgba(230,60,60,0.9)',
-                                }}
+                                style={styles.fingerStyle}
                               />
                             </TouchableOpacity>
                           </View>

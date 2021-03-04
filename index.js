@@ -9,8 +9,8 @@ if (__DEV__) {
 import React from 'react';
 import {AppRegistry} from 'react-native';
 import App from './App';
-import {enableScreens} from 'react-native-screens';
-enableScreens();
+//import {enableScreens} from 'react-native-screens';
+//enableScreens();
 //import { _initLogging } from './react/features/base/logging/functions';
 import {IncomingCallApp} from './react/features/mobile/incoming-call';
 

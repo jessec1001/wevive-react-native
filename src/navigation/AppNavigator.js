@@ -3,8 +3,6 @@ import {createStackNavigator, TransitionSpecs} from '@react-navigation/stack';
 
 import WebUI from '../screens/WebUI/WebUI';
 import About from '../screens/About/About';
-
-import Chat from '../screens/Chat/Chat';
 import VideoCalls from '../screens/VideoCalls/VideoCalls';
 const TransitionScreen = {
   gestureDirection: 'horizontal',
@@ -69,7 +67,11 @@ const AppNavigator = () => {
       />
       <Stack.Screen name="About" component={About} options={defaultConfig} />
       <Stack.Screen name="WebUI" component={WebUI} options={defaultConfig} />
-      <Stack.Screen name="Chat" options={defaultConfig} component={ChatNavigator} />
+      <Stack.Screen
+        name="Chat"
+        options={defaultConfig}
+        component={ChatNavigator}
+      />
     </Stack.Navigator>
   );
 };

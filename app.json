@@ -27,7 +27,7 @@
     "headlineBackground": "rgba(0,0,0,0.5)",
     "alert": "rgb(235, 83, 229)",
     "alert2": "rgb(246,164,0)",
-    "alert3": "rgb(8, 220, 63)",
+    "alert3": "rgb(8, 220, 63)"
   },
   "oauth": {
     "facebook": {

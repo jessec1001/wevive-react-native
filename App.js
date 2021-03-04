@@ -18,23 +18,20 @@ import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 import Orientation from 'react-native-orientation-locker';
 
-import {
-  responsiveHeight,
-  responsiveWidth,
-} from 'react-native-responsive-dimensions';
+import {responsiveWidth} from 'react-native-responsive-dimensions';
 
 import * as RNLocalize from 'react-native-localize';
 //import Geolocation from '@react-native-community/geolocation';
 import bootstrap from './src/utils/bootstrap';
 import i18n from './i18n';
 
-/*NetInfo.fetch().then((state) => {
+NetInfo.fetch().then((state) => {
   global.isInternetReachable = state.isInternetReachable;
 });
 
 const netinfo_unsubscribe = NetInfo.addEventListener((state) => {
   global.isInternetReachable = state.isInternetReachable;
-});*/
+});
 
 import RootStack from './src/navigation/RootStack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -82,7 +79,7 @@ class AppContainer extends Component {
   }
 
   componentWillUnmount() {
-    //netinfo_unsubscribe();
+    netinfo_unsubscribe();
     Dimensions.removeEventListener('change', this.dimensionListener);
     RNLocalize.removeEventListener('change', this.handleLocalizationChange);
     if (Platform.OS === 'android') {
