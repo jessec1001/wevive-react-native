@@ -155,8 +155,10 @@ const RootStack = () => {
       });
   };
   const [avatarUrl, setAvatarUrl] = React.useState(false);
-  AsyncStorage.getItem('avatarUrl').then((avatarUrl) => {
-    setAvatarUrl(avatarUrl.slice(1, -1));
+  AsyncStorage.getItem('avatarUrl').then((URL) => {
+    if (URL) {
+      setAvatarUrl(URL.slice(1, -1));
+    }
   });
   const appUserContextValue = {authData, setAuthData, updateMe, avatarUrl};
   const insets = useSafeAreaInsets();

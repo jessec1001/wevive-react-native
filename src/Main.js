@@ -187,16 +187,6 @@ export default class Main extends Component {
                       navigation={this.props.navigation}
                       route={this.props.route}
                     />
-                    <Image
-                      source={contentFooter}
-                      style={{
-                        position: 'absolute',
-                        marginBottom: 0,
-                        bottom: responsiveHeight(9),
-                        height: 15,
-                        width: '100%',
-                      }}
-                    />
                   </>
                 ) : null}
               </>

@@ -1,7 +1,7 @@
 import RNHeicConverter from 'react-native-heic-converter';
 
 import React, {Fragment, Component, useContext} from 'react';
-import {Text, TextInput, View, TouchableOpacity, Image} from 'react-native';
+import {Text, TextInput, View, TouchableOpacity, Image, Platform} from 'react-native';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import Button from '../../components/Button';
@@ -36,7 +36,10 @@ export default class AvatarScreen extends Component {
       cropperCircleOverlay: true,
       avoidEmptySpaceAroundImage: true,
     }).then((image) => {
-      let imageFilename = image.filename.toLowerCase();
+      let imageFilename =
+        Platform.OS == 'android'
+          ? image.path.replace(/^.*\//, '')
+          : image.filename.toLowerCase();
       imageFilename = imageFilename.replace(/\.heic$/, '.jpg');
       this.setState({
         avatarImage: image.path,
@@ -46,7 +49,6 @@ export default class AvatarScreen extends Component {
     });
   };
   navigateSuccess = () => {
-
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,

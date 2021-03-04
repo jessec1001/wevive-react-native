@@ -173,8 +173,6 @@ class ReactInstanceManagerHolder {
     
         SoLoader.init(activity, /* native exopackage */ false);
         List<ReactPackage> packages = (new ArrayList<>(Arrays.asList(
-                // @invertase/react-native-apple-authentication
-                new com.RNAppleAuthentication.AppleAuthenticationAndroidPackage(),
                 // @react-native-async-storage/async-storage
                 new com.reactnativecommunity.asyncstorage.AsyncStoragePackage(),
                 // @react-native-clipboard/clipboard
@@ -221,8 +219,6 @@ class ReactInstanceManagerHolder {
                 new com.mkuczera.RNReactNativeHapticFeedbackPackage(),
                 // react-native-image-crop-picker
                 new com.reactnative.ivpusic.imagepicker.PickerPackage(),
-                // react-native-image-picker
-                new com.imagepicker.ImagePickerPackage(),
                 // react-native-immersive
                 new com.rnimmersive.RNImmersivePackage(),
                 // react-native-inappbrowser-reborn
@@ -305,13 +301,6 @@ class ReactInstanceManagerHolder {
                 .setUseDeveloperSupport(BuildConfig.DEBUG)
                 .setInitialLifecycleState(LifecycleState.RESUMED)
                 .build();
-
-        // Disable delta updates on Android, they have caused trouble.
-        DevInternalSettings devSettings
-            = (DevInternalSettings)reactInstanceManager.getDevSupportManager().getDevSettings();
-        if (devSettings != null) {
-            devSettings.setBundleDeltasEnabled(false);
-        }
 
         // Register our uncaught exception handler.
         JitsiMeetUncaughtExceptionHandler.register();

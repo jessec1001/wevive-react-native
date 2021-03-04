@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text, StyleSheet, View, Share, Platform} from 'react-native';
+import {Text, StyleSheet, View, Share, Platform, Pressable} from 'react-native';
 import Icon from './components/Icon';
 import {
   responsiveHeight,
@@ -25,7 +25,7 @@ export default function FooterTabs(props) {
     <SafeAreaView edges={['bottom']} style={styles.footerBackground}>
       <View style={styles.footer}>
         <View style={styles.footerItem}>
-          <TouchableOpacity
+          <Pressable
             style={styles.footerButton}
             onPress={() => {
               navigateToChat('PhoneContactsScreen');
@@ -36,10 +36,10 @@ export default function FooterTabs(props) {
               color={colors.footerIcons}
             />
             <Text style={styles.footerText}>Contacts</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <View style={styles.footerItem}>
-          <TouchableOpacity
+          <Pressable
             style={styles.footerButton}
             onPress={() => {
               navigateToChat('ContactsScreen',{filter:"calls"});
@@ -50,10 +50,10 @@ export default function FooterTabs(props) {
               color={colors.footerIcons}
             />
             <Text style={styles.footerText}>Calls</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <View style={styles.footerItem}>
-          <TouchableOpacity
+          <Pressable
             style={styles.footerButton}
             onPress={() => {
               navigateToChat("SearchContactsScreen")
@@ -64,10 +64,10 @@ export default function FooterTabs(props) {
               color={colors.footerIcons}
             />
             <Text style={styles.footerText}>Add new</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <View style={styles.footerItem}>
-          <TouchableOpacity
+          <Pressable
             style={styles.footerButton}
             onPress={() => {
               navigateToChat('ContactsScreen',{filter:"chats"});
@@ -78,10 +78,10 @@ export default function FooterTabs(props) {
               color={colors.footerIcons}
             />
             <Text style={styles.footerText}>Chats</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <View style={styles.footerItem}>
-          <TouchableOpacity
+          <Pressable
             style={styles.footerButton}
             onPress={() => {
               props.navigate('About');
@@ -93,7 +93,7 @@ export default function FooterTabs(props) {
               color={colors.footerIcons}
             />
             <Text style={styles.footerText}>About</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>
@@ -103,6 +103,7 @@ export default function FooterTabs(props) {
 const styles = StyleSheet.create({
   footerBackground: {
     backgroundColor: colors.footer,
+    zIndex: 999,
   },
   footer: {
     flexDirection: 'row',
