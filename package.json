@@ -8,7 +8,7 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
-    "postinstall": "npx copy-files-from-to && mkdir node_modules/lib-jitsi-meet && cp lib-jitsi-meet.min.js node_modules/lib-jitsi-meet && rm -rf ./node_modules/jtsi-meet/node_modules/react-native-webview && rm -rf  node_modules/react-native-chat-plugin/node_modules/react-native-webview/",
+    "postinstall": "./postinstall.sh",
     "preparesim": "cp ./libCardIO_Universal.a ./ios/Pods/CardIO/CardIO/libCardIO.a",
     "prepareprod": "cp ./libCardIO.a ./ios/Pods/CardIO/CardIO/libCardIO.a",
     "prepareorig": "cp ./libCardIO_Original.a ./ios/Pods/CardIO/CardIO/libCardIO.a"
