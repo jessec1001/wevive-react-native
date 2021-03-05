@@ -12,6 +12,7 @@ import AudioMuteButton from '../AudioMuteButton';
 import HangupButton from '../HangupButton';
 import VideoMuteButton from '../VideoMuteButton';
 import ToggleCameraButton from './ToggleCameraButton';
+import { AudioRouteButton } from '../../../mobile/audio-mode';
 import styles from './styles';
 
 /**
@@ -97,7 +98,7 @@ visible={this.props._visible}>
       ...buttonStyles,
       style: {
         ...buttonStyles.style,
-        right: 10,
+        right: 0,
         position: "absolute",
       },
     };
@@ -114,7 +115,8 @@ visible={this.props._visible}>
           <VideoMuteButton
             styles = { buttonStyles }
             toggledStyles = { toggledButtonStyles } />
-        
+          <AudioRouteButton styles = { buttonStyles }
+            toggledStyles = { toggledButtonStyles }  />
             <ToggleCameraButton
                     styles = { toggleCameraStyle }
                     toggledStyles = { toggledButtonStyles } />
