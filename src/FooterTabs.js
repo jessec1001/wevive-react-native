@@ -94,7 +94,6 @@ export default function FooterTabs(props) {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   footerBackground: {
     backgroundColor: colors.footer,

@@ -7,6 +7,11 @@ if (__DEV__) {
 //  console.log('Message handled in the background!', remoteMessage);
 //});
 import React from 'react';
+/*const whyDidYouRender = require('@welldone-software/why-did-you-render');
+  whyDidYouRender(React, {
+    trackAllPureComponents: true,
+  });
+*/
 import {AppRegistry} from 'react-native';
 import App from './App';
 //import {enableScreens} from 'react-native-screens';

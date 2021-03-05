@@ -13,10 +13,8 @@ import {
 } from 'react-native';
 
 import {AppThemeContext} from './context/UserContext';
-import Drawer from 'react-native-drawer';
 import Header from './Header';
 import FooterTabs from './FooterTabs';
-import Sidebar from './components/Sidebar/Sidebar';
 import defaultSidebarLinks from './components/Sidebar/SidebarLinks';
 
 import AppNavigator from './navigation/AppNavigator';
@@ -72,14 +70,6 @@ export default class Main extends Component {
       this.onNotification,
       this.onOpenNotification,
     );
-
-    if (global.isInternetReachable) {
-      /*APIService('content/sidebar', {}, false, 60 * 4).then(result => {
-        if (result.sidebarLinks) {
-          this.setState({sidebarLinks: result.sidebarLinks});
-        }
-      });*/
-    }
     AsyncStorage.getItem('userToken').then((userToken) => {
       //console.error(userToken);
       this.setState({userToken});
@@ -112,29 +102,7 @@ export default class Main extends Component {
       amount,
     });
   };
-  closeDrawer = () => {
-    this.drawer && this.drawer.close();
-  };
-  toggleDrawer = (drawerType = 'profile') => {
-    if (this.state.drawerType != drawerType) {
-      if (this.drawer._open) {
-        setTimeout(() => {
-          this.setState({drawerType});
-          this.toggleDrawer(drawerType);
-        }, 400);
-      } else {
-        this.setState({drawerType});
-      }
-    } else {
-      this.setState({drawerType});
-    }
-    this.drawer && this.drawer.toggle();
-  };
-  openDrawer = () => {
-    this.drawer && this.drawer.open();
-  };
   navigate = (route, routeParams) => {
-    this.closeDrawer();
     if (route == 'VideoCalls') {
       var hiddenHeader = true;
       var hiddenFooter = true;
@@ -156,44 +124,44 @@ export default class Main extends Component {
   };
 
   render() {
-    const {navigate} = this.props.navigation;
-    return (this.state.userToken &&
-      <ChatModule options={{token: this.state.userToken}}
-      socketIoUrl={chat_url}
-      icon={Icon}>
-        <ImageBackground
-          resizeMode="cover"
-          imageStyle={this.state.styles.contentBgImage}
-          style={this.state.styles.contentBg}>
-          <AppThemeContext.Consumer>
-            {({themeSettings, goBack, insets}) => (
-              <>
-                {!themeSettings.hiddenHeader ? (
-                  <Header
-                    themeSettings={themeSettings}
-                    navigation={this.props.navigation}
-                    toggleDrawer={this.toggleDrawer.bind(this)}
-                    hiddenBack={themeSettings.hiddenBack}
-                    goBack={goBack}
-                    navigate={this.navigate}
-                  />
-                ) : null}
-                <AppNavigator />
-                {!themeSettings.hiddenFooter ? (
-                  <>
-                    <FooterTabs
-                      toggleDrawer={this.toggleDrawer.bind(this)}
-                      navigate={this.navigate}
+    return (
+      this.state.userToken && (
+        <ChatModule
+          options={{token: this.state.userToken}}
+          socketIoUrl={chat_url}
+          icon={Icon}>
+          <ImageBackground
+            resizeMode="cover"
+            imageStyle={this.state.styles.contentBgImage}
+            style={this.state.styles.contentBg}>
+            <AppThemeContext.Consumer>
+              {({themeSettings, goBack, insets}) => (
+                <>
+                  {!themeSettings.hiddenHeader ? (
+                    <Header
+                      themeSettings={themeSettings}
                       navigation={this.props.navigation}
-                      route={this.props.route}
+                      hiddenBack={themeSettings.hiddenBack}
+                      goBack={goBack}
+                      navigate={this.navigate}
                     />
-                  </>
-                ) : null}
-              </>
-            )}
-          </AppThemeContext.Consumer>
-        </ImageBackground>
-      </ChatModule>
+                  ) : null}
+                  <AppNavigator />
+                  {!themeSettings.hiddenFooter ? (
+                    <>
+                      <FooterTabs
+                        navigate={this.navigate}
+                        navigation={this.props.navigation}
+                        route={this.props.route}
+                      />
+                    </>
+                  ) : null}
+                </>
+              )}
+            </AppThemeContext.Consumer>
+          </ImageBackground>
+        </ChatModule>
+      )
     );
   }
 }
