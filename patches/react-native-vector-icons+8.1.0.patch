@@ -63,7 +63,7 @@ deleted file mode 100644
 index e4ae46c..0000000
 Binary files a/node_modules/react-native-vector-icons/Fonts/Zocial.ttf and /dev/null differ
 diff --git a/node_modules/react-native-vector-icons/RNVectorIcons.podspec b/node_modules/react-native-vector-icons/RNVectorIcons.podspec
-index 9a1d11d..ff2e9ad 100644
+index 4b716ee..08f6378 100644
 --- a/node_modules/react-native-vector-icons/RNVectorIcons.podspec
 +++ b/node_modules/react-native-vector-icons/RNVectorIcons.podspec
 @@ -12,7 +12,6 @@ Pod::Spec.new do |s|
@@ -72,5 +72,5 @@ index 9a1d11d..ff2e9ad 100644
    s.source_files   = 'RNVectorIconsManager/**/*.{h,m}'
 -  s.resources      = "Fonts/*.ttf"
    s.preserve_paths = "**/*.js"
-   s.dependency 'React'
+   s.dependency 'React-Core'
  

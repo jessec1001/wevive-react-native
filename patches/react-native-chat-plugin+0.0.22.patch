@@ -439,10 +439,16 @@ index b708a42..c3cbf00 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index 0d59b81..00227b4 100644
+index 0d59b81..f8a56ff 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
-@@ -12,24 +12,23 @@ export const { ChatPlugin } = NativeModules;
+@@ -7,29 +7,45 @@ export { addUnreadCountListener, updateCount } from "./utils/unread-counter";
+ import { NativeModules } from 'react-native';
+ import { SQLCipherClient } from "./utils/SQLCipherClient";
+ import { initSocket } from "./utils/SocketIOClient";
+-
++import { PermissionsAndroid } from 'react-native';
+ export const { ChatPlugin } = NativeModules;
  import Contacts from 'react-native-contacts';
  
  
@@ -463,9 +469,27 @@ index 0d59b81..00227b4 100644
    React.useEffect(() => {
 -    Contacts.getAll().then(fetchedContacts => {
 -      setContacts(fetchedContacts.map((r)=>({value:r.givenName, label: r.givenName})));
-+    Contacts.getAllWithoutPhotos().then(fetchedContacts => {
-+      setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, label: r.phoneNumbers[0].number})));
-     });
+-    });
++    if (Platform.OS == 'android') {
++      PermissionsAndroid.request(
++        PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
++        {
++          'title': 'Contacts',
++          'message': 'This app would like to sync your contacts.',
++          'buttonPositive': 'Allow'
++        }
++      )
++      .then((err)=> {
++        Contacts.getAllWithoutPhotos().then(fetchedContacts => {
++          setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, label: r.phoneNumbers[0].number})));
++        });
++      }
++      );
++    } else {
++      Contacts.getAllWithoutPhotos().then(fetchedContacts => {
++        setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, label: r.phoneNumbers[0].number})));
++      });
++    }
    });
    initSocket(socketIoUrl);
    return (

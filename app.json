@@ -16,6 +16,7 @@
     "footer": "rgb(255,255,255)",
     "footerText": "rgb(20,20,20)",
     "footerIcons": "rgb(111,111,111)",
+    "activeFooterIcon": "rgb(227,140,57)",
     "header": "rgba(0,0,0,0)",
     "headerText": "rgb(0,0,0)",
     "background": "rgb(0,56,104)",

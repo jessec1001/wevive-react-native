@@ -1,26 +1,21 @@
 import React from 'react';
-import {Text, StyleSheet, View, Share, Platform, Pressable} from 'react-native';
+import {Text, StyleSheet, View, Pressable} from 'react-native';
 import Icon from './components/Icon';
 import {
   responsiveHeight,
   responsiveWidth,
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useRoute, CommonActions} from '@react-navigation/native';
-import {redirectToNewParams} from './utils/helpers';
-const iconSize = 3;
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+
 
 import {colors} from './../app.json';
 
 export default function FooterTabs(props) {
-  const navigateToChat = (routeName, params = {}) => {
-    props.navigation.navigate('Chat', {
-      screen: routeName,
-    });
-  };
   const route = props.route;
+  const iconSize = responsiveHeight(3);
+  const routeName = getFocusedRouteNameFromRoute(props.route);
   return (
     <SafeAreaView edges={['bottom']} style={styles.footerBackground}>
       <View style={styles.footer}>
@@ -28,12 +23,12 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              navigateToChat('PhoneContactsScreen');
+              props.navigate('PhoneContactsScreen');
             }}>
             <Icon
               name="wetalk"
-              size={responsiveHeight(iconSize)}
-              color={colors.footerIcons}
+              size={iconSize}
+              color={routeName !== 'PhoneContactsScreen' ? colors.footerIcons : colors.activeFooterIcon}
             />
             <Text style={styles.footerText}>Contacts</Text>
           </Pressable>
@@ -42,12 +37,12 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              navigateToChat('ContactsScreen',{filter:"calls"});
+              props.navigate('ContactsScreen',{filter:"calls"});
             }}>
             <Icon
               name="calls"
-              size={responsiveHeight(iconSize)}
-              color={colors.footerIcons}
+              size={iconSize}
+              color={routeName !== 'ContactsScreen' ? colors.footerIcons : colors.activeFooterIcon}
             />
             <Text style={styles.footerText}>Calls</Text>
           </Pressable>
@@ -56,12 +51,12 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              navigateToChat("SearchContactsScreen")
+              props.navigate("SearchContactsScreen")
             }}>
             <Icon
               name="add-new"
-              size={responsiveHeight(iconSize)}
-              color={colors.footerIcons}
+              size={iconSize}
+              color={routeName !== 'SearchContactsScreen' ? colors.footerIcons : colors.activeFooterIcon}
             />
             <Text style={styles.footerText}>Add new</Text>
           </Pressable>
@@ -70,12 +65,12 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              navigateToChat('ContactsScreen',{filter:"chats"});
+              props.navigate('ContactsScreen',{filter:"chats"});
             }}>
             <Icon
               name="chats"
-              size={responsiveHeight(iconSize)}
-              color={colors.footerIcons}
+              size={iconSize}
+              color={routeName !== 'ContactsScreen' ? colors.footerIcons : colors.activeFooterIcon}
             />
             <Text style={styles.footerText}>Chats</Text>
           </Pressable>
@@ -85,12 +80,12 @@ export default function FooterTabs(props) {
             style={styles.footerButton}
             onPress={() => {
               props.navigate('About');
-              //navigateToChat('ContactsScreen',{filter:"groups"});
+              //props.navigate('ContactsScreen',{filter:"groups"});
             }}>
             <Icon
               name="groups"
-              size={responsiveHeight(iconSize)}
-              color={colors.footerIcons}
+              size={iconSize}
+              color={routeName !== 'About' ? colors.footerIcons : colors.activeFooterIcon}
             />
             <Text style={styles.footerText}>About</Text>
           </Pressable>
