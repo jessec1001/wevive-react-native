@@ -2,7 +2,6 @@
 
 import { getFeatureFlag, TILE_VIEW_ENABLED } from '../base/flags';
 import { getPinnedParticipant, getParticipantCount } from '../base/participants';
-import { CHAT_SIZE } from '../chat/constants';
 import {
     ASPECT_RATIO_BREAKPOINT,
     DEFAULT_MAX_COLUMNS,
@@ -48,11 +47,7 @@ export function getMaxColumnCount(state: Object) {
         const { clientWidth } = state['features/base/responsive-ui'];
         let availableWidth = clientWidth;
         const participantCount = getParticipantCount(state);
-        const { isOpen } = state['features/chat'];
-
-        if (isOpen) {
-            availableWidth -= CHAT_SIZE;
-        }
+        const { isOpen } = false;
 
         // If there are just two participants in a conference, enforce single-column view for mobile size.
         if (participantCount === 2 && availableWidth < ASPECT_RATIO_BREAKPOINT) {

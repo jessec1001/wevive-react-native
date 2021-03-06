@@ -101,17 +101,7 @@ export class AbstractWelcomePage extends Component<Props, *> {
      */
     constructor(props: Props) {
         super(props);
-
-        // Bind event handlers so they are only bound once per instance.
-        this._animateRoomnameChanging
-            = this._animateRoomnameChanging.bind(this);
         this._onJoin = this._onJoin.bind(this);
-        this._onRoomChange = this._onRoomChange.bind(this);
-        this._renderInsecureRoomNameWarning = this._renderInsecureRoomNameWarning.bind(this);
-        this._updateRoomname = this._updateRoomname.bind(this);
-
-        //console.error(getFeatureFlag("room"));
-        
     }
 
     /**
@@ -122,7 +112,7 @@ export class AbstractWelcomePage extends Component<Props, *> {
      */
     componentDidMount() {
         this._mounted = true;
-        console.warn(global.disconnected);
+        
         if (!global.disconnected) {
             this._onJoin();
         } else {
@@ -138,56 +128,8 @@ export class AbstractWelcomePage extends Component<Props, *> {
      */
     componentWillUnmount() {
         global.disconnected = false;
-        this._clearTimeouts();
         this._mounted = false;
     }
-
-    _animateRoomnameChanging: (string) => void;
-
-    /**
-     * Animates the changing of the room name.
-     *
-     * @param {string} word - The part of room name that should be added to
-     * placeholder.
-     * @private
-     * @returns {void}
-     */
-    _animateRoomnameChanging(word: string) {
-        let animateTimeoutId;
-        const roomPlaceholder = this.state.roomPlaceholder + word.substr(0, 1);
-
-        if (word.length > 1) {
-            animateTimeoutId
-                = setTimeout(
-                    () => {
-                        this._animateRoomnameChanging(
-                            word.substring(1, word.length));
-                    },
-                    70);
-        }
-        this.setState({
-            animateTimeoutId,
-            roomPlaceholder
-        });
-    }
-
-    /**
-     * Method that clears timeouts for animations and updates of room name.
-     *
-     * @private
-     * @returns {void}
-     */
-    _clearTimeouts() {
-        clearTimeout(this.state.animateTimeoutId);
-        clearTimeout(this.state.updateTimeoutId);
-    }
-
-    /**
-     * Renders the insecure room name warning.
-     *
-     * @returns {ReactElement}
-     */
-    _doRenderInsecureRoomNameWarning: () => React$Component<any>;
 
     _onJoin: () => void;
 
@@ -218,62 +160,6 @@ export class AbstractWelcomePage extends Component<Props, *> {
             this.props.dispatch(appNavigate(room))
                 .then(onAppNavigateSettled, onAppNavigateSettled);
         }
-    }
-
-    _onRoomChange: (string) => void;
-
-    /**
-     * Handles 'change' event for the room name text input field.
-     *
-     * @param {string} value - The text typed into the respective text input
-     * field.
-     * @protected
-     * @returns {void}
-     */
-    _onRoomChange(value: string) {
-        this.setState({
-            room: value,
-            insecureRoomName: this.props._enableInsecureRoomNameWarning && value && isInsecureRoomName(value)
-        });
-    }
-
-    _renderInsecureRoomNameWarning: () => React$Component<any>;;
-
-    /**
-     * Renders the insecure room name warning if needed.
-     *
-     * @returns {ReactElement}
-     */
-    _renderInsecureRoomNameWarning() {
-        if (this.props._enableInsecureRoomNameWarning && this.state.insecureRoomName) {
-            return this._doRenderInsecureRoomNameWarning();
-        }
-
-        return null;
-    }
-
-    _updateRoomname: () => void;
-
-    /**
-     * Triggers the generation of a new room name and initiates an animation of
-     * its changing.
-     *
-     * @protected
-     * @returns {void}
-     */
-    _updateRoomname() {
-        const generatedRoomname = generateRoomWithoutSeparator();
-        const roomPlaceholder = '';
-        const updateTimeoutId = setTimeout(this._updateRoomname, 10000);
-
-        this._clearTimeouts();
-        this.setState(
-            {
-                generatedRoomname,
-                roomPlaceholder,
-                updateTimeoutId
-            },
-            () => this._animateRoomnameChanging(generatedRoomname));
     }
 }
 

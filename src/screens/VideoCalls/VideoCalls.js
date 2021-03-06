@@ -12,7 +12,7 @@ import {App} from '../../../react/features/app/components';
 import { UserContext } from '../../context/UserContext';
 import { useRoute } from '@react-navigation/native';
 
-export default function VideoCalls({callId}) {
+export default function VideoCalls() {
   const {authData} = React.useContext(UserContext);
   const r = useRoute();
   return (
@@ -22,11 +22,16 @@ export default function VideoCalls({callId}) {
           room: r.params.callId,
           'ios.recording.enabled': 0,
           'pip.enabled': 0,
-          resolution: 720,
+          resolution: 360,
           'welcomepage.enabled': 1,
         }}
         serverURL={'https://webrtc.wevive.com'}
-        config={{}}
+        settings={{
+          startAudioOnly: !r.params.video,
+          startWithVideoMuted: !r.params.video,
+          serverURL: 'https://webrtc.wevive.com',
+          disableCallIntegration: false,
+        }}
         url={{serverURL: 'https://webrtc.wevive.com', config: {}}}
         userInfo={{
           displayName: String(authData.id),

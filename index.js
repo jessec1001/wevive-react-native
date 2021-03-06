@@ -1,4 +1,7 @@
 import './react/features/mobile/polyfills';
+import './react/features/app/middlewares';
+import './react/features/app/reducers';
+
 if (__DEV__) {
   //  import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
 }

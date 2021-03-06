@@ -24,7 +24,6 @@ import { handleCallIntegrationChange, handleCrashReportingChange } from './funct
  */
 MiddlewareRegistry.register(store => next => action => {
     const result = next(action);
-
     switch (action.type) {
     case APP_WILL_MOUNT:
         _initializeCallIntegration(store);

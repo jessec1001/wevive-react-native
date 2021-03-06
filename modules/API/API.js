@@ -29,8 +29,8 @@ import {
     selectParticipantInLargeVideo
 } from '../../react/features/large-video/actions';
 import { toggleLobbyMode } from '../../react/features/lobby/actions.web';
-import { RECORDING_TYPES } from '../../react/features/recording/constants';
-import { getActiveSession } from '../../react/features/recording/functions';
+//import { RECORDING_TYPES } from '../../react/features/recording/constants';
+//import { getActiveSession } from '../../react/features/recording/functions';
 import { muteAllParticipants } from '../../react/features/remote-video-menu/actions';
 import { toggleTileView } from '../../react/features/video-layout';
 import { setVideoQuality } from '../../react/features/video-quality';

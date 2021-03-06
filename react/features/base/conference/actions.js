@@ -7,7 +7,6 @@ import {
     sendAnalytics
 } from '../../analytics';
 import { getName } from '../../app/functions';
-import { endpointMessageReceived } from '../../subtitles';
 import { JITSI_CONNECTION_CONFERENCE_KEY } from '../connection';
 import { JitsiConferenceEvents } from '../lib-jitsi-meet';
 import { setAudioMuted, setVideoMuted } from '../media';
@@ -167,10 +166,6 @@ function _addConferenceListeners(conference, dispatch) {
     conference.on(
         JitsiConferenceEvents.DOMINANT_SPEAKER_CHANGED,
         id => dispatch(dominantSpeakerChanged(id, conference)));
-
-    conference.on(
-        JitsiConferenceEvents.ENDPOINT_MESSAGE_RECEIVED,
-        (...args) => dispatch(endpointMessageReceived(...args)));
 
     conference.on(
         JitsiConferenceEvents.PARTICIPANT_CONN_STATUS_CHANGED,
