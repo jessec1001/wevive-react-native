@@ -36,7 +36,6 @@ import { OverflowMenuItem } from '../../../base/toolbox/components';
 import { getLocalVideoTrack, toggleScreensharing } from '../../../base/tracks';
 import { isVpaasMeeting } from '../../../billing-counter/functions';
 import { VideoBlurButton } from '../../../blur';
-import { CHAT_SIZE, ChatCounter, toggleChat } from '../../../chat';
 import { EmbedMeetingDialog } from '../../../embed-meeting';
 import { SharedDocumentButton } from '../../../etherpad';
 import { openFeedbackDialog } from '../../../feedback';
@@ -568,11 +567,6 @@ class Toolbox extends Component<Props, State> {
     _onResize() {
         let widthToUse = window.innerWidth;
 
-        // Take chat size into account when resizing toolbox.
-        if (this.props._chatOpen) {
-            widthToUse -= CHAT_SIZE;
-        }
-
         if (this.state.windowWidth !== widthToUse) {
             this.setState({ windowWidth: widthToUse });
         }
@@ -603,13 +597,6 @@ class Toolbox extends Component<Props, State> {
      * @returns {void}
      */
     _onShortcutToggleChat() {
-        sendAnalytics(createShortcutEvent(
-            'toggle.chat',
-            {
-                enable: !this.props._chatOpen
-            }));
-
-        this._doToggleChat();
     }
 
     _onShortcutToggleVideoQuality: () => void;
@@ -813,13 +800,6 @@ class Toolbox extends Component<Props, State> {
      * @returns {void}
      */
     _onToolbarToggleChat() {
-        sendAnalytics(createToolbarEvent(
-            'toggle.chat',
-            {
-                enable: !this.props._chatOpen
-            }));
-
-        this._doToggleChat();
     }
 
     _onToolbarToggleFullScreen: () => void;
