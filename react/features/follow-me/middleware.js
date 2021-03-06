@@ -139,19 +139,6 @@ function _onFollowMeCommand(attributes = {}, id, store) {
         store.dispatch(setTileView(attributes.tileViewEnabled === 'true'));
     }
 
-    // For now gate etherpad checks behind a web-app check to be extra safe
-    // against calling a web-app global.
-    if (typeof APP !== 'undefined'
-        && oldState.sharedDocumentVisible !== attributes.sharedDocumentVisible) {
-        const isEtherpadVisible = attributes.sharedDocumentVisible === 'true';
-        const documentManager = APP.UI.getSharedDocumentManager();
-
-        if (documentManager
-                && isEtherpadVisible !== state['features/etherpad'].editing) {
-            documentManager.toggleEtherpad();
-        }
-    }
-
     const pinnedParticipant = getPinnedParticipant(state);
     const idOfParticipantToPin = attributes.nextOnStage;
 

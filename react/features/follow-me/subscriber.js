@@ -40,7 +40,7 @@ StateListenerRegistry.register(
  * shown (as a result of the toggle) or {false} if it was hidden
  */
 StateListenerRegistry.register(
-    /* selector */ state => state['features/etherpad'].editing,
+    /* selector */ state => false,
     /* listener */ _sendFollowMeCommand);
 
 /**
@@ -72,7 +72,7 @@ function _getFollowMeState(state) {
     return {
         filmstripVisible: state['features/filmstrip'].visible,
         nextOnStage: pinnedParticipant && pinnedParticipant.id,
-        sharedDocumentVisible: state['features/etherpad'].editing,
+        sharedDocumentVisible: false,
         tileViewEnabled: shouldDisplayTileView(state)
     };
 }

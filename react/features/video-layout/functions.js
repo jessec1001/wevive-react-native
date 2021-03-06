@@ -139,11 +139,7 @@ export function shouldDisplayTileView(state: Object = {}) {
 
         // Reasons for normal mode:
 
-        // Editing etherpad
-        state['features/etherpad']?.editing
-
-        // We pinned a participant
-        || getPinnedParticipant(state)
+        getPinnedParticipant(state)
 
         // It's a 1-on-1 meeting
         || participantCount < 3

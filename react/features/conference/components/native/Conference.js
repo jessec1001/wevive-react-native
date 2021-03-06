@@ -10,10 +10,8 @@ import { Container, LoadingIndicator, TintedView } from '../../../base/react';
 import { connect } from '../../../base/redux';
 import { ASPECT_RATIO_NARROW } from '../../../base/responsive-ui/constants';
 import { TestConnectionInfo } from '../../../base/testing';
-import { ConferenceNotification, isCalendarEnabled } from '../../../calendar-sync';
 
 import { DisplayNameLabel } from '../../../display-name';
-import { SharedDocument } from '../../../etherpad';
 import {
     FILMSTRIP_SIZE,
     Filmstrip,
@@ -204,21 +202,6 @@ class Conference extends AbstractConference<Props, *> {
     }
 
     /**
-     * Renders the conference notification badge if the feature is enabled.
-     *
-     * @private
-     * @returns {React$Node}
-     */
-    _renderConferenceNotification() {
-        const { _calendarEnabled, _reducedUI } = this.props;
-
-        return (
-            _calendarEnabled && !_reducedUI
-                ? <ConferenceNotification />
-                : undefined);
-    }
-
-    /**
      * Renders the content for the Conference container.
      *
      * @private
@@ -320,10 +303,6 @@ class Conference extends AbstractConference<Props, *> {
                 </SafeAreaView>
 
                 <TestConnectionInfo />
-
-                { this._renderConferenceNotification() }
-
-                { this._renderConferenceModals() }
             </>
         );
     }
@@ -431,7 +410,7 @@ function _mapStateToProps(state) {
     return {
         ...abstractMapStateToProps(state),
         _aspectRatio: aspectRatio,
-        _calendarEnabled: isCalendarEnabled(state),
+        _calendarEnabled: false,
         _connecting: Boolean(connecting_),
         _filmstripVisible: isFilmstripVisible(state),
         _largeVideoParticipantId: state['features/large-video'].participantId,
