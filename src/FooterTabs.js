@@ -30,7 +30,7 @@ export default function FooterTabs(props) {
               size={iconSize}
               color={routeName !== 'PhoneContactsScreen' ? colors.footerIcons : colors.activeFooterIcon}
             />
-            <Text style={styles.footerText}>Contacts</Text>
+            <Text style={routeName !== 'PhoneContactsScreen' ? styles.footerText : styles.activeFooterText}>Contacts</Text>
           </Pressable>
         </View>
         <View style={styles.footerItem}>
@@ -44,7 +44,7 @@ export default function FooterTabs(props) {
               size={iconSize}
               color={routeName !== 'ContactsScreen' ? colors.footerIcons : colors.activeFooterIcon}
             />
-            <Text style={styles.footerText}>Calls</Text>
+            <Text style={routeName !== 'ContactsScreen' ? styles.footerText : styles.activeFooterText}>Calls</Text>
           </Pressable>
         </View>
         <View style={styles.footerItem}>
@@ -58,7 +58,7 @@ export default function FooterTabs(props) {
               size={iconSize}
               color={routeName !== 'SearchContactsScreen' ? colors.footerIcons : colors.activeFooterIcon}
             />
-            <Text style={styles.footerText}>Add new</Text>
+            <Text style={routeName !== 'SearchContactsScreen' ? styles.footerText : styles.activeFooterText}>Add new</Text>
           </Pressable>
         </View>
         <View style={styles.footerItem}>
@@ -72,7 +72,7 @@ export default function FooterTabs(props) {
               size={iconSize}
               color={routeName !== 'ContactsScreen' ? colors.footerIcons : colors.activeFooterIcon}
             />
-            <Text style={styles.footerText}>Chats</Text>
+            <Text style={routeName !== 'ContactsScreen' ? styles.footerText : styles.activeFooterText}>Chats</Text>
           </Pressable>
         </View>
         <View style={styles.footerItem}>
@@ -87,7 +87,7 @@ export default function FooterTabs(props) {
               size={iconSize}
               color={routeName !== 'About' ? colors.footerIcons : colors.activeFooterIcon}
             />
-            <Text style={styles.footerText}>About</Text>
+            <Text style={routeName !== 'About' ? styles.footerText : styles.activeFooterText}>About</Text>
           </Pressable>
         </View>
       </View>
@@ -121,6 +121,11 @@ const styles = StyleSheet.create({
     flex: 1,
 
     justifyContent: 'flex-end',
+  },
+  activeFooterText: {
+    color: colors.activeFooterIcon,
+    fontSize: responsiveFontSize(1.15),
+    marginTop: 5,
   },
   footerText: {
     color: colors.footerText,
