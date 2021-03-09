@@ -11,14 +11,14 @@ import {
 import contentStyles from '../../styles/content';
 
 const weviveWhiteLogo = require('../../images/PNG/wetalk_logo.png');
-export default class About extends Component {
+export default class ContactUs extends Component {
   state = {
     contentStyles: contentStyles(),
     licenseKey: null,
   };
   render() {
     return (
-      <ContentWrapper title="About" paddingHorizontal={0} details={
+      <ContentWrapper title="Contact Us" paddingHorizontal={0} details={
         <ImageBackground source={aboutbg} style={styles.aboutbg}>
           <ImageBackground resizeMode={"contain"} source={weviveWhiteLogo} style={styles.weviveWhiteLogo}/>
           <View><Text style={styles.aboutText}>"You cannot hope to build a better world without improving the individuals. To that end, each of us must work for his [or her] own improvement and,

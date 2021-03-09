@@ -3,6 +3,10 @@ import {createStackNavigator, TransitionSpecs} from '@react-navigation/stack';
 
 import WebUI from '../screens/WebUI/WebUI';
 import About from '../screens/About/About';
+import Terms from '../screens/About/Terms';
+import Licenses from '../screens/About/Licenses';
+import ContactUs from '../screens/About/ContactUs';
+
 import Settings from '../screens/Settings/Settings';
 
 import AboutPrivacySettings from '../screens/Settings/AboutPrivacySettings';
@@ -22,6 +26,17 @@ import ProfilePhotoPrivacySettings from '../screens/Settings/ProfilePhotoPrivacy
 import SecuritySettings from '../screens/Settings/SecuritySettings';
 import StorageSettings from '../screens/Settings/StorageSettings';
 import TypingPrivacySettings from '../screens/Settings/TypingPrivacySettings';
+
+
+import AudioDataSettings from '../screens/Settings/AudioDataSettings';
+import DocumentsDataSettings from '../screens/Settings/DocumentsDataSettings';
+import NetworkUsage from '../screens/Settings/NetworkUsage';
+import PhotosDataSettings from '../screens/Settings/PhotosDataSettings';
+import UsedStorageSettings from '../screens/Settings/UsedStorageSettings';
+import VideoDataSettings from '../screens/Settings/VideoDataSettings';
+
+import Help from '../screens/Help/Help';
+import HelpCentre from '../screens/Help/HelpCentre';
 
 import VideoCalls from '../screens/VideoCalls/VideoCalls';
 
@@ -90,6 +105,9 @@ const AppNavigator = () => {
         initialParams={{type: 'all', status: 'live'}}
       />
       <Stack.Screen name="About" component={About} options={defaultConfig} />
+      <Stack.Screen name="Terms" component={Terms} options={defaultConfig} />
+      <Stack.Screen name="Licenses" component={Licenses} options={defaultConfig} />
+      <Stack.Screen name="ContactUs" component={ContactUs} options={defaultConfig} />
       <Stack.Screen
         name="Settings"
         component={Settings}
@@ -199,6 +217,46 @@ const AppNavigator = () => {
       <Stack.Screen
         component={TypingPrivacySettings}
         name={'TypingPrivacySettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={AudioDataSettings}
+        name={'AudioDataSettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={DocumentsDataSettings}
+        name={'DocumentsDataSettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={NetworkUsage}
+        name={'NetworkUsage'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={PhotosDataSettings}
+        name={'PhotosDataSettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={UsedStorageSettings}
+        name={'UsedStorageSettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={VideoDataSettings}
+        name={'VideoDataSettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={Help}
+        name={'Help'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={HelpCentre}
+        name={'HelpCentre'}
         options={defaultConfig}
       />
     </Stack.Navigator>

@@ -8,7 +8,14 @@ export default class PhoneUsernameSettings extends Component {
   render() {
     return (
       <ScrollView>
-        
+        <MenuDivider text="Profile Photo" />
+        <MenuItem>User Name</MenuItem>
+        <MenuDivider blank />
+        <MenuDivider text="Phone Number" />
+        <MenuItem>Phone Number</MenuItem>
+        <MenuDivider blank />
+        <MenuDivider text="About" />
+        <MenuItem>At Work</MenuItem>
       </ScrollView>
     );
   }

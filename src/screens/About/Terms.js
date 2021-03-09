@@ -18,7 +18,7 @@ export default class About extends Component {
   };
   render() {
     return (
-      <ContentWrapper title="About" paddingHorizontal={0} details={
+      <ContentWrapper title="Terms & Conditions" paddingHorizontal={0} details={
         <ImageBackground source={aboutbg} style={styles.aboutbg}>
           <ImageBackground resizeMode={"contain"} source={weviveWhiteLogo} style={styles.weviveWhiteLogo}/>
           <View><Text style={styles.aboutText}>"You cannot hope to build a better world without improving the individuals. To that end, each of us must work for his [or her] own improvement and,
