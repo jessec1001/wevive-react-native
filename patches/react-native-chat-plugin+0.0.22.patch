@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index c0d4abb..822bb1d 100644
+index c0d4abb..3d14a58 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
-@@ -2,20 +2,12 @@ import React from "react";
+@@ -2,46 +2,41 @@ import React from "react";
  import PropTypes from "prop-types";
  import { View, Text, StyleSheet, Alert } from "react-native";
  
@@ -20,11 +20,25 @@ index c0d4abb..822bb1d 100644
  import { decryptConversations, decryptEvents, recreateEncryptionKeys, resendEncryptionKeys} from "./utils/ChatEncryption";
 -
 -const Stack = createStackNavigator();
++import Pressable from "react-native/Libraries/Components/Pressable/Pressable";
  const styles = StyleSheet.create({
    errorView: {
-     flex: 1,
-@@ -28,14 +20,9 @@ const styles = StyleSheet.create({
+-    flex: 1,
++    position: "absolute",
+     justifyContent: "center",
+     padding: 20,
++    flexDirection: "row",
++    top: 3,
    },
+   errorText: {
+     textAlign: "center",
+     color: Colors.TEXT,
++    fontSize: 8,
++    marginLeft: 3,
+   },
++  errorIcon: {
++    fontSize: 10,
++  }
  });
  
 -const defaultOptions = {
@@ -40,7 +54,33 @@ index c0d4abb..822bb1d 100644
    const ctx = React.useContext(ChatContext);
    const socket = getSocket();
    const [retry, setRetry] = React.useState(false);
-@@ -154,16 +141,7 @@ export default function ChatContainer({ options }) {
+   const [showRetryButton, setShowRetryButton] = React.useState(false);
+   React.useEffect(()=>{
+-    ctx.setAuthenticationError("Connecting..");
++    //ctx.setAuthenticationError("Connecting..");
+   }, []);
+   React.useEffect(() => {
+     const emitEvents = (recreateKeys = false) => {
+@@ -141,29 +136,20 @@ export default function ChatContainer({ options }) {
+ 
+     return () => timer && clearTimeout(timer);
+   }, [authError]);
+-
++  const Icon = ctx.icon;
+   // show authentication error.
+   if (authError !== "") {
+     return (
+-      <View style={styles.errorView}>
+-        <Text style={styles.errorText}>
++      <>
++        {children}
++        { showRetryButton ? <Pressable style={styles.errorView} onPress={() => setRetry(!retry)}><Icon style={styles.errorIcon} name="unread" /><Text style={styles.errorText}>
+           Chat error: {authError}
+-        </Text>
+-        { showRetryButton ? <PillButton text={"Reconnect"} onPress={() => setRetry(!retry)} /> : null }
+-      </View>
++        </Text></Pressable> : null }
++      </>
      );
    }
  
@@ -58,6 +98,83 @@ index c0d4abb..822bb1d 100644
  }
  
  ChatContainer.propTypes = {
+diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
+index c41797c..09f4663 100644
+--- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
++++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
+@@ -82,12 +82,47 @@ export function conversationReducer(state, action) {
+   }
+ 
+   case "mute_conversation": {
+-    // delete conversation by id.
++    // mute conversation by id.
++    const conversationId = action.payload.conversationId;
++    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
++    return { ...state, conversations };
++  }
++
++  case "archive_conversation": {
++    // archive conversation by id.
++    const conversationId = action.payload.conversationId;
++    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, archived: !conversation.archived});
++    return { ...state, conversations };
++  }
++
++  case "pin_conversation": {
++    // pin conversation by id.
++    const conversationId = action.payload.conversationId;
++    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, pinned: !conversation.pinned});
++    return { ...state, conversations };
++  }
++
++  case "unread_conversation": {
++    // unread conversation by id.
++    const conversationId = action.payload.conversationId;
++    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, unread: !conversation.unread});
++    return { ...state, conversations };
++  }
++
++  case "mute_conversation": {
++    // mute conversation by id.
+     const conversationId = action.payload.conversationId;
+     const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
+     return { ...state, conversations };
+   }
+ 
++  case "typing_conversation": {
++    // set typing flag conversation by id.
++    const conversationId = action.payload.conversationId;
++    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, typing: !conversation.typing});
++    return { ...state, conversations };
++  }
++
+   case "update_conversations":
+     return { ...state, conversations: action.payload.conversations };
+ 
+@@ -132,9 +167,23 @@ export function createConversationActions(state, dispatch) {
+     dispatch({ type: "mute_conversation", payload: { conversationId }});
+   }
+ 
++  function pinConversation(conversationId) {
++    dispatch({ type: "pin_conversation", payload: { conversationId }});
++  }
++
++  function unreadConversation(conversationId) {
++    dispatch({ type: "unread_conversation", payload: { conversationId }});
++  }
++
++  function archiveConversation(conversationId) {
++    dispatch({ type: "archive_conversation", payload: { conversationId }});
++  }
+   return {
+     deleteConversation,
+     muteConversation,
++    pinConversation,
++    unreadConversation,
++    archiveConversation,
+     getConversations() {
+       state.conversations.sort((a,b)=>{
+         if (a.lastEvent && b.lastEvent) {
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
 index f9bc1dc..531d7ed 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/index.js
@@ -142,7 +259,7 @@ index 0000000..609e264
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 5388ef0..086949d 100644
+index 5388ef0..6e826b6 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -10,7 +10,7 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
@@ -154,15 +271,33 @@ index 5388ef0..086949d 100644
  
  const sendButton = require("../images/sendbtn.png");
  const styles = StyleSheet.create({
-@@ -147,6 +147,7 @@ export default function ChatForm({ conversation }) {
+@@ -144,9 +144,19 @@ export default function ChatForm({ conversation }) {
+       });
+     }
+   },[message]);
++  const saveToDB = React.useCallback((conversation, contents) => {
++    ctx.getDB().then((db)=> {
++      db.executeSql(
++        "INSERT INTO messages(`conversation_id`,`message`) VALUES (?, ?)",
++        [conversation.id, contents]
++      ).then(([results])=> {
  
++      });
++    })
++  });
    const sendMessage = React.useCallback((contents) => {
      const socket = getSocket();
 +    setMessage("");
      socket.emit("events:new_message", { conversationId: conversation.id, message: contents }, ({ success, error }) => {
        if (!success && error) {
          if (tries >= maxRetries) {
-@@ -162,7 +163,6 @@ export default function ChatForm({ conversation }) {
+@@ -158,11 +168,12 @@ export default function ChatForm({ conversation }) {
+             sendMessage(contents);
+           }, 1000 * (1+tries * 2));
+         }
++      } else {
++        saveToDB(conversation.id, contents)
+       }
      });
    },[]);
    const submit = React.useCallback(() => {
@@ -170,7 +305,7 @@ index 5388ef0..086949d 100644
      if (message) {
        ctx.getDB().then((db)=> {
          db.executeSql(
-@@ -177,7 +177,11 @@ export default function ChatForm({ conversation }) {
+@@ -177,7 +188,11 @@ export default function ChatForm({ conversation }) {
            } else {
              sendMessage(message);
            }
@@ -182,7 +317,7 @@ index 5388ef0..086949d 100644
        });
        
        Keyboard.dismiss();
-@@ -193,7 +197,7 @@ export default function ChatForm({ conversation }) {
+@@ -193,7 +208,7 @@ export default function ChatForm({ conversation }) {
  
      });
    };
@@ -191,7 +326,30 @@ index 5388ef0..086949d 100644
  
    const [audioWebview, setWebView] = React.useState(false);
    const [audioLoaded, setAudioLoaded] = React.useState(false);
-@@ -235,7 +239,7 @@ export default function ChatForm({ conversation }) {
+@@ -203,12 +218,12 @@ export default function ChatForm({ conversation }) {
+   const recordAudio = () => {
+     if (audioRecording) {
+       setAudioRecording(false);
+-      Recording.stop();
++      //Recording.stop();
+       if (this.listener) this.listener.remove();
+       return;
+     }
+     setAudioRecording(true);
+-    Recording.init({
++    /*Recording.init({
+       bufferSize: 81920,
+       sampleRate: 44100,
+       bitsPerChannel: 8,
+@@ -227,6 +242,7 @@ export default function ChatForm({ conversation }) {
+     });
+ 
+     Recording.start();
++    */
+   };
+   
+   return (
+@@ -235,7 +251,7 @@ export default function ChatForm({ conversation }) {
        <TextInput
          textAlignVertical={"top"}
          numberOfLines={5}
@@ -200,11 +358,69 @@ index 5388ef0..086949d 100644
          value={message}
          style={styles.txt}
          onSubmitEditing={submit}
+@@ -243,7 +259,6 @@ export default function ChatForm({ conversation }) {
+         placeholderTextColor={"rgb(125,125,125)"}
+         blurOnSubmit={true}
+         onChangeText={onChangeText} />
+-      <AudioRecord setWebView={setWebView} setLoading={setAudioLoaded}/>
+       <TouchableOpacity onPress={recordAudio} style={styles.micBtn}>
+         <Icon name="microphone" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
+       </TouchableOpacity>
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index bbdff8a..4a08b15 100644
+index bbdff8a..18b81be 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-@@ -106,9 +106,9 @@ export default function ChatScreen({ navigation, route }) {
+@@ -13,6 +13,7 @@ import { useSafeArea } from "react-native-safe-area-context";
+ import {decryptEvents} from "../utils/ChatEncryption";
+ import TypingIndicator from "./TypingIndicator";
+ import { TouchableOpacity } from "react-native-gesture-handler";
++import Pressable from "react-native/Libraries/Components/Pressable/Pressable";
+ const styles = StyleSheet.create({
+   container: {
+     flex: 1,
+@@ -30,6 +31,25 @@ const styles = StyleSheet.create({
+   wallpaper: {
+     width: "100%",
+     height: "100%"
++  },
++  buttons: {
++    marginVertical: 10,
++    flexDirection: "row",
++    marginRight: 10,
++  },
++  button: {
++    backgroundColor: "rgb(242,142,62)",
++    borderRadius: 24,
++    padding: 3,
++    marginRight: 15,
++  },
++  callIcon: {
++    fontSize: 35,
++    color: "white",
++  },
++  videoCallIcon: {
++    fontSize: 35,
++    color: "white",
+   }
+ });
+ const chatWallpaper = require("../images/chat_background.png");
+@@ -103,12 +123,25 @@ export default function ChatScreen({ navigation, route }) {
+       ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents)});
+     });
+   }
++  const Icon = ctx.icon;
++  const buttons = <View style={styles.buttons}>
++    <Pressable style={styles.button} onPress={()=>{
++      navigation.navigate("VideoCalls",{callId:conversation.id, video:false});
++    }}>
++      <Icon name="medium-call-icon" style={styles.callIcon} />
++    </Pressable>
++    <Pressable style={styles.button} onPress={()=>{
++      navigation.navigate("VideoCalls",{callId:conversation.id, video:true});
++    }}>
++      <Icon name="medium-video-icon" style={styles.videoCallIcon} />
++    </Pressable>
++  </View>;
    let offset = 30 + insets.top;
    return (
      <>
@@ -212,11 +428,11 @@ index bbdff8a..4a08b15 100644
 +      <View style={styles.container}>
          <Header
 -          left={<PillButton text="Back" onPress={() => navigation.goBack()} />}
-+          right={<PillButton text="Call" onPress={() => navigation.navigate("VideoCalls",{callId:conversation.id})} />}
++          right={buttons}
            title={conversation.name || "Chat"} />
          <View style={styles.inner}>
            <View style={styles.list}>
-@@ -125,7 +125,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -125,7 +158,7 @@ export default function ChatScreen({ navigation, route }) {
              </ImageBackground>
            </View>
          </View>
@@ -355,7 +571,7 @@ index 42efb16..f2714f7 100644
    buttonText: {
      color: Colors.BACKGROUND,
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
-index fa4d21e..232c5be 100644
+index fa4d21e..72544a9 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 @@ -16,6 +16,7 @@ const closeIcon = require("../images/close.png");
@@ -386,7 +602,7 @@ index fa4d21e..232c5be 100644
      zIndex: 10,
      top: 5
    },
-@@ -48,7 +55,22 @@ const styles = StyleSheet.create({
+@@ -48,23 +55,44 @@ const styles = StyleSheet.create({
      flexDirection: "column",
      justifyContent: "center",
      backgroundColor: "rgb(130,180,120)"
@@ -409,11 +625,24 @@ index fa4d21e..232c5be 100644
 +    backgroundColor: "rgb(111,111,111)"
    },
    muteText: {
-     width:25,
-@@ -66,14 +88,21 @@ const styles = StyleSheet.create({
-     fontSize: 11,
-     marginTop: 5,
+-    width:25,
+-    height: 25,
+     color: "white",
+-    fontSize: 25,
++    fontSize: 22,
    },
+   muteTextText: {
+     color: "white",
+     fontSize: 11,
+-    marginTop: 5,
++    marginTop: 10,
+   },
+   deleteTextText: {
+     color: "white",
+     fontSize: 11,
+-    marginTop: 5,
++    marginTop: 10,
++  },
 +  archiveView: {
 +    width: 60,
 +    height: "100%",
@@ -421,10 +650,10 @@ index fa4d21e..232c5be 100644
 +    flexDirection: "column",
 +    justifyContent: "center",
 +    backgroundColor: "rgb(111,111,111)"
-+  },
+   },
    deleteView: {
      width: 60,
-     height: "100%",
+@@ -72,14 +100,15 @@ const styles = StyleSheet.create({
      alignItems: "center",
      flexDirection: "column",
      justifyContent: "center",
@@ -433,7 +662,18 @@ index fa4d21e..232c5be 100644
 +    backgroundColor: "rgb(201, 66, 59)"
    },
    deleteText: {
-     width:25,
+-    width:25,
+-    height: 25,
+     color: "white",
+-    fontSize: 25,
++    fontSize: 22,
++  },
++  archiveText: {
++    color: "white",
++    fontSize: 22,
+   },
+   chatBackground: {
+     flex: 1,
 @@ -101,34 +130,13 @@ const styles = StyleSheet.create({
      backgroundColor: "rgb(145,145,145)",
      borderRadius: 30,
@@ -473,7 +713,7 @@ index fa4d21e..232c5be 100644
  
  export default function ConversationList({ navigation }) {
    const ctx = React.useContext(ChatContext);
-@@ -182,26 +190,77 @@ export default function ConversationList({ navigation }) {
+@@ -182,26 +190,79 @@ export default function ConversationList({ navigation }) {
      <PillButton text="New Public Channel" onPress={() => navigation.navigate("SearchContactsScreen")} />
      <PillButton text="New 1 to 1 Chat" onPress={() => navigation.navigate("SearchContactsScreen")} />
    </>
@@ -490,13 +730,13 @@ index fa4d21e..232c5be 100644
 +    return (
 +      <View style={styles.hiddenItemContainer}>
 +        <View style={styles.leftSwipeContainer}>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.deleteConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.unreadConversation(item.id, false)}>
 +            <View style={styles.unreadView}>
 +              <Icon name="unread"  style={styles.muteText} />
 +              <Text style={styles.muteTextText}>Unread</Text>
 +            </View>
 +          </TouchableOpacity>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.muteConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.pinConversation(item.id, false)}>
 +            <View style={styles.pinView}>
 +              <Icon name="office-push-pin"  style={styles.deleteText} />
 +              <Text style={styles.deleteTextText}>Pin</Text>
@@ -505,21 +745,21 @@ index fa4d21e..232c5be 100644
 +        </View>
 +  
 +        <View style={styles.deleteContainer}>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.deleteConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.muteConversation(item.id, false)}>
 +            <View style={styles.muteView}>
 +              <Icon name="mute-icon"  style={styles.muteText} />
 +              <Text style={styles.muteTextText}>Mute</Text>
 +            </View>
 +          </TouchableOpacity>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.muteConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.deleteConversation(item.id, false)}>
 +            <View style={styles.deleteView}>
 +              <Icon name="trash"  style={styles.deleteText} />
 +              <Text style={styles.deleteTextText}>Delete</Text>
 +            </View>
 +          </TouchableOpacity>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.muteConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.archiveConversation(item.id, false)}>
 +            <View style={styles.archiveView}>
-+              <Icon name="archive"  style={styles.deleteText} />
++              <Icon name="archive"  style={styles.archiveText} />
 +              <Text style={styles.deleteTextText}>Archive</Text>
 +            </View>
 +          </TouchableOpacity>
@@ -551,6 +791,8 @@ index fa4d21e..232c5be 100644
            recalculateHiddenLayout={false}
 -          rightOpenValue={-120}
 +          rightOpenValue={-180}
++          stopLeftSwipe={120}
++          stopRightSwipe={-180}
 +          leftOpenValue={120}
            closeOnRowBeginSwipe={true}
 -          keyExtractor={item => item.id}

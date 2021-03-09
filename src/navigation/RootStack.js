@@ -120,7 +120,7 @@ const RootStack = () => {
           changedTheme.hiddenFooter = false;
         }
       }
-      if (routeName === 'Chat') {
+      if (routeName === 'ContactsScreen') {
         changedTheme.hiddenBack = true;
       } else {
         changedTheme.hiddenBack = false;

@@ -31,8 +31,9 @@
 
     NSLog(@"Enabling Firebase");
     [FIRApp configure];
-
+    
     JitsiMeet *jitsiMeet = [JitsiMeet sharedInstance];
+    [[FIRCrashlytics crashlytics] setCrashlyticsCollectionEnabled: TRUE];
 
     jitsiMeet.conferenceActivityType = JitsiMeetConferenceActivityType;
     jitsiMeet.customUrlScheme = @"org.jitsi.meet";
@@ -46,8 +47,6 @@
 
   [jitsiMeet application:application didFinishLaunchingWithOptions:launchOptions];
 
-
-    ViewController *rootController = (ViewController *)self.window.rootViewController;
     //[jitsiMeet showSplashScreen:rootController.view];
 
     return YES;
