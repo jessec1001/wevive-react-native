@@ -18,6 +18,8 @@ const showActionSheet = () => {
 };
 
 export default function FooterTabs(props) {
+  // useRoute doesn't work here
+  const params = props.route.state.routes[props.route.state.index].params;
   const ActionSheetElement = (props) => {
     return (
       <View style={styles.menuItem}>
@@ -26,7 +28,6 @@ export default function FooterTabs(props) {
       </View>
     );
   };
-  const route = props.route;
   const iconSize = responsiveHeight(3);
   const routeName = getFocusedRouteNameFromRoute(props.route);
   const createConversation = (index) => {
@@ -53,7 +54,7 @@ export default function FooterTabs(props) {
         ref={actionSheetRef}
         title={'Create conversation'}
         options={[
-          <ActionSheetElement text="Nearby contact" icon="lock" />,
+          <ActionSheetElement text="Nearby contact" icon="mapmarker" />,
           <ActionSheetElement text="Private group" icon="lock" />,
           <ActionSheetElement text="Public group" icon="lock" />,
           <ActionSheetElement text="1-to-1 Chat" icon="lock" />,
@@ -91,20 +92,20 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              props.navigate('ContactsScreen', {filter: 'calls'});
+              props.navigate('ContactsScreen', {filter: 'calls', type: null});
             }}>
             <Icon
               name="calls"
               size={iconSize}
               color={
-                routeName !== 'ContactsScreen'
+                routeName !== 'ContactsScreen' || params?.filter !== 'calls'
                   ? colors.footerIcons
                   : colors.activeFooterIcon
               }
             />
             <Text
               style={
-                routeName !== 'ContactsScreen'
+                routeName !== 'ContactsScreen' || params?.filter !== 'calls'
                   ? styles.footerText
                   : styles.activeFooterText
               }>
@@ -137,20 +138,20 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              props.navigate('ContactsScreen', {filter: 'chats'});
+              props.navigate('ContactsScreen', {filter: 'chats', type: null});
             }}>
             <Icon
               name="chats"
               size={iconSize}
               color={
-                routeName !== 'ContactsScreen'
+                routeName !== 'ContactsScreen' || params?.filter !== 'chats'
                   ? colors.footerIcons
                   : colors.activeFooterIcon
               }
             />
             <Text
               style={
-                routeName !== 'ContactsScreen'
+                routeName !== 'ContactsScreen' || params?.filter !== 'chats'
                   ? styles.footerText
                   : styles.activeFooterText
               }>
@@ -162,25 +163,25 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              props.navigate('About');
-              //props.navigate('ContactsScreen',{filter:"groups"});
+              //props.navigate('About');
+              props.navigate('ContactsScreen',{filter:"groups", type: null});
             }}>
             <Icon
               name="groups"
               size={iconSize}
               color={
-                routeName !== 'About'
+                routeName !== 'ContactsScreen' || params?.filter !== 'groups'
                   ? colors.footerIcons
                   : colors.activeFooterIcon
               }
             />
             <Text
               style={
-                routeName !== 'About'
+                routeName !== 'ContactsScreen' || params?.filter !== 'groups'
                   ? styles.footerText
                   : styles.activeFooterText
               }>
-              About
+              Groups
             </Text>
           </Pressable>
         </View>
@@ -199,8 +200,9 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2),
   },
   menuIcon: {
-    fontSize: responsiveWidth(5),
+    fontSize: responsiveWidth(4),
     color: 'rgb(100,100,100)',
+    alignSelf: "center",
   },
   footerBackground: {
     backgroundColor: colors.footer,
@@ -231,13 +233,17 @@ const styles = StyleSheet.create({
   },
   activeFooterText: {
     color: colors.activeFooterIcon,
-    fontSize: responsiveFontSize(1.15),
+    fontSize: responsiveFontSize(1.5),
+    fontFamily: "SFProDisplay-Regular",
+    fontWeight: "400",
     marginTop: 5,
   },
   footerText: {
     color: colors.footerText,
-    fontSize: responsiveFontSize(1.15),
+    fontSize: responsiveFontSize(1.5),
     marginTop: 5,
+    fontFamily: "SFProDisplay-Regular",
+    fontWeight: "400",
   },
   contentFooter: {
     width: '100%',

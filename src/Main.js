@@ -38,7 +38,7 @@ import ChatModule from 'react-native-chat-plugin';
 
 import Icon from './components/Icon';
 const chat_url = 'https://chat.wevive.com/';
-
+//const chat_url = 'http://192.168.0.180:3001/';
 const contentFooter = null;
 
 export default class Main extends Component {

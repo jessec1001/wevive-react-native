@@ -69,6 +69,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: responsiveWidth(7.5),
     fontWeight: '700',
     color: 'rgb(100,100,100)',
+    fontFamily: "SFProDisplay-Regular",
+    fontSize: responsiveFontSize(2),
   },
   toggleStyle: {
     alignSelf: 'flex-end',
@@ -85,6 +87,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     fontSize: responsiveFontSize(1.5),
     color: 'rgb(100,100,100)',
+    fontFamily: "SFProDisplay-Regular",
   },
   menuDivider: {
     backgroundColor: 'rgb(215,215,215)',
@@ -110,16 +113,19 @@ const styles = StyleSheet.create({
   },
   menuItem: {
     alignSelf: 'center',
-    fontSize: responsiveWidth(4),
+    fontSize: responsiveWidth(4.5),
+    fontFamily: "SFProDisplay-Regular",
   },
   importantMenuItem: {
     color: 'rgb(230, 142, 67)',
     alignSelf: 'center',
-    fontSize: responsiveWidth(4),
+    fontSize: responsiveWidth(4.5),
+    fontFamily: "SFProDisplay-Regular",
   },
   noticeMenuItem: {
     color: 'rgb(75,189,163)',
     alignSelf: 'center',
-    fontSize: responsiveWidth(4),
+    fontSize: responsiveWidth(4.5),
+    fontFamily: "SFProDisplay-Regular",
   }
 });

@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index c0d4abb..3d14a58 100644
+index c0d4abb..93fa9e4 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
-@@ -2,46 +2,41 @@ import React from "react";
+@@ -2,62 +2,69 @@ import React from "react";
  import PropTypes from "prop-types";
  import { View, Text, StyleSheet, Alert } from "react-native";
  
@@ -29,6 +29,7 @@ index c0d4abb..3d14a58 100644
      padding: 20,
 +    flexDirection: "row",
 +    top: 3,
++    left: 20,
    },
    errorText: {
      textAlign: "center",
@@ -60,8 +61,59 @@ index c0d4abb..3d14a58 100644
 +    //ctx.setAuthenticationError("Connecting..");
    }, []);
    React.useEffect(() => {
++    // get latest conversations from the DB:
++    ctx.getConversationsFromDB().then((conversations)=> {
++      for (let i=0;i<conversations.length;i++) {
++        let conversation = conversations.item(i);
++        ctx.addConversation({...conversation, id: conversation.group_id, time: new Date(conversation.created_at)});
++      }
++    });
      const emitEvents = (recreateKeys = false) => {
-@@ -141,29 +136,20 @@ export default function ChatContainer({ options }) {
+-      // get all conversations.
+-      socket.emit("conversations:fetch", async (res) => {
+-        if (res && res.success && Array.isArray(res.conversations)) {
+-          const conversations = await decryptConversations(res.conversations, socket.chat_private_key, ctx, recreateKeys);
+-          ctx.setConversations(conversations);
+-        }
+-
+-        socket.emit("events:get_unread_count", ({ success, stats }) => {
+-          if (success && stats && Array.isArray(stats) && stats.length > 0) {
+-            ctx.updateUnreadCounts({ stats });
++      // get latest conversations from the server:
++      ctx.getLatestEventFromDB().then((event)=> {
++        const options = event ? {since: event.created_at} : {since: 0};
++        socket.emit("conversations:fetch", options, async (res) => {
++          if (res && res.success && Array.isArray(res.conversations)) {
++            const conversations = await decryptConversations(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys);
++            ctx.setConversations(conversations);
++            conversations.map(c=>ctx.saveConversationToDB(c));
+           }
+         });
+       });
++      //get unread count.
++      socket.emit("events:get_unread_count", ({ success, stats }) => {
++        if (success && stats && Array.isArray(stats) && stats.length > 0) {
++          ctx.updateUnreadCounts({ stats });
++        }
++      });
+     };
+     const authenticationCallback = (res) => {
+       setTimeout(() => {
+@@ -106,11 +113,13 @@ export default function ChatContainer({ options }) {
+             { conversationId: event.conversationId, count: 1 }
+           );
+         }
++        ctx.saveMessageToDB(event.conversationId, event.text, event.owner.id);
+       }
+     }
+     async function handleConversationCreated({ conversation }) {
+       const newConversation = await decryptConversations([conversation], socket.chat_private_key, ctx);
+       if (!newConversation[0].hidden) ctx.addConversation(newConversation[0]);
++      ctx.saveConversationToDB(conversation.id, conversation.name);
+     }
+     socket.on("events:event_created", handleEventCreated);
+     socket.on("conversations:created", handleConversationCreated);
+@@ -141,29 +150,20 @@ export default function ChatContainer({ options }) {
  
      return () => timer && clearTimeout(timer);
    }, [authError]);
@@ -72,13 +124,14 @@ index c0d4abb..3d14a58 100644
      return (
 -      <View style={styles.errorView}>
 -        <Text style={styles.errorText}>
-+      <>
-+        {children}
-+        { showRetryButton ? <Pressable style={styles.errorView} onPress={() => setRetry(!retry)}><Icon style={styles.errorIcon} name="unread" /><Text style={styles.errorText}>
-           Chat error: {authError}
+-          Chat error: {authError}
 -        </Text>
 -        { showRetryButton ? <PillButton text={"Reconnect"} onPress={() => setRetry(!retry)} /> : null }
 -      </View>
++      <>
++        {children}
++        { showRetryButton ? <Pressable style={styles.errorView} onPress={() => setRetry(!retry)}><Icon style={styles.errorIcon} name="refreshbold" /><Text style={styles.errorText}>
++          Disconnected
 +        </Text></Pressable> : null }
 +      </>
      );
@@ -98,21 +151,48 @@ index c0d4abb..3d14a58 100644
  }
  
  ChatContainer.propTypes = {
+diff --git a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
+index 8e9472a..7073df8 100644
+--- a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
++++ b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
+@@ -27,7 +27,6 @@ export function createAuthActions(state, dispatch) {
+     if (authenticationTimeout) {
+       clearTimeout(authenticationTimeout);
+     }
+-    // authenticate.
+     socket.emit("users:authenticate", options, function handleAuthSuccess(res) {
+       if (res && res.success) {
+         setAuthInfo(options, res.user);
+@@ -104,7 +103,7 @@ export function createAuthActions(state, dispatch) {
+       const handleRequireAuthentication = createRequireAuthenticationHandler(callback);
+       const handleSocketDisconnected = createSocketDisconnectedHandler();
+       socket.on('connect', () => {
+-        console.log(socket.id); // 'G5p5...'
++        
+       });
+       // handle connection error.
+       socket.on("error", handleSocketError);
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
-index c41797c..09f4663 100644
+index c41797c..39e83be 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
-@@ -82,12 +82,47 @@ export function conversationReducer(state, action) {
+@@ -1,3 +1,5 @@
++import React from "react";
++import { ChatContext } from "react-native-chat-plugin/ChatContext";
+ import { getSocket } from "../utils/SocketIOClient";
+ 
+ const addConversations = (state, conversations) => {
+@@ -82,12 +84,47 @@ export function conversationReducer(state, action) {
    }
  
    case "mute_conversation": {
 -    // delete conversation by id.
 +    // mute conversation by id.
-+    const conversationId = action.payload.conversationId;
-+    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
-+    return { ...state, conversations };
-+  }
-+
+     const conversationId = action.payload.conversationId;
+     const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
+     return { ...state, conversations };
+   }
+ 
 +  case "archive_conversation": {
 +    // archive conversation by id.
 +    const conversationId = action.payload.conversationId;
@@ -136,11 +216,11 @@ index c41797c..09f4663 100644
 +
 +  case "mute_conversation": {
 +    // mute conversation by id.
-     const conversationId = action.payload.conversationId;
-     const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
-     return { ...state, conversations };
-   }
- 
++    const conversationId = action.payload.conversationId;
++    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
++    return { ...state, conversations };
++  }
++
 +  case "typing_conversation": {
 +    // set typing flag conversation by id.
 +    const conversationId = action.payload.conversationId;
@@ -151,7 +231,24 @@ index c41797c..09f4663 100644
    case "update_conversations":
      return { ...state, conversations: action.payload.conversations };
  
-@@ -132,9 +167,23 @@ export function createConversationActions(state, dispatch) {
+@@ -120,11 +157,14 @@ export function conversationReducer(state, action) {
+ 
+ export function createConversationActions(state, dispatch) {
+   const socket = getSocket();
+-
+   function deleteConversation(conversationId, hidden) {
++    dispatch({ type: "delete_conversation", payload: { conversationId }});
++    const ctx = this;
+     socket.emit("conversations:delete", { conversationId, hidden }, function (res) {
+       if (res && res.success) {
+-        dispatch({ type: "delete_conversation", payload: { conversationId }});
++        ctx.removeConversationFromDB(conversationId);
++      } else {
++        ctx.removeConversationFromDB(conversationId);
+       }
+     });
+   }
+@@ -132,11 +172,26 @@ export function createConversationActions(state, dispatch) {
      dispatch({ type: "mute_conversation", payload: { conversationId }});
    }
  
@@ -174,21 +271,104 @@ index c41797c..09f4663 100644
 +    archiveConversation,
      getConversations() {
        state.conversations.sort((a,b)=>{
++        if (a.pinned && !b.pinned) return false;
          if (a.lastEvent && b.lastEvent) {
+           return a.lastEvent.time < b.lastEvent.time;
+         } else if (a.lastEvent) {
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
-index f9bc1dc..531d7ed 100644
+index f9bc1dc..d22cbba 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/index.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/index.js
-@@ -17,7 +17,7 @@ const reducer = combineReducers(
+@@ -17,8 +17,87 @@ const reducer = combineReducers(
    settingsReducer
  );
  
 -export function ChatContextProvider({options,children,socketIoUrl, db, icon, contacts}) {
 +export function ChatContextProvider({options,children,socketIoUrl, getDB, icon, contacts}) {
    const [state, dispatch] = React.useReducer(reducer, ChatInitialState);
++  const removeConversationFromDB = React.useCallback((conversationId) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "DELETE FROM conversations WHERE group_id = ?",
++          [conversationId]
++        ).then(([results])=> {
++          console.error(results);
++          resolve(results);
++        });
++      })
++    });
++  },[]);
++  const markConversation = React.useCallback((conversationId, type, value) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "UPDATE conversations SET `is_"+type+"`=? WHERE group_id = ?",
++          [conversationId, value]
++        ).then(([results])=> {
++          resolve(results);
++        });
++      })
++    });
++  },[]);
++  const getConversationsFromDB = React.useCallback(() => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "SELECT * FROM conversations ORDER BY created_at DESC"
++        ).then(([results])=> {
++          resolve(results.rows.length > 0 ? results.rows : false);
++        });
++      })
++    });
++  },[]);
++  const getMessagesFromDB = React.useCallback((conversationId) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "SELECT * FROM messages WHERE group_id = ? ORDER BY created_at DESC",
++          [conversationId]
++        ).then(([results])=> {
++          resolve(results.rows.length > 0 ? results.rows : false);
++        });
++      })
++    });
++  },[]);
++  const getLatestEventFromDB = React.useCallback(() => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "SELECT created_at FROM messages UNION ALL SELECT created_at FROM conversations ORDER BY created_at DESC"
++        ).then(([results])=> {
++          resolve(results.rows.length > 0 ? results.rows.item(0) : 0);
++        });
++      })
++    });
++  },[]);
++  const saveMessageToDB = React.useCallback((conversation, contents, author) => {
++    getDB().then((db)=> {
++      db.executeSql(
++        "INSERT OR IGNORE INTO messages(`group_id`,`text`,`author_id`, created_at) VALUES (?, ?, ?, ?)",
++        [conversation.id, contents, author, Math.floor(Date.now() / 1000)]
++      ).then(([results])=> {
++
++      });
++    })
++  },[]);
++  const saveConversationToDB = React.useCallback((conversation, name) => {
++    getDB().then((db)=> {
++      db.executeSql(
++        "INSERT OR IGNORE INTO conversations(`group_id`,`group_key`,`name`,`created_by`,`created_at`) VALUES (?, ?, ?, ?, ?)",
++        [conversation.id, "", conversation.name, conversation.participants[0].id, Math.floor(Date.now() / 1000)]
++      ).then(([results])=> {
++
++      });
++    })
++  },[]);
    const context = React.useMemo(
      () => {
-@@ -26,9 +26,7 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
+       return ({
+@@ -26,11 +105,16 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
          ...createAuthActions(state, dispatch),
          ...createChatActions(state, dispatch),
          ...createConversationActions(state, dispatch),
@@ -197,9 +377,19 @@ index f9bc1dc..531d7ed 100644
 -        },
 +        getDB,
          contacts,
-         icon
+-        icon
++        icon,
++        saveMessageToDB,
++        saveConversationToDB,
++        getLatestEventFromDB,
++        getConversationsFromDB,
++        getMessagesFromDB,
++        markConversation,
++        removeConversationFromDB
        });
-@@ -47,5 +45,5 @@ ChatContextProvider.propTypes = {
+     },
+     [state]
+@@ -47,5 +131,5 @@ ChatContextProvider.propTypes = {
    options: PropTypes.object.isRequired,
    children: PropTypes.element.isRequired,
    socketIoUrl: PropTypes.string.isRequired,
@@ -259,7 +449,7 @@ index 0000000..609e264
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 5388ef0..6e826b6 100644
+index 5388ef0..c0884bc 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -10,7 +10,7 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
@@ -271,32 +461,31 @@ index 5388ef0..6e826b6 100644
  
  const sendButton = require("../images/sendbtn.png");
  const styles = StyleSheet.create({
-@@ -144,9 +144,19 @@ export default function ChatForm({ conversation }) {
-       });
-     }
-   },[message]);
-+  const saveToDB = React.useCallback((conversation, contents) => {
-+    ctx.getDB().then((db)=> {
-+      db.executeSql(
-+        "INSERT INTO messages(`conversation_id`,`message`) VALUES (?, ?)",
-+        [conversation.id, contents]
-+      ).then(([results])=> {
- 
-+      });
-+    })
-+  });
+@@ -135,9 +135,8 @@ export default function ChatForm({ conversation }) {
+   const onChangeText = React.useCallback((text) => {
+     setMessage(text);
+     const socket = getSocket();
+-    if (settings.disable_typing_events) {
++    if (!settings.disable_typing_events) {
+       socket.emit("events:typing", { conversationId: conversation.id }, ({ success, error }) => {
+-        i = i + 1;
+         if (!success && error) {
+           Alert.alert("Error", error);
+         }
+@@ -147,6 +146,7 @@ export default function ChatForm({ conversation }) {
+   
    const sendMessage = React.useCallback((contents) => {
      const socket = getSocket();
 +    setMessage("");
      socket.emit("events:new_message", { conversationId: conversation.id, message: contents }, ({ success, error }) => {
        if (!success && error) {
          if (tries >= maxRetries) {
-@@ -158,11 +168,12 @@ export default function ChatForm({ conversation }) {
+@@ -158,11 +158,12 @@ export default function ChatForm({ conversation }) {
              sendMessage(contents);
            }, 1000 * (1+tries * 2));
          }
 +      } else {
-+        saveToDB(conversation.id, contents)
++        ctx.saveMessageToDB(conversation.id, contents, socket.chat_user_id)
        }
      });
    },[]);
@@ -305,7 +494,7 @@ index 5388ef0..6e826b6 100644
      if (message) {
        ctx.getDB().then((db)=> {
          db.executeSql(
-@@ -177,7 +188,11 @@ export default function ChatForm({ conversation }) {
+@@ -177,7 +178,11 @@ export default function ChatForm({ conversation }) {
            } else {
              sendMessage(message);
            }
@@ -317,7 +506,7 @@ index 5388ef0..6e826b6 100644
        });
        
        Keyboard.dismiss();
-@@ -193,7 +208,7 @@ export default function ChatForm({ conversation }) {
+@@ -193,7 +198,7 @@ export default function ChatForm({ conversation }) {
  
      });
    };
@@ -326,7 +515,7 @@ index 5388ef0..6e826b6 100644
  
    const [audioWebview, setWebView] = React.useState(false);
    const [audioLoaded, setAudioLoaded] = React.useState(false);
-@@ -203,12 +218,12 @@ export default function ChatForm({ conversation }) {
+@@ -203,12 +208,12 @@ export default function ChatForm({ conversation }) {
    const recordAudio = () => {
      if (audioRecording) {
        setAudioRecording(false);
@@ -341,7 +530,7 @@ index 5388ef0..6e826b6 100644
        bufferSize: 81920,
        sampleRate: 44100,
        bitsPerChannel: 8,
-@@ -227,6 +242,7 @@ export default function ChatForm({ conversation }) {
+@@ -227,6 +232,7 @@ export default function ChatForm({ conversation }) {
      });
  
      Recording.start();
@@ -349,7 +538,7 @@ index 5388ef0..6e826b6 100644
    };
    
    return (
-@@ -235,7 +251,7 @@ export default function ChatForm({ conversation }) {
+@@ -235,7 +241,7 @@ export default function ChatForm({ conversation }) {
        <TextInput
          textAlignVertical={"top"}
          numberOfLines={5}
@@ -358,7 +547,7 @@ index 5388ef0..6e826b6 100644
          value={message}
          style={styles.txt}
          onSubmitEditing={submit}
-@@ -243,7 +259,6 @@ export default function ChatForm({ conversation }) {
+@@ -243,7 +249,6 @@ export default function ChatForm({ conversation }) {
          placeholderTextColor={"rgb(125,125,125)"}
          blurOnSubmit={true}
          onChangeText={onChangeText} />
@@ -367,18 +556,30 @@ index 5388ef0..6e826b6 100644
          <Icon name="microphone" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
        </TouchableOpacity>
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index bbdff8a..18b81be 100644
+index bbdff8a..e5423af 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-@@ -13,6 +13,7 @@ import { useSafeArea } from "react-native-safe-area-context";
+@@ -1,5 +1,5 @@
+ import React from "react";
+-import { View, StyleSheet, KeyboardAvoidingView, ImageBackground, Platform } from "react-native";
++import { View, StyleSheet, Alert, KeyboardAvoidingView, ImageBackground, Platform, Text } from "react-native";
+ import PropTypes from "prop-types";
+ import Header from "../Components/Header";
+ import ChatForm from "./ChatForm";
+@@ -13,6 +13,12 @@ import { useSafeArea } from "react-native-safe-area-context";
  import {decryptEvents} from "../utils/ChatEncryption";
  import TypingIndicator from "./TypingIndicator";
  import { TouchableOpacity } from "react-native-gesture-handler";
 +import Pressable from "react-native/Libraries/Components/Pressable/Pressable";
++
++import Clipboard from "@react-native-clipboard/clipboard";
++import {captureRef} from "react-native-view-shot";
++import Share from "react-native-share";
++
  const styles = StyleSheet.create({
    container: {
      flex: 1,
-@@ -30,6 +31,25 @@ const styles = StyleSheet.create({
+@@ -30,8 +36,142 @@ const styles = StyleSheet.create({
    wallpaper: {
      width: "100%",
      height: "100%"
@@ -401,10 +602,135 @@ index bbdff8a..18b81be 100644
 +  videoCallIcon: {
 +    fontSize: 35,
 +    color: "white",
++  },
++  menuBox: {
++    position: "absolute",
++    backgroundColor: "#333",
++    borderRadius: 20,
++    zIndex: 999,
++    right: 20,
++    paddingVertical: 5,
++  },
++  ownMenuBox: {
++    position: "absolute",
++    backgroundColor: "#333",
++    borderRadius: 20,
++    left: 10,
++    paddingVertical: 5,
++    zIndex: 999,
++  },
++  menuText: {
++    color: "white",
++    fontSize: 12,
++  },
++  menuButton: {
++    marginVertical: 7,
++    paddingBottom: 15,
++    paddingHorizontal: 20,
++    zIndex: 999,
++    flexDirection: "row",
++    justifyContent: "space-between",
++    borderBottomColor: "white",
++    borderBottomWidth: 1,
++    width: 130,
++  },
++  lastMenuButton: {
++    marginVertical: 7,
++    paddingBottom: 5,
++    paddingHorizontal: 20,
++    zIndex: 999,
++    flexDirection: "row",
++    justifyContent: "space-between",
++    width: 130,
++  },
++  iconStyle: {
++    top: 2,
++  },
++  forwardIconStyle: {
++    top: 2,
++    left: 0,
++    transform: [
++      {rotateY: "180deg"}
++    ]
    }
  });
++
++
++const shareImage = async (viewRef) => {
++  try {
++    const uri = await captureRef(viewRef, {
++      format: "png",
++      quality: 0.8,
++    });
++
++    // share
++    const shareResponse = await Share.open({url: uri});
++  } catch (error) {
++    console.log("error", error);
++  }
++};
++
++const MenuButton = ({event, text, Icon, iconName, size, style, viewRef, setSelectedEvent={setSelectedEvent}}) => {
++  return (
++    <TouchableOpacity onPress={()=>{
++      setTimeout(() => {
++        setSelectedEvent(false);
++      }, 100);
++      if (text === "Star") {
++        Alert.alert("Starred message");
++      }
++      if (text === "Reply") {
++        Clipboard.setString(event.text);
++      }
++      if (text === "Copy") {
++        Clipboard.setString(event.text);
++        Alert.alert("Message copied to clipboard");
++      }
++      if (text === "Forward") {
++        Clipboard.setString(event.text);
++        Alert.alert("Select contact");
++      }
++      if (text === "Save") {
++        setTimeout(() => {
++          shareImage(viewRef);
++        },1);
++      }
++    }}>
++      <View style={style}>
++        <Text style={styles.menuText}>{text}</Text>
++        <Icon name={iconName} color={"white"} size={size} style={text==="Forward" ? styles.forwardIconStyle : styles.iconStyle} />
++      </View>
++    </TouchableOpacity>
++  );
++}
++const Menu = ({event, Icon, setSelectedEvent, viewRef, tapEvent}) => {
++  const ctx = React.useContext(ChatContext);
++  const username = ctx.getUsername();
++  const author = event?.owner?.username;
++  const isOwn = author === username;
++  return (
++    <View style={{...(isOwn ? styles.ownMenuBox : styles.menuBox), top: tapEvent.nativeEvent.pageY - 170}}>
++      <MenuButton style={styles.menuButton} event={event} text={"Star"} Icon={Icon} iconName={"star-icon"} size={15} setSelectedEvent={setSelectedEvent} />
++      <MenuButton style={styles.menuButton} event={event} text={"Reply"} Icon={Icon} iconName={"reply-icon"} size={12} setSelectedEvent={setSelectedEvent} />
++      <MenuButton style={styles.menuButton} event={event} text={"Forward"} Icon={Icon} iconName={"reply-icon"} size={12} setSelectedEvent={setSelectedEvent} />
++      <MenuButton style={styles.menuButton} event={event} text={"Copy"} Icon={Icon} iconName={"copy-icon"} size={15} setSelectedEvent={setSelectedEvent} />
++      <MenuButton viewRef={viewRef} style={styles.lastMenuButton} event={event} text={"Save"} Icon={Icon} iconName={"save-download-icon"} size={15} setSelectedEvent={setSelectedEvent} />
++    </View>
++  );
++}
++
  const chatWallpaper = require("../images/chat_background.png");
-@@ -103,12 +123,25 @@ export default function ChatScreen({ navigation, route }) {
+ export default function ChatScreen({ navigation, route }) {
+ 
+@@ -41,6 +181,7 @@ export default function ChatScreen({ navigation, route }) {
+     return null;
+   }
+   const insets = useSafeArea();
++  const [selectedEvent, setSelectedEvent] = React.useState(false);
+   const [showMenu, setShowMenu] = React.useState(false);
+   const [lastpage, setLastPage] = React.useState(false);
+   const ctx = React.useContext(ChatContext);
+@@ -103,12 +244,25 @@ export default function ChatScreen({ navigation, route }) {
        ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents)});
      });
    }
@@ -432,20 +758,41 @@ index bbdff8a..18b81be 100644
            title={conversation.name || "Chat"} />
          <View style={styles.inner}>
            <View style={styles.list}>
-@@ -125,7 +158,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -117,7 +271,7 @@ export default function ChatScreen({ navigation, route }) {
+                 if (events.length >= 20) {
+                   fetchMoreMessages();
+                 }
+-              }} showMenu={showMenu} setShowMenu={setShowMenu}/>
++              }} setSelectedEvent={setSelectedEvent} />
+               <TypingIndicator conversation={conversation} />
+               <View style={styles.form}>
+                 <ChatForm conversation={conversation} />
+@@ -125,7 +279,8 @@ export default function ChatScreen({ navigation, route }) {
              </ImageBackground>
            </View>
          </View>
 -      </KeyboardAvoidingView>
++        {selectedEvent && Menu({event: selectedEvent.event, Icon, setSelectedEvent, tapEvent: selectedEvent.tapEvent, viewRef: selectedEvent.viewRef})}
 +      </View>
      </>
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-index 50d322e..51c91f6 100644
+index 50d322e..b9e0e61 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-@@ -20,7 +20,8 @@ const styles = StyleSheet.create({
+@@ -6,9 +6,7 @@ import { ChatContext } from "../ChatContext";
+ import { EventPropType } from "../PropTypes";
+ import Colors from "../constants/Colors";
+ 
+-import Clipboard from "@react-native-clipboard/clipboard";
+-import {captureRef} from "react-native-view-shot";
+-import Share from "react-native-share";
++
+ import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+ 
+ 
+@@ -20,7 +18,8 @@ const styles = StyleSheet.create({
    message: {
      borderRadius: 15,
      backgroundColor: "rgb(223,223,223)",
@@ -455,7 +802,27 @@ index 50d322e..51c91f6 100644
      marginLeft: 25,
      marginRight: 80,
      marginVertical: 8,
-@@ -65,22 +66,27 @@ const styles = StyleSheet.create({
+@@ -32,9 +31,6 @@ const styles = StyleSheet.create({
+     shadowOpacity: 0.1,
+     shadowRadius: 6.27,
+ 
+-    elevation: 10,
+-    zIndex: 1,
+-
+   },
+   selfMessage: {
+     borderRadius: 25,
+@@ -51,9 +47,6 @@ const styles = StyleSheet.create({
+     },
+     shadowOpacity: 0.15,
+     shadowRadius: 6.27,
+-    position: "relative",
+-    elevation: 10,
+-    zIndex: 1,
+   },
+   author: {
+     fontWeight: "bold",
+@@ -65,22 +58,27 @@ const styles = StyleSheet.create({
    },
    time: {
      textAlign: "right",
@@ -492,10 +859,142 @@ index 50d322e..51c91f6 100644
    },
    likeIndicatorBox: {
      position: "absolute",
-@@ -267,19 +273,21 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
-         <Text style={styles.author}>{author}</Text>
-         <Text style={styles.body}>{text}</Text>
-         {encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
+@@ -128,121 +126,10 @@ const styles = StyleSheet.create({
+     right : 10,
+     top: 10,
+     opacity: 0.2
+-  },
+-  menuBox: {
+-    position: "absolute",
+-    backgroundColor: "#333",
+-    borderRadius: 20,
+-    zIndex: 999,
+-    bottom: 20,
+-    right: -70,
+-    paddingVertical: 5,
+-  },
+-  ownMenuBox: {
+-    position: "absolute",
+-    backgroundColor: "#333",
+-    
+-    borderRadius: 20,
+-    zIndex: 999,
+-    bottom: 20,
+-    left: -70,
+-    paddingVertical: 5,
+-  },
+-  menuText: {
+-    color: "white",
+-    fontSize: 12,
+-  },
+-  menuButton: {
+-    marginVertical: 7,
+-    paddingBottom: 15,
+-    paddingHorizontal: 20,
+-    zIndex: 999,
+-    flexDirection: "row",
+-    justifyContent: "space-between",
+-    borderBottomColor: "white",
+-    borderBottomWidth: 1,
+-    width: 130,
+-  },
+-  lastMenuButton: {
+-    marginVertical: 7,
+-    paddingBottom: 5,
+-    paddingHorizontal: 20,
+-    zIndex: 999,
+-    flexDirection: "row",
+-    justifyContent: "space-between",
+-    width: 130,
+-  },
+-  iconStyle: {
+-    top: 2,
+-  },
+-  forwardIconStyle: {
+-    top: 2,
+-    left: 0,
+-    //width: 20,
+-    //height: 20,
+-    transform: [
+-      {rotateY: "180deg"}
+-    ]
+   }
+ });
+-async function shareImage (viewRef) {
+-  try {
+-    const uri = await captureRef(viewRef, {
+-      format: "png",
+-      quality: 0.8,
+-    });
+-
+-    // share
+-    const shareResponse = await Share.open({url: uri});
+-  } catch (error) {
+-    console.log("error", error);
+-  }
+-}
+-
+-function MenuButton({event, text, Icon, iconName, size, style, viewRef, setShowMenu={setShowMenu}}) {
+-  return (
+-    <TouchableOpacity onPress={()=>{
+-      setShowMenu(false);
+-      if (text === "Star") {
+-        Alert.alert("Starred message");
+-      }
+-      if (text === "Reply") {
+-        Clipboard.setString(event.text);
+-      }
+-      if (text === "Copy") {
+-        Clipboard.setString(event.text);
+-        Alert.alert("Message copied to clipboard");
+-      }
+-      if (text === "Forward") {
+-        Clipboard.setString(event.text);
+-        Alert.alert("Select contact");
+-      }
+-      if (text === "Save") {
+-        setTimeout(() => {
+-          shareImage(viewRef);
+-        },100);
+-      }
+-    }}>
+-      <View style={style}>
+-        <Text style={styles.menuText}>{text}</Text>
+-        <Icon name={iconName} color={"white"} size={size} style={text==="Forward" ? styles.forwardIconStyle : styles.iconStyle} />
+-      </View>
+-    </TouchableOpacity>
+-  );
+-}
+-function Menu({event, isOwn, Icon, setShowMenu, viewRef}) {
+-  return (
+-    <View style={isOwn ? styles.ownMenuBox : styles.menuBox}>
+-      <MenuButton style={styles.menuButton} event={event} text={"Star"} Icon={Icon} iconName={"star-icon"} size={15} setShowMenu={setShowMenu} />
+-      <MenuButton style={styles.menuButton} event={event} text={"Reply"} Icon={Icon} iconName={"reply-icon"} size={12} setShowMenu={setShowMenu} />
+-      <MenuButton style={styles.menuButton} event={event} text={"Forward"} Icon={Icon} iconName={"reply-icon"} size={12} setShowMenu={setShowMenu} />
+-      <MenuButton style={styles.menuButton} event={event} text={"Copy"} Icon={Icon} iconName={"copy-icon"} size={15} setShowMenu={setShowMenu} />
+-      <MenuButton viewRef={viewRef} style={styles.lastMenuButton} event={event} text={"Save"} Icon={Icon} iconName={"save-download-icon"} size={15} setShowMenu={setShowMenu} />
+-    </View>
+-  );
+-}
+ 
+-function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMenu, Icon }) {
++function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent, Icon }) {
+   const viewRef = React.useRef();
+   const [likes, setLikes] = React.useState(0);
+   const options = {
+@@ -258,31 +145,34 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
+     ReactNativeHapticFeedback.trigger("impactMedium", options);
+   }
+   return (
+-    <TouchableHighlight ref={viewRef} underlayColor={"#bbb"} style={isOwn ? styles.selfMessage : styles.message} delayLongPress={1000} onPress={(evt) => {
+-      setShowMenu(false);
+-    }} onLongPress={(evt) => {
+-      setShowMenu(event.id);
+-    }}>
+-      <>
+-        <Text style={styles.author}>{author}</Text>
+-        <Text style={styles.body}>{text}</Text>
+-        {encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
 -        <Text style={styles.time}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
 -        <Text style={styles.readIndicator}>
 -          <Icon name="ticks" color={"rgb(228,140,58)"} />
@@ -504,39 +1003,103 @@ index 50d322e..51c91f6 100644
 -          <Icon name="ticks" color={"rgb(228,140,58)"} />
 -        </Text>
 -        <Pressable style={styles.likeIndicatorBox} onPress={()=>sendLike(event)} onLongPress={()=>sendDislike(event)}>
-+        <View style={styles.timeBox}>
-+          <Text style={styles.time}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
-+          <Text style={styles.readIndicator}>
-+            <Icon name="ticks" color={"rgb(228,140,58)"} size={8} />
-+          </Text>
-+          <Text style={styles.deliveryIndicator}>
-+            <Icon name="ticks" color={"rgb(228,140,58)"} size={8}/>
-+          </Text>
-+        </View>
-+        <TouchableOpacity style={styles.likeIndicatorBox} onPress={()=>sendLike(event)} onLongPress={()=>sendDislike(event)}>
-           <>
-             <Icon name={likes > 0 ? "heart" : "ei-heart"} color={"#f44"} style={likes > 0 ? styles.likeIndicator : styles.emptyLikeIndicator} />
-             {likes > 0 && <Text style={styles.likeText}>{likes}</Text>}
-           </>
+-          <>
+-            <Icon name={likes > 0 ? "heart" : "ei-heart"} color={"#f44"} style={likes > 0 ? styles.likeIndicator : styles.emptyLikeIndicator} />
+-            {likes > 0 && <Text style={styles.likeText}>{likes}</Text>}
+-          </>
 -        </Pressable>
-+        </TouchableOpacity>
-         {menu && Menu({event, isOwn, Icon, setShowMenu, viewRef})}
-       </>
-     </TouchableHighlight>
+-        {menu && Menu({event, isOwn, Icon, setShowMenu, viewRef})}
+-      </>
+-    </TouchableHighlight>
++    <>
++      <TouchableHighlight ref={viewRef} underlayColor={"#bbb"} style={isOwn ? styles.selfMessage : styles.message} delayLongPress={500} onPress={(evt) => {
++        setSelectedEvent(null);
++      }} onLongPress={(evt) => {
++        setSelectedEvent({event, viewRef, tapEvent:evt});
++      }}>
++        <>
++          <Text style={styles.author}>{author}</Text>
++          <Text style={styles.body}>{text}</Text>
++          {encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
++          <View style={styles.timeBox}>
++            <Text style={styles.time}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
++            <Text style={styles.readIndicator}>
++              <Icon name="ticks" color={"rgb(228,140,58)"} size={8} />
++            </Text>
++            <Text style={styles.deliveryIndicator}>
++              <Icon name="ticks" color={"rgb(228,140,58)"} size={8}/>
++            </Text>
++          </View>
++          <TouchableOpacity style={styles.likeIndicatorBox} onPress={()=>sendLike(event)} onLongPress={()=>sendDislike(event)}>
++            <>
++              <Icon name={likes > 0 ? "heart" : "ei-heart"} color={"#f44"} style={likes > 0 ? styles.likeIndicator : styles.emptyLikeIndicator} />
++              {likes > 0 && <Text style={styles.likeText}>{likes}</Text>}
++            </>
++          </TouchableOpacity>
++        </>
++      </TouchableHighlight>
++    </>
+   );
+ }
+ Message.propTypes = {
+@@ -294,7 +184,7 @@ Message.propTypes = {
+   setShowMenu: PropTypes.func,
+ };
+ 
+-export default function MessageItem ({ event, menu, setShowMenu }) {
++export default function MessageItem ({ event, menu, setSelectedEvent }) {
+   const ctx = React.useContext(ChatContext);
+   const username = ctx.getUsername();
+   const isMessage = event?.type === "MESSAGE";
+@@ -302,7 +192,7 @@ export default function MessageItem ({ event, menu, setShowMenu }) {
+   const isOwn = author === username;
+   if (isMessage) {
+     if (event?.hidden) return null;
+-    return (<Message Icon={ctx.icon} menu={menu} setShowMenu={setShowMenu} event={event} text={event?.text} isOwn={isOwn} author={author} time={event?.time} encrypted={event?.encrypted} />);
++    return (<Message Icon={ctx.icon} menu={menu} setSelectedEvent={setSelectedEvent} event={event} text={event?.text} isOwn={isOwn} author={author} time={event?.time} encrypted={event?.encrypted} />);
+   } else {
+     return (<Text style={styles.notification}>{event?.text}</Text>);
+   }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessagesList.js b/node_modules/react-native-chat-plugin/ChatScreen/MessagesList.js
-index d7b227a..6af932a 100644
+index d7b227a..2fbc6d2 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessagesList.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessagesList.js
-@@ -1,5 +1,5 @@
+@@ -1,29 +1,98 @@
  import React from "react";
 -import { FlatList } from "react-native";
-+import { FlatList, View } from "react-native";
++import { FlatList, View, TouchableOpacity, Text } from "react-native";
  import PropTypes from "prop-types";
  
  import MessageItem from "./MessageItem";
-@@ -15,13 +15,16 @@ renderItem.propTypes = {
+ import { EventPropType } from "../PropTypes";
++import {StyleSheet} from 'react-native';
  
- export default function MessageList({ events, onEndReached, showMenu, setShowMenu }) {
+-
+-function renderItem({ item, showMenu, setShowMenu }) {
+-  return (<MessageItem event={item} menu={item.id == showMenu} setShowMenu={setShowMenu} />);
++function renderItem({ item, setSelectedEvent }) {
++  return (<MessageItem event={item} setSelectedEvent={setSelectedEvent} />);
+ }
+ renderItem.propTypes = {
+   item: EventPropType,
+ };
+ 
+-export default function MessageList({ events, onEndReached, showMenu, setShowMenu }) {
++const renderCell = ({index, style, ...props}) => {
++  zIndex = index;
++  return <View style={[style, zIndex]} {...props} />;
++}
++
++
++
++export default function MessageList({ events, onEndReached, setSelectedEvent }) {
++  const flatlistRef = React.useRef();
++  const [goToBottom, setGoToBottom] = React.useState(false);
++  const scrollToEnd = React.useCallback(() => {
++    flatlistRef.current.scrollToIndex({index:0});
++  }, [flatlistRef])
++  const ctx = React.useContext(ChatContext);
++  const Icon = ctx.icon;
    return (
 -    <FlatList
 -      inverted={true}
@@ -545,19 +1108,73 @@ index d7b227a..6af932a 100644
 -      onEndReached={onEndReached}
 -      onEndReachedThreshold={0.5}
 -    />
-+    <View style={{flex: 1}}>
++    <>
 +      <FlatList
++        ref={flatlistRef}
++        scrollEventThrottle={200}
++        onScroll={(event) => {
++          const scrollOffset = event.nativeEvent.contentOffset.y
++          if (scrollOffset > 0 && !goToBottom) {
++            setGoToBottom(true);
++          } else if (goToBottom && scrollOffset <= 0) {
++            setGoToBottom(false);
++          }
++        }}
++        contentContainerStyle={{ paddingBottom: 20 }}
 +        inverted
-+        data={[...events.reverse()]}
-+        renderItem={({item}) => renderItem({item, showMenu, setShowMenu})}
++        data={[...events].reverse()}
++        renderItem={({item}) => renderItem({item, setSelectedEvent})}
 +        onEndReached={onEndReached}
 +        onEndReachedThreshold={0.5}
 +        removeClippedSubviews={false}
 +      />
-+    </View>
++      {goToBottom && <TouchableOpacity style={styles.goToBottom} onPress={scrollToEnd}>
++          <View style={styles.goToBottomIconContainer}>
++            <Icon name={"arrow"} style={styles.goToBottomIcon}/>
++          </View>
++        </TouchableOpacity>}
++    </>
    );
  }
++
++
++
++import {
++  responsiveHeight,
++  responsiveWidth,
++  responsiveFontSize
++} from 'react-native-responsive-dimensions';
++import { ChatContext } from "react-native-chat-plugin/ChatContext";
++const styles = StyleSheet.create({
++  goToBottom: {
++      position: "absolute",
++      right: 0,
++      backgroundColor: "rgb(124, 178, 128)",
++      bottom: responsiveWidth(30),
++      borderTopLeftRadius: responsiveWidth(5),
++      borderBottomLeftRadius: responsiveWidth(5),
++      paddingVertical: responsiveWidth(2),
++      paddingHorizontal: responsiveWidth(3),
++  },
++  goToBottomIcon: {
++    fontSize: responsiveFontSize(1.2),
++    color: "white",
++    top: 1,
++  },
++  goToBottomIconContainer: {
++    borderWidth: 1,
++    borderRadius: 40,
++    borderColor: "white",
++    padding: responsiveWidth(2),
++    justifyContent: "center",
++    width: 30,
++    height: 30,
++  }
++});
++
  MessageList.propTypes = {
+   events: PropTypes.arrayOf(EventPropType),
+   onEndReached: PropTypes.func
 diff --git a/node_modules/react-native-chat-plugin/Components/PillButton.js b/node_modules/react-native-chat-plugin/Components/PillButton.js
 index 42efb16..f2714f7 100644
 --- a/node_modules/react-native-chat-plugin/Components/PillButton.js
@@ -570,8 +1187,72 @@ index 42efb16..f2714f7 100644
    },
    buttonText: {
      color: Colors.BACKGROUND,
+diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
+index a3184cd..f8d6377 100644
+--- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
++++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
+@@ -7,6 +7,7 @@ import Fonts from "../constants/Fonts";
+ import { ConversationPropType } from "../PropTypes";
+ import { ChatContext } from "../ChatContext";
+ import LinearGradient from "react-native-linear-gradient";
++import { responsiveFontSize } from "react-native-responsive-dimensions";
+ const styles = StyleSheet.create(
+   {
+     container: {
+@@ -58,12 +59,18 @@ const styles = StyleSheet.create(
+       color: Colors.TEXT,
+     },
+     encryptedIcon: {
+-      position: "absolute",
+-      width: 10,
+-      height: 10,
+-      right : 1,
+-      top: 3,
+-      opacity: 0.6
++    },
++    mutedIcon: {
++      width: 20,
++    },
++    conversationName: {
++      flexDirection: "row",
++    },
++    conversationIcon: {
++      top: 7,
++      marginLeft: 5,
++      fontSize: responsiveFontSize(1.3),
++      color: "rgb(150,150,150)"
+     }
+   }
+ );
+@@ -88,16 +95,23 @@ export default function ContactComponent({ conversation, onPress }) {
+   if (user && Array.isArray(participants) && participants.length > 1) {
+     participants = participants.filter(p => p.id !== user.id);
+   }
+-
++  const Icon = ctx.icon;
++  //console.warn(conversation);
+   return (
+     <TouchableHighlight
+       onPress={() => (onPress && onPress(conversation))}
+       underlayColor="#F8E2DD">
+       <LinearGradient style={styles.container} colors={['#ffffff', '#f3f3f3']}>
+         <ProfilePreview text={conversation.name} contacts={participants} />
+-        {conversation.encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
++        
+         <View>
+-          <Text style={styles.name}>{conversation.name}</Text>
++          <View style={styles.conversationName}>
++            <Text style={styles.name}>{conversation.name}</Text>
++            {conversation.encrypted ? <Image source={lockIcon} style={styles.conversationIcon} /> : null }
++            {conversation.muted && <Icon name="mute-icon" style={styles.conversationIcon} />}
++            {conversation.pinned && <Icon name="office-push-pin" style={styles.conversationIcon} />}
++            {conversation.archived && <Icon name="archive" style={styles.conversationIcon} />}
++          </View>
+           <Text style={styles.preview}>{ getPreview(conversation) }</Text>
+         </View>
+         {getPreviewDate(conversation)}
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
-index fa4d21e..72544a9 100644
+index fa4d21e..b15d67d 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 @@ -16,6 +16,7 @@ const closeIcon = require("../images/close.png");
@@ -674,7 +1355,7 @@ index fa4d21e..72544a9 100644
    },
    chatBackground: {
      flex: 1,
-@@ -101,34 +130,13 @@ const styles = StyleSheet.create({
+@@ -101,43 +130,26 @@ const styles = StyleSheet.create({
      backgroundColor: "rgb(145,145,145)",
      borderRadius: 30,
      height: 400,
@@ -711,9 +1392,25 @@ index fa4d21e..72544a9 100644
 -  );
 -};
  
- export default function ConversationList({ navigation }) {
+-export default function ConversationList({ navigation }) {
++export default function ContactsScreen({ navigation, route }) {
    const ctx = React.useContext(ChatContext);
-@@ -182,26 +190,79 @@ export default function ConversationList({ navigation }) {
+-  const conversations = ctx.getConversations().filter(c => c.hidden == undefined || !c.hidden);
++  const swiper = React.useRef();
++  const conversations = ctx.getConversations()
++  .filter(c => c.hidden == undefined || !c.hidden)
++  .filter(c => route.params?.type == 'archived' ? c.archived : !c.archived)
++  //.filter(c => route.params.type == 'pinned' && !c.pinned)
++  
+   const [results, setResults] = React.useState([]);
+   const onPress = (conversation) => {
+     navigation.navigate("ChatScreen", { conversation });
+   };
+-
+   const [query, setQuery] = React.useState("");
+ 
+   function searchAsyncForMessages(ctx, query) {
+@@ -182,32 +194,110 @@ export default function ConversationList({ navigation }) {
      <PillButton text="New Public Channel" onPress={() => navigation.navigate("SearchContactsScreen")} />
      <PillButton text="New 1 to 1 Chat" onPress={() => navigation.navigate("SearchContactsScreen")} />
    </>
@@ -724,43 +1421,67 @@ index fa4d21e..72544a9 100644
 +      <ContactComponent conversation={item} onPress={onPress} />
 +    );
 +  };
-+  
++  const markConversation = React.useCallback((conversation, type, value) => {
++    switch (type) {
++      case 'pin':
++        ctx.pinConversation(conversation.id, !conversation.pinned);
++        break;
++      case 'mute':
++        ctx.muteConversation(conversation.id, !conversation.muted);
++        break;
++      case 'delete':
++        ctx.deleteConversation(conversation.id, !conversation.deleted);
++        break;
++      case 'archive':
++        ctx.archiveConversation(conversation.id, !conversation.archived);
++        break;
++      case 'unread':
++        ctx.unreadConversation(conversation.id, !conversation.unread);
++        break;
++      default:
++        break;
++    }
++    if (type != 'unread') {
++      ctx.markConversation(conversation.id, type, value);
++    }
++    swiper.current?.closeAllOpenRows();
++  },[]);
 +  const renderHiddenItem = ({item}) => {
 +    const Icon = ctx.icon;
 +    return (
 +      <View style={styles.hiddenItemContainer}>
 +        <View style={styles.leftSwipeContainer}>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.unreadConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => markConversation(item, 'unread')}>
 +            <View style={styles.unreadView}>
 +              <Icon name="unread"  style={styles.muteText} />
 +              <Text style={styles.muteTextText}>Unread</Text>
 +            </View>
 +          </TouchableOpacity>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.pinConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => markConversation(item, 'pin')}>
 +            <View style={styles.pinView}>
 +              <Icon name="office-push-pin"  style={styles.deleteText} />
-+              <Text style={styles.deleteTextText}>Pin</Text>
++              <Text style={styles.deleteTextText}>{item.pinned ? "Unpin" : "Pin"}</Text>
 +            </View>
 +          </TouchableOpacity>
 +        </View>
 +  
 +        <View style={styles.deleteContainer}>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.muteConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => markConversation(item, 'mute')}>
 +            <View style={styles.muteView}>
 +              <Icon name="mute-icon"  style={styles.muteText} />
-+              <Text style={styles.muteTextText}>Mute</Text>
++              <Text style={styles.muteTextText}>{item.muted ? "Unmute" : "Mute"}</Text>
 +            </View>
 +          </TouchableOpacity>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.deleteConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => markConversation(item, 'delete')}>
 +            <View style={styles.deleteView}>
 +              <Icon name="trash"  style={styles.deleteText} />
 +              <Text style={styles.deleteTextText}>Delete</Text>
 +            </View>
 +          </TouchableOpacity>
-+          <TouchableOpacity style={styles.deleteViewParent} onPress={() => ctx.archiveConversation(item.id, false)}>
++          <TouchableOpacity style={styles.deleteViewParent} onPress={() => markConversation(item, 'archive')}>
 +            <View style={styles.archiveView}>
 +              <Icon name="archive"  style={styles.archiveText} />
-+              <Text style={styles.deleteTextText}>Archive</Text>
++              <Text style={styles.deleteTextText}>{item.archived ? "Unarchive" : "Archive"}</Text>
 +            </View>
 +          </TouchableOpacity>
 +        </View>
@@ -798,11 +1519,20 @@ index fa4d21e..72544a9 100644
 -          keyExtractor={item => item.id}
 +          keyExtractor={keyExtractor}
 +          useNativeDriver
++          ref={swiper}
          />
        </ImageBackground>
      </View>
+   );
+ }
+ 
+-ConversationList.propTypes = {
++ContactsScreen.propTypes = {
+   navigation: NavigationPropType,
+ };
+\ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 731a30e..e5f6117 100644
+index 731a30e..82aa6c1 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 @@ -6,6 +6,9 @@ import { ChatContext } from "../ChatContext";
@@ -830,7 +1560,7 @@ index 731a30e..e5f6117 100644
    headerStyle: {
      backgroundColor: "rgb(125,125,125)",
      padding: 20,
-@@ -114,62 +125,107 @@ const styles = StyleSheet.create({
+@@ -114,62 +125,87 @@ const styles = StyleSheet.create({
    }
  });
  
@@ -848,6 +1578,7 @@ index 731a30e..e5f6117 100644
 -      </LinearGradient>
 -    </TouchableOpacity>
 -  );
+-};
 +const onShare = async (numbers, navigation) => {
 +  SendSMS.send({
 +    body: 'Hey - Join Wevive, a social network for doing good. Here is the link - https://wevive.com',
@@ -861,30 +1592,10 @@ index 731a30e..e5f6117 100644
 +    //console.warn('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
 +  });
 +}
-+const onShare2 = async () => {
-+  try {
-+    const result = await Share.share({
-+      message:
-+        'Hey - Join Wevive, a social network for doing good.' + (Platform.OS == 'android' ? "Here is the link - https://wevive.com" : ""),
-+      url:
-+        'https://wevive.com'
-+    });
-+    if (result.action === Share.sharedAction) {
-+      if (result.activityType) {
-+        // shared with activity type of result.activityType
-+      } else {
-+        // shared
-+      }
-+    } else if (result.action === Share.dismissedAction) {
-+      // dismissed
-+    }
-+  } catch (error) {
-+    alert(error.message);
-+  }
- };
  
 -const renderSectionHeader = (ctx, section) => {
 -  const Icon = ctx.icon;
++
 +const renderSectionHeader = (section) => {
    return (
      <View style={styles.sectionHeaderContainer}>
@@ -963,7 +1674,7 @@ index 731a30e..e5f6117 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
-index b708a42..da25d8e 100644
+index b708a42..b0acb75 100644
 --- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 @@ -1,5 +1,5 @@
@@ -982,7 +1693,15 @@ index b708a42..da25d8e 100644
  import {
    SearchReducer,
    SearchInitialState,
-@@ -27,8 +27,53 @@ const styles = StyleSheet.create({
+@@ -18,6 +18,7 @@ import {
+   dispatchAppendContactsAction,
+   dispatchEndReachedAction
+ } from "./SearchReducers";
++import { useRoute } from "@react-navigation/native";
+ 
+ const styles = StyleSheet.create({
+   container: {
+@@ -27,19 +28,63 @@ const styles = StyleSheet.create({
      flex: 1,
      justifyContent: "center",
    },
@@ -1036,6 +1755,55 @@ index b708a42..da25d8e 100644
  const renderContact = (contact, onPress) => {
    return <SearchResultComponent contact={contact} onPress={onPress} />;
  };
+ 
+-export default function SearchContactsScreen({ navigation }) {
++export default function SearchContactsScreen({navigation, route}) {
+   const [query, setQuery] = React.useState("");
+   const [loading, setLoading] = React.useState(false);
+   const [state, dispatch] = React.useReducer(SearchReducer, SearchInitialState);
+   const ctx = React.useContext(ChatContext);
+   const socket = getSocket();
+-
+   const update = (success, contacts, dispatcher) => {
+     if (!success || (contacts && contacts.length === 0)) {
+       dispatcher(dispatch, contacts);
+@@ -51,11 +96,11 @@ export default function SearchContactsScreen({ navigation }) {
+ 
+   const getUsers = () => {
+     if (!query) {
+-      socket.emit("users:get_followings", { page: 1 }, function ({ success, followings }) {
++      socket.emit("users:get_followings", { type: route.params.type, page: 1 }, function ({ success, followings }) {
+         update(success, followings, dispatchUpdateContactsAction);
+       });
+     } else {
+-      socket.emit("users:get_followings", { page: 1 }, ({ success, followings }) => {
++      socket.emit("users:get_followings", { type: route.params.type, page: 1 }, ({ success, followings }) => {
+         if (followings) {
+           followings = followings.filter((follower) => {
+             return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+@@ -69,11 +114,11 @@ export default function SearchContactsScreen({ navigation }) {
+   const getMoreUsers = () => {
+     if (state.page > 0) {
+       if (!query) {
+-        socket.emit("users:get_followings", { page: state.page + 1 }, function ({ success, followings }) {
++        socket.emit("users:get_followings", { type: route.params.type, page: state.page + 1 }, function ({ success, followings }) {
+           update(success, followings, dispatchAppendContactsAction);
+         });
+       } else {
+-        socket.emit("users:get_followings", { page: state.page + 1 }, ({ success, followings }) => {
++        socket.emit("users:get_followings", { type: route.params.type, page: state.page + 1 }, ({ success, followings }) => {
+           if (followings) {
+             followings = followings.filter((follower) => {
+               return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+@@ -88,7 +133,7 @@ export default function SearchContactsScreen({ navigation }) {
+   React.useEffect(() => {
+     const timer = setTimeout(() => {
+       getUsers();
+-    }, 300);
++    }, 100);
+ 
+     return () => clearTimeout(timer);
+   }, [query]);
 @@ -129,8 +174,7 @@ export default function SearchContactsScreen({ navigation }) {
          right={<PillButton text="Next" onPress={createChat} />}
          title="Add participants" />
@@ -1047,7 +1815,7 @@ index b708a42..da25d8e 100644
          style={styles.container}
          data={state.contacts}
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index 0d59b81..f8a56ff 100644
+index 0d59b81..16a7c19 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
 @@ -7,29 +7,45 @@ export { addUnreadCountListener, updateCount } from "./utils/unread-counter";
@@ -1078,6 +1846,7 @@ index 0d59b81..f8a56ff 100644
 -    Contacts.getAll().then(fetchedContacts => {
 -      setContacts(fetchedContacts.map((r)=>({value:r.givenName, label: r.givenName})));
 -    });
+-  });
 +    if (Platform.OS == 'android') {
 +      PermissionsAndroid.request(
 +        PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
@@ -1098,7 +1867,7 @@ index 0d59b81..f8a56ff 100644
 +        setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, label: r.phoneNumbers[0].number})));
 +      });
 +    }
-   });
++  },[]);
    initSocket(socketIoUrl);
    return (
 -    <ChatContextProvider options={options} socketIoUrl={socketIoUrl} db={db} icon={icon} contacts={contacts}>
@@ -1111,7 +1880,7 @@ index 0d59b81..f8a56ff 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
-index 8cb4565..e4f1191 100644
+index 8cb4565..657908d 100644
 --- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 +++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 @@ -4,7 +4,7 @@ SQLite.DEBUG(false);
@@ -1119,11 +1888,49 @@ index 8cb4565..e4f1191 100644
  
  let db = null;
 -let db_version = 20;
-+let db_version = 30;
++let db_version = 39;
  export function getEncryptionKeys(context) {
    return new Promise((resolve, reject) => {
      context.getDB().then((db) => {
-@@ -146,9 +146,9 @@ export function SQLCipherClient(options) {
+@@ -49,6 +49,7 @@ function initKeys(token) {
+ }
+ 
+ function initDB(token) {
++  //console.warn('initDB');
+   /**
+      Creating new chat:
+      1) Generate and save the group_key
+@@ -77,12 +78,17 @@ function initDB(token) {
+     db.executeSql(
+       `CREATE TABLE conversations (
+           id INTEGER PRIMARY KEY,
+-          group_id TEXT NOT NULL,
++          group_id TEXT UNIQUE NOT NULL,
+           group_key TEXT NOT NULL,
+           name TEXT NOT NULL,
+           avatar TEXT,
+           created_by TEXT NOT NULL,
+-          created_at INTEGER NOT NULL
++          created_at INTEGER NOT NULL,
++          is_pin INTEGER,
++          is_starred INTEGER,
++          is_archive INTEGER,
++          is_mute INTEGER,
++          is_delete INTEGER
+         );`,
+     ),
+     db.executeSql(
+@@ -92,7 +98,8 @@ function initDB(token) {
+           group_id TEXT NOT NULL,
+           author_id TEXT NOT NULL,
+           text TEXT NOT NULL,
+-          created_at TEXT NOT NULL
++          created_at TEXT NOT NULL,
++          starred INTEGER
+         );`,
+     ),
+     db.executeSql(
+@@ -146,9 +153,9 @@ export function SQLCipherClient(options) {
    return new Promise((resolve, reject) => {
      if (!db) {
        SQLite.openDatabase({
@@ -1135,7 +1942,7 @@ index 8cb4565..e4f1191 100644
        }).then(
          (dbInstance) => {
            db = dbInstance;
-@@ -165,13 +165,7 @@ export function SQLCipherClient(options) {
+@@ -165,13 +172,7 @@ export function SQLCipherClient(options) {
          },
        );
      } else {
@@ -1151,3 +1958,19 @@ index 8cb4565..e4f1191 100644
    });
  }
 \ No newline at end of file
+diff --git a/node_modules/react-native-chat-plugin/utils/SocketIOClient.js b/node_modules/react-native-chat-plugin/utils/SocketIOClient.js
+index 67f1028..0438d14 100644
+--- a/node_modules/react-native-chat-plugin/utils/SocketIOClient.js
++++ b/node_modules/react-native-chat-plugin/utils/SocketIOClient.js
+@@ -13,10 +13,10 @@ export function getSocket() {
+ }
+ 
+ export const initSocket = (socketIoUrl) => {
++  
+   if (socket) {
+     return socket;
+   }
+-
+   socket = IO(socketIoUrl, {
+     path: "/io",
+     jsonp: false,

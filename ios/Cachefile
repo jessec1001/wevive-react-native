@@ -1,0 +1,16 @@
+workspace "jitsi-meet" do
+  configuration "release" do
+    build_configuration "Release"
+    xcodebuild_args "-UseModernBuildSystem=NO"
+  end
+
+  derived_data_path "build"
+
+  target "JitsiMeetSDK" do
+    cache "libFolly.a"
+    cache "libglog.a"
+    cache "libwebp.a"
+    cache "libRNSVG.a"
+    
+  end
+end

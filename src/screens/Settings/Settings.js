@@ -46,13 +46,15 @@ export default class Settings extends Component {
         </MenuItem>
         <MenuItem
           onPress={() => {
-            this.props.navigation.navigate('ContactsScreen', {starred:1});
+            this.props.navigation.navigate('ContactsScreen', {type: 'starred'});
           }}>
           Starred Messages
         </MenuItem>
         <MenuItem
           onPress={() => {
-            this.props.navigation.navigate('ContactsScreen', {archived:1});
+            this.props.navigation.navigate('ContactsScreen', {
+              type: 'archived',
+            });
           }}>
           Archived Messages
         </MenuItem>

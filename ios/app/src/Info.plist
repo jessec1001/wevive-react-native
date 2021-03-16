@@ -87,6 +87,8 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>wevive.ttf</string>
+		<string>SFProDisplay-Regular.ttf</string>
+		<string>SFProDisplay-Semibold.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
