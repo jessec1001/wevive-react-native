@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
   },
   mainLogoStyle: {
     borderRadius: 7,
-    width: responsiveWidth(40),
-    height: responsiveHeight(7.5),
+    width: responsiveWidth(55),
+    height: responsiveHeight(10),
   },
   mainLogoContainerStyle: {
     justifyContent: 'center',
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     //backgroundColor: colors.secondaryBackground,
     borderRadius: 7,
     marginBottom: responsiveWidth(1),
-    padding: responsiveWidth(3),
+    padding: responsiveWidth(2),
   },
   mainLogoImageStyle: {
     resizeMode: 'contain',

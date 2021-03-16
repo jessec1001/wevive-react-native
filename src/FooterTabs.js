@@ -19,7 +19,7 @@ const showActionSheet = () => {
 
 export default function FooterTabs(props) {
   // useRoute doesn't work here
-  const params = props.route.state.routes[props.route.state.index].params;
+  const params = props.route.state?.routes[props.route.state.index].params;
   const ActionSheetElement = (props) => {
     return (
       <View style={styles.menuItem}>
@@ -197,7 +197,9 @@ const styles = StyleSheet.create({
     marginRight: responsiveWidth(3),
     width: responsiveWidth(30),
     textAlign: 'center',
-    fontSize: responsiveFontSize(2),
+    fontWeight: "100",
+    fontSize: responsiveFontSize(2.2),
+    fontFamily: "SFProDisplay-Regular",
   },
   menuIcon: {
     fontSize: responsiveWidth(4),

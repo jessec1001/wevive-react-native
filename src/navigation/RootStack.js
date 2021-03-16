@@ -154,6 +154,9 @@ const RootStack = () => {
         });
       });
   };
+  React.useEffect(() => {
+    updateMe();
+  }, []);
   const [avatarUrl, setAvatarUrl] = React.useState(false);
   AsyncStorage.getItem('avatarUrl').then((URL) => {
     if (URL) {
