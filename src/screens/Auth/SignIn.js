@@ -36,36 +36,8 @@ Object.keys(allCountries)
   });
 import {AuthContext} from '../../context/AuthContext';
 import {ClientContext} from '../../context/ClientContext';
-const removeTrunkPrefix = (country, number) => {
-  const non_standard_prefixes = {
-    AZ: '8',
-    MX: '01',
-    MN: '01|02',
-    TM: '8',
-    UZ: '8',
-    KZ: '8',
-    RU: '8',
-    BY: '8',
-    HU: '06',
-    LT: '8',
-  };
-  let trunkPrefix = '0';
-  if (country && typeof non_standard_prefixes[country] !== 'undefined') {
-    trunkPrefix = non_standard_prefixes[country];
-  }
-  const trunkPrefixRegex = new RegExp(`^(${trunkPrefix})`, 'g');
-  return number.replace(trunkPrefixRegex, '');
-};
-const getCountryPhoneCode = (country) => {
-  if (!country || !phoneCodes[country]) {
-    return;
-  }
-  if (Array.isArray(phoneCodes[country])) {
-    return `+${phoneCodes[country][0]}`;
-  } else {
-    return `+${phoneCodes[country]}`;
-  }
-};
+import { getCountryPhoneCode, removeTrunkPrefix } from '../../utils/phonehelpers';
+
 const countryPhoneCode = (country) => {
   if (!country || !phoneCodes[country]) {
     return;

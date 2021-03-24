@@ -365,7 +365,6 @@ const styles = (keyboard) => {
       height: responsiveWidth(6),
       position: 'absolute',
       top: responsiveWidth(4.5),
-      left: responsiveWidth(8.5),
     },
     countryCode: {
       alignSelf: 'center',

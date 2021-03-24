@@ -45,13 +45,6 @@ export default class PrivacySettings extends Component {
           If you turn off read receipts, you won’t be able to see read receipts
           from other people. Read receipts are always sent for group chats.
         </MenuDescription>
-        <MenuDivider />
-        <MenuItem onPress={() => {}} type={'toggle'}>
-          Screen Lock (requires Touch ID)
-        </MenuItem>
-        <MenuDescription>
-          Require Touch ID to unlock Wevive
-        </MenuDescription>
       </ScrollView>
     );
   }

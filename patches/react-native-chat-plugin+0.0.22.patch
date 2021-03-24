@@ -173,7 +173,7 @@ index 8e9472a..7073df8 100644
        // handle connection error.
        socket.on("error", handleSocketError);
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
-index c41797c..39e83be 100644
+index c41797c..73d4762 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 @@ -1,3 +1,5 @@
@@ -182,6 +182,15 @@ index c41797c..39e83be 100644
  import { getSocket } from "../utils/SocketIOClient";
  
  const addConversations = (state, conversations) => {
+@@ -51,7 +53,7 @@ const setTyping = (state, conversationId, userId) => {
+     newConversations[conversationIdx].typing = {};
+   }
+   if (!(userId in newConversations[conversationIdx].typing)) {
+-    newConversations[conversationIdx].typing = {userId, timestamp};
++    newConversations[conversationIdx].typing[userId] = {userId, timestamp};
+   }
+   return { ...state, conversations: newConversations };
+ };
 @@ -82,12 +84,47 @@ export function conversationReducer(state, action) {
    }
  
@@ -449,7 +458,7 @@ index 0000000..609e264
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 5388ef0..c0884bc 100644
+index 5388ef0..584d864 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -10,7 +10,7 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
@@ -473,7 +482,7 @@ index 5388ef0..c0884bc 100644
            Alert.alert("Error", error);
          }
 @@ -147,6 +146,7 @@ export default function ChatForm({ conversation }) {
-   
+ 
    const sendMessage = React.useCallback((contents) => {
      const socket = getSocket();
 +    setMessage("");
@@ -778,7 +787,7 @@ index bbdff8a..e5423af 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-index 50d322e..b9e0e61 100644
+index 50d322e..9ce4a52 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 @@ -6,9 +6,7 @@ import { ChatContext } from "../ChatContext";
@@ -982,9 +991,17 @@ index 50d322e..b9e0e61 100644
    const viewRef = React.useRef();
    const [likes, setLikes] = React.useState(0);
    const options = {
-@@ -258,31 +145,34 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
+@@ -257,32 +144,37 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
+     setLikes(likes - 1);
      ReactNativeHapticFeedback.trigger("impactMedium", options);
    }
++  /*const likesButton = <TouchableOpacity style={styles.likeIndicatorBox} onPress={()=>sendLike(event)} onLongPress={()=>sendDislike(event)}>
++    <>
++      <Icon name={likes > 0 ? "heart" : "ei-heart"} color={"#f44"} style={likes > 0 ? styles.likeIndicator : styles.emptyLikeIndicator} />
++      {likes > 0 && <Text style={styles.likeText}>{likes}</Text>}
++    </>
++  </TouchableOpacity>;*/
++  const likesButton = null;
    return (
 -    <TouchableHighlight ref={viewRef} underlayColor={"#bbb"} style={isOwn ? styles.selfMessage : styles.message} delayLongPress={1000} onPress={(evt) => {
 -      setShowMenu(false);
@@ -1030,19 +1047,14 @@ index 50d322e..b9e0e61 100644
 +              <Icon name="ticks" color={"rgb(228,140,58)"} size={8}/>
 +            </Text>
 +          </View>
-+          <TouchableOpacity style={styles.likeIndicatorBox} onPress={()=>sendLike(event)} onLongPress={()=>sendDislike(event)}>
-+            <>
-+              <Icon name={likes > 0 ? "heart" : "ei-heart"} color={"#f44"} style={likes > 0 ? styles.likeIndicator : styles.emptyLikeIndicator} />
-+              {likes > 0 && <Text style={styles.likeText}>{likes}</Text>}
-+            </>
-+          </TouchableOpacity>
++          {likesButton}
 +        </>
 +      </TouchableHighlight>
 +    </>
    );
  }
  Message.propTypes = {
-@@ -294,7 +184,7 @@ Message.propTypes = {
+@@ -294,7 +186,7 @@ Message.propTypes = {
    setShowMenu: PropTypes.func,
  };
  
@@ -1051,7 +1063,7 @@ index 50d322e..b9e0e61 100644
    const ctx = React.useContext(ChatContext);
    const username = ctx.getUsername();
    const isMessage = event?.type === "MESSAGE";
-@@ -302,7 +192,7 @@ export default function MessageItem ({ event, menu, setShowMenu }) {
+@@ -302,7 +194,7 @@ export default function MessageItem ({ event, menu, setShowMenu }) {
    const isOwn = author === username;
    if (isMessage) {
      if (event?.hidden) return null;
@@ -1532,35 +1544,68 @@ index fa4d21e..b15d67d 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 731a30e..82aa6c1 100644
+index 731a30e..64f0a00 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-@@ -6,6 +6,9 @@ import { ChatContext } from "../ChatContext";
+@@ -6,6 +6,14 @@ import { ChatContext } from "../ChatContext";
  import { NavigationPropType } from "../PropTypes";
  import LinearGradient from "react-native-linear-gradient";
  import { TouchableHighlight } from "react-native-gesture-handler";
 +
 +import SendSMS from 'react-native-sms'
++import { responsiveFontSize } from "react-native-responsive-dimensions";
++import APIService from "../../../src/service/APIService";
++import {ClientContext} from '../../../src/context/ClientContext';
++import { clearPhoneNumber } from "../../../src/utils/phonehelpers";
++
 +
  const styles = StyleSheet.create({
    container: {
      flex: 1,
-@@ -103,6 +106,14 @@ const styles = StyleSheet.create({
-     borderWidth: 1,
+@@ -100,9 +108,18 @@ const styles = StyleSheet.create({
+     width: 20,
+     height: 20,
+     borderRadius: 20,
+-    borderWidth: 1,
++    borderWidth: 0.5,
      borderColor: "#333",
    },
 +  markedContactToggle: {
-+    backgroundColor: "#bbb",
++    backgroundColor: "rgb(75,159,183)",
 +    width: 20,
 +    height: 20,
 +    borderRadius: 20,
 +    borderWidth: 1,
-+    borderColor: "#333",
++    borderColor: "rgb(75,159,183)",
++    justifyContent: "center",
 +  },
    headerStyle: {
      backgroundColor: "rgb(125,125,125)",
      padding: 20,
-@@ -114,62 +125,87 @@ const styles = StyleSheet.create({
+@@ -111,65 +128,136 @@ const styles = StyleSheet.create({
+   },
+   headerButtonStyle: {
+     color: "white",
++  },
++  markTick: {
++    color: "white",
++    fontSize: responsiveFontSize(1.2),
++    justifyContent: "center",
++    alignSelf: "center",
++  },
++  alreadyExists: {
++    fontSize: responsiveFontSize(1.1),
++    alignSelf: "center",
++    position: "absolute",
++    left: 20,
++    bottom: 10,
++  },
++  numberOfFriends: {
++    fontSize: responsiveFontSize(1.1),
++    alignSelf: "center",
++    position: "absolute",
++    left: 20,
++    bottom: 10,
    }
  });
  
@@ -1607,40 +1652,66 @@ index 731a30e..82aa6c1 100644
  
 -export default function ConversationList({ navigation }) {
 +export default function PhoneContactsScreen({ navigation }) {
-+
+   const ctx = React.useContext(ChatContext);
++  const clientctx = React.useContext(ClientContext);
++  const Icon = ctx.icon;
++  const [selectedContacts, setSelectedContacts] = React.useState([]);
++  const [existingUsers, setExistingUsers] = React.useState({existing:[],contacts:[]});
+   const contacts = ctx.contacts;
++  const getNumbers = () => {
++    return ctx.contacts.map(c => clearPhoneNumber(clientctx.geo.geo.country_code, c.label));
++  };
++  React.useEffect(() => {
++    APIService('phone-contacts/sync/',{numbers: getNumbers()}).then((r)=>{
++      const friends = [];
++      r.contacts.forEach(u => friends[u.phone_number] = u.users);
++      setExistingUsers(
++        {
++          existing: r.users.map(u => u.phone_number),
++          contacts: friends,
++        }
++      );
++    });
++  },[]);
 +  const toggleSelected = (item, marked) => {
 +    if (marked < 0) {
 +      setSelectedContacts(selectedContacts.concat([item.label]));
 +    } else {
 +      setSelectedContacts(selectedContacts.filter((r)=>(r != item.label)));
 +    }
-+  }
++  };
 +  const Contact = ({item, marked}) => {
++    const cleanedNumber = clearPhoneNumber(clientctx.geo.geo.country_code, item.label);
++    const alreadyExists = existingUsers.existing.indexOf(cleanedNumber) !== -1;
++    const numberOfFriends = existingUsers.contacts && existingUsers.contacts.indexOf(cleanedNumber) !== -1 ? existingUsers.contacts[cleanedNumber] - 1 : 0;
 +    return (
-+      <TouchableOpacity onPress={()=>toggleSelected(item, marked)}>
++      <TouchableOpacity onPress={()=>!alreadyExists && toggleSelected(item, marked)}>
 +        <LinearGradient style={styles.listItemContainer} colors={['#fff','#f3f3f3']}>
 +          <Text style={styles.listItemLabel}>{item.value}</Text>
-+          <View style={selectedContacts.indexOf(item.label) >= 0 ? styles.markedContactToggle : styles.contactToggle}>
-+  
-+          </View>
++          {alreadyExists && <Text style={styles.alreadyExists}>Wevive user</Text>}
++          {!alreadyExists && numberOfFriends > 0 && <Text style={styles.numberOfFriends}>Friend of {numberOfFriends} wevive users</Text>}
++          {!alreadyExists && <View style={selectedContacts.indexOf(item.label) >= 0 ? styles.markedContactToggle : styles.contactToggle}>
++            {selectedContacts.indexOf(item.label) >= 0 && <Icon name="ticks" style={styles.markTick}/>}
++          </View>}
 +        </LinearGradient>
 +      </TouchableOpacity>
 +    );
 +  };
 +
-   const ctx = React.useContext(ChatContext);
-+  const [selectedContacts, setSelectedContacts] = React.useState([]);
-   const contacts = ctx.contacts;
++  
++  
    const goBack = () => {
      navigation.goBack();
    };
 -  //console.error(contacts.length);
+-  return (
+-    <View style={styles.container}>
 +  const goNext = () => {
 +    onShare(selectedContacts, navigation);
 +  }
 +  const renderItem = (item) => <Contact key={item.value} item={item} marked={selectedContacts.indexOf(item.label)} />;
-   return (
-     <View style={styles.container}>
++  return contacts && (
++    <>
        <View style={styles.headerStyle}>
          <TouchableOpacity onPress={goBack}>
            <Text style={styles.headerButtonStyle}>Cancel</Text>
@@ -1651,18 +1722,28 @@ index 731a30e..82aa6c1 100644
 -        </TouchableOpacity>
 +        </TouchableOpacity>}
        </View>
-       <AlphabetList
-         data={contacts}
-         indexLetterColor={'white'}
-         indexLetterSize={15}
-         alphabetContainer={styles.alphabetContainer}
+-      <AlphabetList
+-        data={contacts}
+-        indexLetterColor={'white'}
+-        indexLetterSize={15}
+-        alphabetContainer={styles.alphabetContainer}
 -        renderItem={(item) => <Contact item={item} ctx={ctx} />}
 -        renderSectionHeader={(section) => renderSectionHeader(ctx, section)}
-+        renderItem={renderItem}
-+        renderSectionHeader={renderSectionHeader}
-         letterItemStyle={styles.letterItemStyle}
-       />
-     </View>
+-        letterItemStyle={styles.letterItemStyle}
+-      />
+-    </View>
++      <View style={styles.container}>
++        <AlphabetList
++          data={contacts}
++          indexLetterColor={'white'}
++          indexLetterSize={15}
++          alphabetContainer={styles.alphabetContainer}
++          renderItem={renderItem}
++          renderSectionHeader={renderSectionHeader}
++          letterItemStyle={styles.letterItemStyle}
++        />
++      </View>
++    </>
    );
  }
  
@@ -1674,7 +1755,7 @@ index 731a30e..82aa6c1 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
-index b708a42..b0acb75 100644
+index b708a42..5298b57 100644
 --- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 @@ -1,5 +1,5 @@
@@ -1693,15 +1774,18 @@ index b708a42..b0acb75 100644
  import {
    SearchReducer,
    SearchInitialState,
-@@ -18,6 +18,7 @@ import {
+@@ -18,7 +18,9 @@ import {
    dispatchAppendContactsAction,
    dispatchEndReachedAction
  } from "./SearchReducers";
+-
 +import { useRoute } from "@react-navigation/native";
- 
++import { clearPhoneNumber } from "../../../src/utils/phonehelpers";
++import {ClientContext} from '../../../src/context/ClientContext';
  const styles = StyleSheet.create({
    container: {
-@@ -27,19 +28,63 @@ const styles = StyleSheet.create({
+     flex: 1,
+@@ -27,19 +29,59 @@ const styles = StyleSheet.create({
      flex: 1,
      justifyContent: "center",
    },
@@ -1742,6 +1826,8 @@ index b708a42..b0acb75 100644
 +  },
  });
  
+-const renderContact = (contact, onPress) => {
+-  return <SearchResultComponent contact={contact} onPress={onPress} />;
 +const renderSectionHeader = (ctx, section) => {
 +  const Icon = ctx.icon;
 +  return (
@@ -1750,10 +1836,6 @@ index b708a42..b0acb75 100644
 +      
 +    </View>
 +  );
-+};
-+
- const renderContact = (contact, onPress) => {
-   return <SearchResultComponent contact={contact} onPress={onPress} />;
  };
  
 -export default function SearchContactsScreen({ navigation }) {
@@ -1767,7 +1849,7 @@ index b708a42..b0acb75 100644
    const update = (success, contacts, dispatcher) => {
      if (!success || (contacts && contacts.length === 0)) {
        dispatcher(dispatch, contacts);
-@@ -51,11 +96,11 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -51,11 +93,11 @@ export default function SearchContactsScreen({ navigation }) {
  
    const getUsers = () => {
      if (!query) {
@@ -1781,7 +1863,7 @@ index b708a42..b0acb75 100644
          if (followings) {
            followings = followings.filter((follower) => {
              return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -69,11 +114,11 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -69,11 +111,11 @@ export default function SearchContactsScreen({ navigation }) {
    const getMoreUsers = () => {
      if (state.page > 0) {
        if (!query) {
@@ -1795,7 +1877,7 @@ index b708a42..b0acb75 100644
            if (followings) {
              followings = followings.filter((follower) => {
                return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -88,7 +133,7 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -88,7 +130,7 @@ export default function SearchContactsScreen({ navigation }) {
    React.useEffect(() => {
      const timer = setTimeout(() => {
        getUsers();
@@ -1804,16 +1886,59 @@ index b708a42..b0acb75 100644
  
      return () => clearTimeout(timer);
    }, [query]);
-@@ -129,8 +174,7 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -121,20 +163,27 @@ export default function SearchContactsScreen({ navigation }) {
+       </View>
+     );
+   }
+-
++  const clientctx = React.useContext(ClientContext);
++  const contacts = ctx.contacts;
++  const [friends, setFriends] = React.useState([]);
++  React.useEffect(() =>{
++    const ffriends = {};
++    contacts.forEach(c => {
++      const cleanedNumber = clearPhoneNumber(clientctx.geo.geo.country_code, c.label);
++      ffriends[cleanedNumber] = c.value;
++    });
++    setFriends(ffriends);
++  },[]);
+   return (
+     <View style={styles.container}>
+       <Header
+-        left={<PillButton text="Cancel" onPress={() => navigation.goBack()} />}
          right={<PillButton text="Next" onPress={createChat} />}
          title="Add participants" />
- 
+-
 -      <TextInput placeholder={"Search"} onChangeText={query => setQuery(query)} />
 -
 +      <TextInput multiline={true} placeholder={"Search"} onChangeText={query => setQuery(query)} />
        <FlatList
          style={styles.container}
          data={state.contacts}
+-        renderItem={({ item }) => renderContact(item, onPress)}
++        renderItem={({item}) => <SearchResultComponent contacts={friends} contact={item} onPress={onPress} />}
+         onEndReached={getMoreUsers} />
+     </View>
+   );
+diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
+index b245cc3..677a838 100644
+--- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
++++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
+@@ -43,12 +43,12 @@ const styles = StyleSheet.create(
+   }
+ );
+ 
+-export default function SearchResultComponent({ contact, onPress }) {
++export default function SearchResultComponent({ contacts, contact, onPress }) {
+   return (
+     <TouchableOpacity style={styles.container} onPress={() => onPress(contact)}>
+       <ProfilePreview text={contact.username} contacts={[contact]} />
+       <View style={styles.nameContainer}>
+-        <Text style={styles.name}>{contact.username}</Text>
++        <Text style={styles.name}>{contacts && Object.keys(contacts).indexOf(contact.username) !== -1 ? contacts[contact.username] : contact.username  }</Text>
+       </View>
+       {
+         contact.selected
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
 index 0d59b81..16a7c19 100644
 --- a/node_modules/react-native-chat-plugin/index.js

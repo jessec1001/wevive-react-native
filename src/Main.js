@@ -144,6 +144,7 @@ export default class Main extends Component {
                       hiddenBack={themeSettings.hiddenBack}
                       goBack={goBack}
                       navigate={this.navigate}
+                      route={this.props.route}
                     />
                   ) : null}
                   <AppNavigator />

@@ -7,6 +7,7 @@ import Terms from '../screens/About/Terms';
 import Licenses from '../screens/About/Licenses';
 import ContactUs from '../screens/About/ContactUs';
 
+import CallHistory from '../screens/CallHistory/CallHistory';
 import Settings from '../screens/Settings/Settings';
 
 import AboutPrivacySettings from '../screens/Settings/AboutPrivacySettings';
@@ -14,6 +15,14 @@ import AccountSettings from '../screens/Settings/AccountSettings';
 import BlockedPrivacySettings from '../screens/Settings/BlockedPrivacySettings';
 import ChatPrivacySettings from '../screens/Settings/ChatPrivacySettings';
 import ChangeNumber from '../screens/Settings/ChangeNumber';
+import ChangeNumberVerification from '../screens/Settings/ChangeNumberVerification';
+import DeleteAccountConfirmation from '../screens/Settings/DeleteAccountConfirmation';
+import ChangeNumberConfirmation from '../screens/Settings/ChangeNumberConfirmation';
+import ChangeNumberSuccess from '../screens/Settings/ChangeNumberSuccess';
+import DeleteAccountSuccess from '../screens/Settings/DeleteAccountSuccess';
+import DeleteChatsSuccess from '../screens/Settings/DeleteChatsSuccess';
+import DeleteChatsConfirmation from '../screens/Settings/DeleteChatsConfirmation';
+
 import ChatsSettings from '../screens/Settings/ChatsSettings';
 import DeleteAccount from '../screens/Settings/DeleteAccount';
 import DeleteChats from '../screens/Settings/DeleteChats';
@@ -115,6 +124,11 @@ const AppNavigator = () => {
       />
       <Stack.Screen name="WebUI" component={WebUI} options={defaultConfig} />
       <Stack.Screen
+        component={CallHistory}
+        name={'CallHistory'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
         component={ContactsScreen}
         name={'ContactsScreen'}
         options={defaultConfig}
@@ -157,6 +171,41 @@ const AppNavigator = () => {
       <Stack.Screen
         component={ChangeNumber}
         name={'ChangeNumber'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={ChangeNumberVerification}
+        name={'ChangeNumberVerification'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={ChangeNumberConfirmation}
+        name={'ChangeNumberConfirmation'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={ChangeNumberSuccess}
+        name={'ChangeNumberSuccess'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={DeleteAccountConfirmation}
+        name={'DeleteAccountConfirmation'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={DeleteAccountSuccess}
+        name={'DeleteAccountSuccess'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={DeleteChatsConfirmation}
+        name={'DeleteChatsConfirmation'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={DeleteChatsSuccess}
+        name={'DeleteChatsSuccess'}
         options={defaultConfig}
       />
       <Stack.Screen

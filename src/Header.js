@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   View,
+  Text,
   ImageBackground,
 } from 'react-native';
 import Icon from './components/Icon';
@@ -16,10 +17,120 @@ import {
 } from 'react-native-responsive-dimensions';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors} from '../app.json';
-import { UserContext } from './context/UserContext';
+import {UserContext} from './context/UserContext';
+const getTitle = (name) => {
+  if (name.indexOf("PrivacySettings") !== -1) return "Privacy Settings";
+  switch (name) {
+    case 'PhoneUsernameSettings':
+      return 'Photo & Username';
+    case 'ContactsScreen':
+      return 'Chats';
+    case 'ChatScreen':
+      return false;
+    case 'AccountSettings':
+      return "Account";
+    case 'ChangeNumber':
+      return "Change Number";
+    case 'SecuritySettings':
+      return "Settings";
+    case 'DeleteAccount':
+      return "Delete Account";
+    case 'DeleteChats':
+      return "Delete Chats";
+    case 'PrivacySettings':
+      return "Privacy Settings";
+    case 'ContactUs':
+      return "Contact Us";
+    case 'ChangeNumberVerification': 
+      return 'Change Phone Number';
+    case 'ChangeNumberConfirmation':
+      return 'Verify new number';
+    case 'ChangeNumberSuccess':
+      return 'Phone number changed';
+    default:
+      break;
+  }
+  return name;
+};
 
+const getStyleSuffix = (name) => {
+  switch (name) {
+    case 'PhoneUsernameSettings':
+      return 'Big';
+    case 'ContactsScreen':
+      return "";
+    case 'ChatScreen':
+      return "";
+    case 'AccountSettings':
+      return "Big";
+    case 'ChangeNumber':
+      return "Big";
+    case 'SecuritySettings':
+      return "Big";
+    case 'DeleteAccount':
+      return "Big";
+    case 'DeleteChats':
+      return "Big";
+    case 'PrivacySettings':
+      return "Big";
+    case 'ChangeNumberVerification':
+      return "Big";
+    case 'ChangeNumberConfirmation':
+      return "Big";
+    case 'ContactUs':
+      return "Big";
+    default:
+      break;
+  }
+  return "";
+};
+const getLogo = (name) => {
+  const styleSuffix = getStyleSuffix(name);
+  const logoStyle = name ? styles[`mainLogoStyle${styleSuffix}`] : styles.mainLogoStyle;
+  return styleSuffix !== 'Big' ? <ClientLogo
+    style={logoStyle}
+    imageStyle={styles.mainLogoImageStyle}
+  /> : <Icon style={logoStyle} name='w-watermark' />
+}
+const getNextRoute = (name, params) => {
+  switch (name) {
+    case "ChangeNumber":
+      return "ChangeNumberVerification"
+    case "ChangeNumberVerification":
+      return "ChangeNumberConfirmation"
+    case "DeleteChats":
+      return "DeleteChatsConfirmation"
+    default:
+      return {};
+  }
+}
+const getNextParams = (name, params) => {
+  
+}
+const getNextOrProfile = (props, name, params, avatarUrl) => {
+  const styleSuffix = getStyleSuffix(name);
+  const next = [
+    "ChangeNumber",
+    "ChangeNumberVerification",
+  ];
+  const logoStyle = name ? styles[`mainLogoStyle${styleSuffix}`] : styles.mainLogoStyle;
+  return next.indexOf(name) === -1  ? <TouchableOpacity onPress={() => props.navigate('Settings')}>
+  <Image resizeMode="cover" source={{uri: avatarUrl}} style={styles.headerProfileImage} />
+</TouchableOpacity> : <TouchableOpacity onPress={() => props.navigate(getNextRoute(name, params),getNextParams(name, params))}>
+  <Text style={styles.goNextText}>Next</Text>
+</TouchableOpacity> 
+}
 export default function Header(props) {
   const ctx = React.useContext(UserContext);
+  const name = props.route.state?.routes[props.route.state.index].name;
+  const params = props.route.state?.routes[props.route.state.index].params;
+  //console.warn(name, params);
+  const title = name ? getTitle(name) : false;
+  const styleSuffix = getStyleSuffix(name);
+  const style = name ? styles[`headerTitle${styleSuffix}`] : styles.headerTitle;
+  const logo = getLogo(name);
+  const nextOrProfile = getNextOrProfile(props, name, params, ctx.avatarUrl);
+  
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar
@@ -46,15 +157,11 @@ export default function Header(props) {
           ) : null}
         </View>
         <View style={styles.mainLogoContainerStyle}>
-          <ClientLogo
-            style={styles.mainLogoStyle}
-            imageStyle={styles.mainLogoImageStyle}
-          />
+          {logo}
+          {title && <Text style={style}>{title}</Text>}
         </View>
         <View style={styles.right}>
-          <TouchableOpacity onPress={() => props.navigate('Settings')}>
-            <Image resizeMode="cover" source={{uri: ctx.avatarUrl}} style={styles.headerProfileImage} />
-          </TouchableOpacity>
+          {nextOrProfile}
         </View>
       </View>
     </SafeAreaView>
@@ -66,7 +173,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: "white",
+    backgroundColor: 'white',
   },
   left: {
     flex: 1,
@@ -82,8 +189,22 @@ const styles = StyleSheet.create({
   },
   mainLogoStyle: {
     borderRadius: 7,
-    width: responsiveWidth(55),
-    height: responsiveHeight(10),
+    width: responsiveWidth(40),
+    height: responsiveHeight(9),
+    marginTop: responsiveWidth(2),
+  },
+  mainLogoStyleBig: {
+    borderRadius: 7,
+    marginTop: responsiveWidth(1),
+    alignSelf: "center",
+    fontSize: responsiveFontSize(4),
+    color: 'rgb(227,140,57)',
+  },
+  headerTitle: {
+    top: -responsiveWidth(3.3),
+    fontFamily: 'SFProDisplay-Regular',
+    fontSize: responsiveFontSize(1.3),
+    fontWeight: '100',
   },
   mainLogoContainerStyle: {
     justifyContent: 'center',
@@ -100,6 +221,13 @@ const styles = StyleSheet.create({
     width: responsiveWidth(12),
     height: responsiveWidth(12),
     borderRadius: responsiveWidth(12),
-    backgroundColor: "rgba(30,30,30,0.1)"
+    backgroundColor: 'rgba(30,30,30,0.1)',
+  },
+  goNextText: {
+    fontFamily: 'SFProDisplay-Regular',
+    color: 'rgba(30,30,30,1)',
+    fontSize: responsiveFontSize(2.3),
+    marginRight: responsiveWidth(1),
+    fontWeight: '100',
   }
 });

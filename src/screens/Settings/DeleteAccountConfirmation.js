@@ -45,18 +45,15 @@ const countryPhoneCode = (country) => {
       );
     }
   };
-export default class DeleteAccount extends Component {
+export default class ChangeNumberVerification extends Component {
   state = {
     email: null,
     bioAccessToken: null,
     avatarImage: null,
   };
   navigateSuccess = () => {
-    this.props.navigation.navigate('DeleteAccountConfirmation');
+    this.props.navigation.navigate('DeleteAccountSuccess');
   };
-  goToChangeNumber = () => {
-    this.props.navigation.navigate('ChangeNumber');
-  }
   render() {
     const {navigate} = this.props.navigation;
     return (
@@ -101,30 +98,9 @@ export default class DeleteAccount extends Component {
               handleSubmit,
               setFieldValue,
             }}>
-              <Text>
-                You are deleting your wevive account:
-              </Text>
-              <Text>
-                Cancel
-              </Text>
-<Text>
-  Deleting your account will:
-</Text>
-<Text>
-•Delete your account info and profile photo
-</Text>
-<Text>
-•Delete you from all wevive groups
-</Text>
-<Text>
-•Delete your message history on this phone
-</Text>
-<Text>
-•Delete your iCloud backup
-</Text>
-              <Text style={styles.pageHeadlineStyle}>Enter your PIN</Text>
+              <Text style={styles.pageHeadlineStyle}>Enter the verification code</Text>
               <Text style={styles.pageTextStyle}>
-                Please enter the PIN number that you saved after registration.
+                Please enter the verification number that you received.
               </Text>
               <SmoothPinCodeInput
                 codeLength={6}
@@ -139,7 +115,6 @@ export default class DeleteAccount extends Component {
                   <Button onPress={handleSubmit} title="Delete my account" />
                 </View>
               )}
-              <Button onPress={this.goToChangeNumber} title="Change number instead" />
             </AuthContext.Provider>
           )}
         </Formik>

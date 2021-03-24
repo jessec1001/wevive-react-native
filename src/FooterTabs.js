@@ -36,6 +36,9 @@ export default function FooterTabs(props) {
         props.navigate('SearchContactsScreen', {type: 'nearby'});
         break;
       case 1:
+        props.navigate('SearchContactsScreen', {type: 'oneToOne'});
+        break;
+      /*case 1:
         props.navigate('SearchContactsScreen', {type: 'private'});
         break;
       case 2:
@@ -43,11 +46,45 @@ export default function FooterTabs(props) {
         break;
       case 3:
         props.navigate('SearchContactsScreen', {type: 'oneToOne'});
-        break;
+        break;*/
       default:
         break;
     }
   };
+  let groupActions = [
+    <ActionSheetElement text="Private group" icon="lock" />,
+    <ActionSheetElement text="Public group" icon="lock" />,
+  ];
+  groupActions = [];
+  let groupsButton = (
+    <View style={styles.footerItem}>
+      <Pressable
+        style={styles.footerButton}
+        onPress={() => {
+          //props.navigate('About');
+          props.navigate('ContactsScreen', {filter: 'groups', type: null});
+        }}>
+        <Icon
+          name="groups"
+          size={iconSize}
+          color={
+            routeName !== 'ContactsScreen' || params?.filter !== 'groups'
+              ? colors.footerIcons
+              : colors.activeFooterIcon
+          }
+        />
+        <Text
+          style={
+            routeName !== 'ContactsScreen' || params?.filter !== 'groups'
+              ? styles.footerText
+              : styles.activeFooterText
+          }>
+          Groups
+        </Text>
+      </Pressable>
+    </View>
+  );
+  groupsButton = null;
   return (
     <SafeAreaView edges={['bottom']} style={styles.footerBackground}>
       <ActionSheet
@@ -55,8 +92,7 @@ export default function FooterTabs(props) {
         title={'Create conversation'}
         options={[
           <ActionSheetElement text="Nearby contact" icon="mapmarker" />,
-          <ActionSheetElement text="Private group" icon="lock" />,
-          <ActionSheetElement text="Public group" icon="lock" />,
+          ...groupActions,
           <ActionSheetElement text="1-to-1 Chat" icon="lock" />,
           'Cancel',
         ]}
@@ -84,7 +120,7 @@ export default function FooterTabs(props) {
                   ? styles.footerText
                   : styles.activeFooterText
               }>
-              Contacts
+              Invite
             </Text>
           </Pressable>
         </View>
@@ -92,20 +128,20 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              props.navigate('ContactsScreen', {filter: 'calls', type: null});
+              props.navigate('CallHistory');
             }}>
             <Icon
               name="calls"
               size={iconSize}
               color={
-                routeName !== 'ContactsScreen' || params?.filter !== 'calls'
+                routeName !== 'CallHistory'
                   ? colors.footerIcons
                   : colors.activeFooterIcon
               }
             />
             <Text
               style={
-                routeName !== 'ContactsScreen' || params?.filter !== 'calls'
+                routeName !== 'CallHistory'
                   ? styles.footerText
                   : styles.activeFooterText
               }>
@@ -159,32 +195,7 @@ export default function FooterTabs(props) {
             </Text>
           </Pressable>
         </View>
-        <View style={styles.footerItem}>
-          <Pressable
-            style={styles.footerButton}
-            onPress={() => {
-              //props.navigate('About');
-              props.navigate('ContactsScreen',{filter:"groups", type: null});
-            }}>
-            <Icon
-              name="groups"
-              size={iconSize}
-              color={
-                routeName !== 'ContactsScreen' || params?.filter !== 'groups'
-                  ? colors.footerIcons
-                  : colors.activeFooterIcon
-              }
-            />
-            <Text
-              style={
-                routeName !== 'ContactsScreen' || params?.filter !== 'groups'
-                  ? styles.footerText
-                  : styles.activeFooterText
-              }>
-              Groups
-            </Text>
-          </Pressable>
-        </View>
+        {groupsButton}
       </View>
     </SafeAreaView>
   );
@@ -197,14 +208,14 @@ const styles = StyleSheet.create({
     marginRight: responsiveWidth(3),
     width: responsiveWidth(30),
     textAlign: 'center',
-    fontWeight: "100",
+    fontWeight: '100',
     fontSize: responsiveFontSize(2.2),
-    fontFamily: "SFProDisplay-Regular",
+    fontFamily: 'SFProDisplay-Regular',
   },
   menuIcon: {
     fontSize: responsiveWidth(4),
     color: 'rgb(100,100,100)',
-    alignSelf: "center",
+    alignSelf: 'center',
   },
   footerBackground: {
     backgroundColor: colors.footer,
@@ -236,16 +247,16 @@ const styles = StyleSheet.create({
   activeFooterText: {
     color: colors.activeFooterIcon,
     fontSize: responsiveFontSize(1.5),
-    fontFamily: "SFProDisplay-Regular",
-    fontWeight: "400",
+    fontFamily: 'SFProDisplay-Regular',
+    fontWeight: '400',
     marginTop: 5,
   },
   footerText: {
     color: colors.footerText,
     fontSize: responsiveFontSize(1.5),
     marginTop: 5,
-    fontFamily: "SFProDisplay-Regular",
-    fontWeight: "400",
+    fontFamily: 'SFProDisplay-Regular',
+    fontWeight: '400',
   },
   contentFooter: {
     width: '100%',

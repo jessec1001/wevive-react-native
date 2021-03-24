@@ -27,6 +27,7 @@ Object.keys(allCountries)
 import {AuthContext} from '../../context/AuthContext';
 import {ClientContext} from '../../context/ClientContext';
 import { getCountryPhoneCode, removeTrunkPrefix } from '../../utils/phonehelpers';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const countryPhoneCode = (country) => {
     if (!country || !phoneCodes[country]) {
       return;
@@ -45,18 +46,15 @@ const countryPhoneCode = (country) => {
       );
     }
   };
-export default class DeleteAccount extends Component {
+export default class ChangeNumberVerification extends Component {
   state = {
     email: null,
     bioAccessToken: null,
     avatarImage: null,
   };
   navigateSuccess = () => {
-    this.props.navigation.navigate('DeleteAccountConfirmation');
+    this.props.navigation.navigate('ContactsScreen');
   };
-  goToChangeNumber = () => {
-    this.props.navigation.navigate('ChangeNumber');
-  }
   render() {
     const {navigate} = this.props.navigation;
     return (
@@ -74,10 +72,6 @@ export default class DeleteAccount extends Component {
           }}
           validationSchema={yup.object().shape({
             //email: yup.string().email().required(),
-            pin: yup
-              .string()
-              .min(6)
-              .required(),
           })}>
           {({
             values,
@@ -101,45 +95,10 @@ export default class DeleteAccount extends Component {
               handleSubmit,
               setFieldValue,
             }}>
-              <Text>
-                You are deleting your wevive account:
-              </Text>
-              <Text>
-                Cancel
-              </Text>
-<Text>
-  Deleting your account will:
-</Text>
-<Text>
-•Delete your account info and profile photo
-</Text>
-<Text>
-•Delete you from all wevive groups
-</Text>
-<Text>
-•Delete your message history on this phone
-</Text>
-<Text>
-•Delete your iCloud backup
-</Text>
-              <Text style={styles.pageHeadlineStyle}>Enter your PIN</Text>
-              <Text style={styles.pageTextStyle}>
-                Please enter the PIN number that you saved after registration.
-              </Text>
-              <SmoothPinCodeInput
-                codeLength={6}
-                containerStyle={styles.cellInputStyle}
-                cellStyle={styles.cellStyle}
-                cellStyleFocused={styles.cellStyleFocused}
-                value={values.pin}
-                onTextChange={handleChange('pin')}
-              />
-              {values.pin.length > 0 && !errors.pin && (
-                <View style={styles.buttonContainerStyle}>
-                  <Button onPress={handleSubmit} title="Delete my account" />
-                </View>
-              )}
-              <Button onPress={this.goToChangeNumber} title="Change number instead" />
+              <Text style={styles.pageHeadlineStyle}>Chats deleted</Text>
+              <View style={styles.buttonContainerStyle}>
+                <Button onPress={handleSubmit} title="Go to chats" />
+              </View>
             </AuthContext.Provider>
           )}
         </Formik>

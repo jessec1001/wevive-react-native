@@ -45,18 +45,20 @@ const countryPhoneCode = (country) => {
       );
     }
   };
-export default class DeleteAccount extends Component {
+export default class ChangeNumberVerification extends Component {
   state = {
     email: null,
     bioAccessToken: null,
     avatarImage: null,
   };
   navigateSuccess = () => {
-    this.props.navigation.navigate('DeleteAccountConfirmation');
+    this.props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'AvatarScreen'}],
+      }),
+    );
   };
-  goToChangeNumber = () => {
-    this.props.navigation.navigate('ChangeNumber');
-  }
   render() {
     const {navigate} = this.props.navigation;
     return (
@@ -101,27 +103,6 @@ export default class DeleteAccount extends Component {
               handleSubmit,
               setFieldValue,
             }}>
-              <Text>
-                You are deleting your wevive account:
-              </Text>
-              <Text>
-                Cancel
-              </Text>
-<Text>
-  Deleting your account will:
-</Text>
-<Text>
-•Delete your account info and profile photo
-</Text>
-<Text>
-•Delete you from all wevive groups
-</Text>
-<Text>
-•Delete your message history on this phone
-</Text>
-<Text>
-•Delete your iCloud backup
-</Text>
               <Text style={styles.pageHeadlineStyle}>Enter your PIN</Text>
               <Text style={styles.pageTextStyle}>
                 Please enter the PIN number that you saved after registration.
@@ -136,10 +117,55 @@ export default class DeleteAccount extends Component {
               />
               {values.pin.length > 0 && !errors.pin && (
                 <View style={styles.buttonContainerStyle}>
-                  <Button onPress={handleSubmit} title="Delete my account" />
+                  <Button onPress={handleSubmit} title="NEXT" />
                 </View>
               )}
-              <Button onPress={this.goToChangeNumber} title="Change number instead" />
+              <View>
+                        <Text style={styles.pageHeadlineStyle}>
+                          Enter your new phone number
+                        </Text>
+                        <View>
+                          <FormInput
+                            type="select"
+                            value={values.country}
+                            values={sortedCountries}
+                            name="country"
+                            label={trans('auth.country')}
+                          />
+                          {values.country && (
+                            <ImageBackground
+                              source={getFlag(values.country)}
+                              style={styles.countryFlag}
+                              resizeMode={'contain'}
+                            />
+                          )}
+                        </View>
+                        <View style={styles.inputContainerStyle}>
+                          <View>
+                            {countryPhoneCode(values.country)}
+                            
+                            <TextInput
+                              value={values.phone}
+                              onChangeText={(phone) =>
+                                setFieldValue('phone', phone.trim())
+                              }
+                              onBlur={() => setFieldTouched('phone')}
+                              placeholder="Phone"
+                              style={styles.inputStyle}
+                              name="phone"
+                              placeholderTextColor={styles.inputStyle.color}
+                              autoCapitalize="none"
+                              testID="phone"
+                              accessibilityLabel="phone"
+                              accessible
+                              textContentType="telephoneNumber"
+                            />
+                          </View>
+                        </View>
+                        {touched.phone && errors.phone && (
+                          <Text style={styles.errorStyle}>{errors.phone}</Text>
+                        )}
+                    </View>
             </AuthContext.Provider>
           )}
         </Formik>

@@ -420,10 +420,6 @@ PODS:
     - React
   - RNDeviceInfo (8.0.2):
     - React-Core
-  - RNFastImage (8.3.4):
-    - React-Core
-    - SDWebImage (~> 5.8)
-    - SDWebImageWebPCoder (~> 0.6.1)
   - RNFBApp (11.0.0):
     - Firebase/CoreOnly (= 7.7.0)
     - React-Core
@@ -467,8 +463,6 @@ PODS:
     - React-Core
   - RNWatch (0.4.3):
     - React
-  - SDWebImage (5.10.4):
-    - SDWebImage/Core (= 5.10.4)
   - SDWebImage/Core (5.10.4)
   - SDWebImageWebPCoder (0.6.1):
     - libwebp (~> 1.0)
@@ -547,7 +541,6 @@ DEPENDENCIES:
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNDefaultPreference (from `../node_modules/react-native-default-preference`)
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
-  - RNFastImage (from `../node_modules/react-native-fast-image`)
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -707,8 +700,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-default-preference"
   RNDeviceInfo:
     :path: "../node_modules/react-native-device-info"
-  RNFastImage:
-    :path: "../node_modules/react-native-fast-image"
   RNFBApp:
     :path: "../node_modules/@react-native-firebase/app"
   RNFBMessaging:
@@ -819,7 +810,6 @@ SPEC CHECKSUMS:
   RNDateTimePicker: 8a51a2216c307769e69ef827293d59549ab1ca23
   RNDefaultPreference: 2f8d6d54230edbd78708ada8d63bb275e5a8415b
   RNDeviceInfo: a9601119924a67d2479d3facf04cec7b658f44ed
-  RNFastImage: d4870d58f5936111c56218dbd7fcfc18e65b58ff
   RNFBApp: 1624ffcfc328c00ec3049d2f1bbf09d3e78dcdb7
   RNFBMessaging: 43d7ae1f8b93d20ad3194cac3e31ca446d4e9828
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
