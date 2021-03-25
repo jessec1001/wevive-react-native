@@ -36,9 +36,6 @@ export default function FooterTabs(props) {
         props.navigate('SearchContactsScreen', {type: 'nearby'});
         break;
       case 1:
-        props.navigate('SearchContactsScreen', {type: 'oneToOne'});
-        break;
-      /*case 1:
         props.navigate('SearchContactsScreen', {type: 'private'});
         break;
       case 2:
@@ -46,16 +43,15 @@ export default function FooterTabs(props) {
         break;
       case 3:
         props.navigate('SearchContactsScreen', {type: 'oneToOne'});
-        break;*/
+        break;
       default:
         break;
     }
   };
   let groupActions = [
-    <ActionSheetElement text="Private group" icon="lock" />,
     <ActionSheetElement text="Public group" icon="lock" />,
   ];
-  groupActions = [];
+  //groupActions = [];
   let groupsButton = (
     <View style={styles.footerItem}>
       <Pressable
@@ -84,7 +80,7 @@ export default function FooterTabs(props) {
       </Pressable>
     </View>
   );
-  groupsButton = null;
+  //groupsButton = null;
   return (
     <SafeAreaView edges={['bottom']} style={styles.footerBackground}>
       <ActionSheet
@@ -93,7 +89,7 @@ export default function FooterTabs(props) {
         options={[
           <ActionSheetElement text="Nearby contact" icon="mapmarker" />,
           ...groupActions,
-          <ActionSheetElement text="1-to-1 Chat" icon="lock" />,
+          <ActionSheetElement text="Private Chat" icon="lock" />,
           'Cancel',
         ]}
         onPress={createConversation}

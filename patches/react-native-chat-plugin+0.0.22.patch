@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index c0d4abb..93fa9e4 100644
+index c0d4abb..8b0064e 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
-@@ -2,62 +2,69 @@ import React from "react";
+@@ -2,101 +2,116 @@ import React from "react";
  import PropTypes from "prop-types";
  import { View, Text, StyleSheet, Alert } from "react-native";
  
@@ -56,50 +56,137 @@ index c0d4abb..93fa9e4 100644
    const socket = getSocket();
    const [retry, setRetry] = React.useState(false);
    const [showRetryButton, setShowRetryButton] = React.useState(false);
-   React.useEffect(()=>{
+-  React.useEffect(()=>{
 -    ctx.setAuthenticationError("Connecting..");
-+    //ctx.setAuthenticationError("Connecting..");
-   }, []);
-   React.useEffect(() => {
-+    // get latest conversations from the DB:
-+    ctx.getConversationsFromDB().then((conversations)=> {
-+      for (let i=0;i<conversations.length;i++) {
-+        let conversation = conversations.item(i);
-+        ctx.addConversation({...conversation, id: conversation.group_id, time: new Date(conversation.created_at)});
-+      }
-+    });
-     const emitEvents = (recreateKeys = false) => {
+-  }, []);
+-  React.useEffect(() => {
+-    const emitEvents = (recreateKeys = false) => {
 -      // get all conversations.
 -      socket.emit("conversations:fetch", async (res) => {
 -        if (res && res.success && Array.isArray(res.conversations)) {
 -          const conversations = await decryptConversations(res.conversations, socket.chat_private_key, ctx, recreateKeys);
 -          ctx.setConversations(conversations);
 -        }
--
++  const authenticationCallback = (res) => {
++    setTimeout(() => {
++      socket.chat_user_id = res.user.id;
++      /*resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
+ 
 -        socket.emit("events:get_unread_count", ({ success, stats }) => {
 -          if (success && stats && Array.isArray(stats) && stats.length > 0) {
 -            ctx.updateUnreadCounts({ stats });
-+      // get latest conversations from the server:
-+      ctx.getLatestEventFromDB().then((event)=> {
-+        const options = event ? {since: event.created_at} : {since: 0};
-+        socket.emit("conversations:fetch", options, async (res) => {
-+          if (res && res.success && Array.isArray(res.conversations)) {
-+            const conversations = await decryptConversations(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys);
-+            ctx.setConversations(conversations);
-+            conversations.map(c=>ctx.saveConversationToDB(c));
-           }
-         });
-       });
-+      //get unread count.
-+      socket.emit("events:get_unread_count", ({ success, stats }) => {
-+        if (success && stats && Array.isArray(stats) && stats.length > 0) {
-+          ctx.updateUnreadCounts({ stats });
-+        }
-+      });
-     };
-     const authenticationCallback = (res) => {
-       setTimeout(() => {
-@@ -106,11 +113,13 @@ export default function ChatContainer({ options }) {
+-          }
+-        });
+-      });
+-    };
+-    const authenticationCallback = (res) => {
+-      setTimeout(() => {
+-        socket.chat_user_id = res.user.id;
+-        /*resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
+-
+-        }).catch((error) => {
+-          //console.error('error');
+-        });*/
+-        if (res.user.public_key != socket.chat_public_key) {
+-          recreateEncryptionKeys(ctx, socket.chat_token, res.user.salt).then(({ public_key, private_key }) => {
+-            if (public_key != res.user.public_key) {
+-              socket.chat_public_key = public_key;
+-              socket.chat_private_key = private_key;
+-              socket.emit("users:updateKey", {public_key});
+-              resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
+-                emitEvents();
+-              }).catch(() => {
+-                emitEvents(true);
+-              });
+-            } else {
+-              socket.chat_public_key = public_key;
+-              socket.chat_private_key = private_key;
++      }).catch((error) => {
++        //console.error('error');
++      });*/
++      /*
++      if (res.user.public_key != socket.chat_public_key) {
++        recreateEncryptionKeys(ctx, socket.chat_token, res.user.salt).then(({ public_key, private_key }) => {
++          if (public_key != res.user.public_key) {
++            socket.chat_public_key = public_key;
++            socket.chat_private_key = private_key;
++            socket.emit("users:updateKey", {public_key});
++            resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
+               emitEvents();
+-            }
++            }).catch(() => {
++              emitEvents(true);
++            });
++          } else {
++            socket.chat_public_key = public_key;
++            socket.chat_private_key = private_key;
++            emitEvents();
++          }
+           
+-          });
+-        } else {
+-          emitEvents();
+-        }
+-      },10);
+-    };
++        });
++      } else {
++        emitEvents();
++      }
++      */
++      emitEvents();
++    },10);
++  };
++  React.useEffect(() => {
+     getEncryptionKeys(ctx).then(({ private_key, public_key, salt }) => {
+-      socket.chat_public_key = public_key;
+-      socket.chat_private_key = private_key;
+-      socket.chat_token = options.token;
+-      ctx.authenticate({...options,public_key, salt}, authenticationCallback);
++    socket.chat_public_key = public_key;
++    socket.chat_private_key = private_key;
++    socket.chat_token = options.token;
++    ctx.authenticate({...options,public_key, salt}, authenticationCallback);
++  });
++},[]);
++const emitEvents = (recreateKeys = false) => {
++  // get latest conversations from the server:
++  ctx.getLatestEventFromDB().then((event)=> {
++    //console.error(event);
++    const options = event ? {since: 0} : {since: 0};
++    socket.emit("conversations:fetch", options, async (res) => {
++      if (res && res.success && Array.isArray(res.conversations)) {
++        const conversations = await decryptConversations(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys);
++        ctx.setConversations(conversations);
++        //console.error(conversations);
++        conversations.map(c=>ctx.saveConversationToDB(c));
++      }
++    });
++  });
++  //get unread count.
++  socket.emit("events:get_unread_count", ({ success, stats }) => {
++    if (success && stats && Array.isArray(stats) && stats.length > 0) {
++      ctx.updateUnreadCounts({ stats });
++    }
++  });
++};
++  React.useEffect(()=>{
++    //ctx.setAuthenticationError("Connecting..");
++  }, []);
++  React.useEffect(() => {
++    // get latest conversations from the DB:
++    ctx.getConversationsFromDB().then((conversations)=> {
++      for (let i=0;i<conversations.length;i++) {
++        let conversation = conversations.item(i);
++        ctx.addConversation({...conversation, id: conversation.group_id, time: new Date(conversation.created_at)});
++      }
+     });
+     
++  
+     async function handleEventCreated ({ event }) {
+       if (event && event.id) {
+         const [decryptedEvent] = await decryptEvents(event.conversationId, [event], socket.chat_private_key, ctx);
+@@ -106,11 +121,13 @@ export default function ChatContainer({ options }) {
              { conversationId: event.conversationId, count: 1 }
            );
          }
@@ -109,11 +196,11 @@ index c0d4abb..93fa9e4 100644
      async function handleConversationCreated({ conversation }) {
        const newConversation = await decryptConversations([conversation], socket.chat_private_key, ctx);
        if (!newConversation[0].hidden) ctx.addConversation(newConversation[0]);
-+      ctx.saveConversationToDB(conversation.id, conversation.name);
++      ctx.saveConversationToDB(conversation, conversation.name);
      }
      socket.on("events:event_created", handleEventCreated);
      socket.on("conversations:created", handleConversationCreated);
-@@ -141,29 +150,20 @@ export default function ChatContainer({ options }) {
+@@ -141,29 +158,20 @@ export default function ChatContainer({ options }) {
  
      return () => timer && clearTimeout(timer);
    }, [authError]);
@@ -172,6 +259,20 @@ index 8e9472a..7073df8 100644
        });
        // handle connection error.
        socket.on("error", handleSocketError);
+diff --git a/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
+index 787b10d..38cf700 100644
+--- a/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
++++ b/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
+@@ -14,8 +14,8 @@ export function ChatReducer(state, action) {
+     const { conversationId, events, page  } = action.payload;
+     const conversationIdx = state.conversations.findIndex((c) => c.id === conversationId);
+     const conversations = [...state.conversations];
+-    conversations[conversationIdx].lastEvent = events[0];
+     conversations[conversationIdx].events = events.reverse();
++    conversations[conversationIdx].lastEvent = conversations[conversationIdx].events[0];
+     conversations[conversationIdx].page = page;
+     return { ...state, conversations };
+   }
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 index c41797c..73d4762 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
@@ -285,16 +386,73 @@ index c41797c..73d4762 100644
            return a.lastEvent.time < b.lastEvent.time;
          } else if (a.lastEvent) {
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
-index f9bc1dc..d22cbba 100644
+index f9bc1dc..035829c 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/index.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/index.js
-@@ -17,8 +17,87 @@ const reducer = combineReducers(
+@@ -6,6 +6,7 @@ import combineReducers from "./combineReducers";
+ import { authReducer, createAuthActions } from "./AuthReducer";
+ import { createConversationActions, conversationReducer } from "./ConversationReducer";
+ import { createSettingsActions, settingsReducer } from "./SettingsReducer";
++import { SHA512 } from "crypto-js";
+ 
+ 
+ export const ChatContext = React.createContext({...ChatInitialState});
+@@ -17,8 +18,332 @@ const reducer = combineReducers(
    settingsReducer
  );
  
 -export function ChatContextProvider({options,children,socketIoUrl, db, icon, contacts}) {
 +export function ChatContextProvider({options,children,socketIoUrl, getDB, icon, contacts}) {
    const [state, dispatch] = React.useReducer(reducer, ChatInitialState);
++  const removeFolderFromDisk = React.useCallback((type) => {
++    return new Promise((resolve, reject) => {
++      //TODO: remove folder from disk
++    });
++  });
++  const removeFiles = React.useCallback((type) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "UPDATE files SET path=?",[""]
++        ).then(([results])=> {
++          removeFolderFromDisk(type).then(() => {
++            resolve(results);
++          });
++        });
++      })
++    });
++  },[]);
++  const removeConversationsFromDB = React.useCallback((conversationId) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "DELETE FROM messages"
++        ).then(([results])=> {
++          if (withConversations) {
++            db.executeSql(
++              "DELETE FROM conversations"
++            ).then(([results])=> {
++              resolve(results);
++            });
++          } else {
++            resolve(results);
++          }
++        });
++      })
++    });
++  },[]);
++  const deleteCall = React.useCallback((callId) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "DELETE FROM calls WHERE id = ?",
++          [callId]
++        ).then(([results])=> {
++          resolve(results);
++        });
++      })
++    });
++  },[]);
 +  const removeConversationFromDB = React.useCallback((conversationId) => {
 +    return new Promise((resolve, reject) => {
 +      return getDB().then((db)=> {
@@ -302,9 +460,41 @@ index f9bc1dc..d22cbba 100644
 +          "DELETE FROM conversations WHERE group_id = ?",
 +          [conversationId]
 +        ).then(([results])=> {
-+          console.error(results);
 +          resolve(results);
 +        });
++      })
++    });
++  },[]);
++  const getSettings = React.useCallback((name, settings) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "SELECT * FROM settings WHERE name=?", [name]
++        ).then(([results])=> {
++          resolve(results);
++        })
++      });
++    });
++  });
++  const updateSettings = React.useCallback((name, settings) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "INSERT OR IGNORE INTO settings (`name`) VALUES (?)",
++          [name]
++        ).then(() => {
++          db.executeSql(
++            "SELECT * FROM settings WHERE name=?", [name]
++          ).then(([results])=> {
++            //TODO: Merge results and passed settings
++            db.executeSql(
++              "UPDATE settings SET `settings`=? WHERE name = ?",
++              [value, conversationId]
++            ).then(([results])=> {
++              resolve(results);
++            });
++          })
++        })
 +      })
 +    });
 +  },[]);
@@ -313,9 +503,89 @@ index f9bc1dc..d22cbba 100644
 +      return getDB().then((db)=> {
 +        db.executeSql(
 +          "UPDATE conversations SET `is_"+type+"`=? WHERE group_id = ?",
-+          [conversationId, value]
++          [value, conversationId]
 +        ).then(([results])=> {
 +          resolve(results);
++        });
++      })
++    });
++  },[]);
++  const updateMessageEvent = React.useCallback((messageId, eventId) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "UPDATE messages SET `eventId`=? WHERE id = ?",
++          [eventId, messageId]
++        ).then(([results])=> {
++          resolve(results);
++        });
++      })
++    });
++  },[]);
++  const markMessage = React.useCallback((messageId, type, value) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "UPDATE conversations SET `is_"+type+"`=? WHERE id = ?",
++          [value, messageId]
++        ).then(([results])=> {
++          resolve(results);
++        });
++      })
++    });
++  },[]);
++  const updateLastSeen = React.useCallback((userId) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "UPDATE users SET `seen_at`=? WHERE userId = ?",
++          [Math.floor(Date.now() / 1000), userId]
++        ).then(([results])=> {
++          resolve(results);
++        });
++      })
++    });
++  },[]);
++  const getCallsFromDB = React.useCallback(() => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "SELECT * FROM calls ORDER BY created_at DESC"
++        ).then(([results])=> {
++          resolve(results.rows.length > 0 ? results.rows : false);
++        });
++      })
++    });
++  },[]);
++  const getGroupsFromDB = React.useCallback(() => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "SELECT * FROM groups ORDER BY created_at DESC"
++        ).then(([results])=> {
++          resolve(results.rows.length > 0 ? results.rows : false);
++        });
++      })
++    });
++  },[]);
++  const getPostsFromDB = React.useCallback(() => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "SELECT * FROM posts ORDER BY created_at DESC"
++        ).then(([results])=> {
++          resolve(results.rows.length > 0 ? results.rows : false);
++        });
++      })
++    });
++  },[]);
++  const getUsersFromDB = React.useCallback(() => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          "SELECT * FROM users ORDER BY created_at DESC"
++        ).then(([results])=> {
++          resolve(results.rows.length > 0 ? results.rows : false);
 +        });
 +      })
 +    });
@@ -354,13 +624,77 @@ index f9bc1dc..d22cbba 100644
 +      })
 +    });
 +  },[]);
++  const _saveFileToDisk = React.useCallback((url, path) => {
++    return new Promise((resolve, reject) => {
++      //TODO fetch and save to path
++      fetch(url).then(()=> {
++        resolve(path);
++      });
++    });
++  });
++  const saveFileToDisk = React.useCallback((url, filetype) => {
++    //TODO implement fileExists
++    return new Promise((resolve, reject) => {
++      const path = filetype + "/" + SHA512(url);
++      const fileExists = lib.fileExists(path)
++      if (fileExists !== false) {
++        resolve(path);
++      } else { 
++        _saveFileToDisk(url, path, filetype).then((path)=>{
++          resolve(path);
++        });
++      }
++    });
++  },[]);
++
++  const getFileSize = React.useCallback((path) => {
++    //TODO get filesize
++    const size = lib.getfilesize(path);
++    return getFileSize(path);
++  },[]);
++
++  const saveFile = React.useCallback((url, filetype, refId) => {
++    const path = saveFileToDisk(url, filetype);
++    const size = getFileSize(path);
++    getDB().then((db)=> {
++      db.executeSql(
++        "INSERT OR IGNORE INTO files (`url`,`type`, `path` ,`size`,`contents`, `refId`, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
++        [url, type, path, size, refId, Math.floor(Date.now() / 1000)]
++      ).then(([results])=> {
++        //console.error('saveMessage',conversation, contents, author, results);
++      });
++    })
++  },[]);
++  const saveCallToDB = React.useCallback((conversation, created_by) => {
++    getDB().then((db)=> {
++      db.executeSql(
++        "INSERT OR IGNORE INTO calls(`group_id`,`name`,`created_by`, created_at) VALUES (?, ?, ?, ?)",
++        [conversation.id, conversation.name, created_by, Math.floor(Date.now() / 1000)]
++      ).then(([results])=> {
++        return results;
++      });
++    })
++  },[]);
++  const saveUserToDB = React.useCallback((userId, avatarUrl, username, phone_number) => {
++    return new Promise((resolve, reject) => {
++      getDB().then((db)=> {
++        avatarFileId = await saveFile(avatarUrl,'avatar',userId);
++        db.executeSql(
++          "INSERT OR IGNORE INTO users (`userId`,`username`,`avatarUrl`, `avatarFileId`, `phone_number`, created_at) VALUES (?, ?, ?, ?, ?, ?)",
++          [userId, username, avatarUrl, avatarFileId, Math.floor(Date.now() / 1000)]
++        ).then(([results])=> {
++          return results;
++        });
++      })
++    });
++  },[]);
 +  const saveMessageToDB = React.useCallback((conversation, contents, author) => {
 +    getDB().then((db)=> {
 +      db.executeSql(
 +        "INSERT OR IGNORE INTO messages(`group_id`,`text`,`author_id`, created_at) VALUES (?, ?, ?, ?)",
 +        [conversation.id, contents, author, Math.floor(Date.now() / 1000)]
 +      ).then(([results])=> {
-+
++        return results;
 +      });
 +    })
 +  },[]);
@@ -368,16 +702,36 @@ index f9bc1dc..d22cbba 100644
 +    getDB().then((db)=> {
 +      db.executeSql(
 +        "INSERT OR IGNORE INTO conversations(`group_id`,`group_key`,`name`,`created_by`,`created_at`) VALUES (?, ?, ?, ?, ?)",
-+        [conversation.id, "", conversation.name, conversation.participants[0].id, Math.floor(Date.now() / 1000)]
++        [conversation.id, "", conversation.name, conversation.participants[conversation.participants.length-1].id, Math.floor(Date.now() / 1000)]
 +      ).then(([results])=> {
-+
++        return results;
++      });
++    })
++  },[]);
++  const savePostToDB = React.useCallback((conversation, name) => {
++    getDB().then((db)=> {
++      db.executeSql(
++        "INSERT OR IGNORE INTO conversations(`group_id`,`group_key`,`name`,`created_by`,`created_at`) VALUES (?, ?, ?, ?, ?)",
++        [conversation.id, "", conversation.name, conversation.participants[conversation.participants.length-1].id, Math.floor(Date.now() / 1000)]
++      ).then(([results])=> {
++        return results;
++      });
++    })
++  },[]);
++  const saveGroupToDB = React.useCallback((conversation, name) => {
++    getDB().then((db)=> {
++      db.executeSql(
++        "INSERT OR IGNORE INTO conversations(`group_id`,`group_key`,`name`,`created_by`,`created_at`) VALUES (?, ?, ?, ?, ?)",
++        [conversation.id, "", conversation.name, conversation.participants[conversation.participants.length-1].id, Math.floor(Date.now() / 1000)]
++      ).then(([results])=> {
++        return results;
 +      });
 +    })
 +  },[]);
    const context = React.useMemo(
      () => {
        return ({
-@@ -26,11 +105,16 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
+@@ -26,11 +351,32 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
          ...createAuthActions(state, dispatch),
          ...createChatActions(state, dispatch),
          ...createConversationActions(state, dispatch),
@@ -394,11 +748,27 @@ index f9bc1dc..d22cbba 100644
 +        getConversationsFromDB,
 +        getMessagesFromDB,
 +        markConversation,
-+        removeConversationFromDB
++        removeConversationFromDB,
++        updateMessageEvent,
++        getSettings,
++        updateSettings,
++        saveCallToDB,
++        saveUserToDB,
++        getCallsFromDB,
++        getUsersFromDB,
++        updateLastSeen,
++        removeConversationsFromDB,
++        removeFiles,
++        savePostToDB,
++        saveGroupToDB,
++        getPostsFromDB,
++        getGroupsFromDB,
++        deleteCall,
++        markMessage,
        });
      },
      [state]
-@@ -47,5 +131,5 @@ ChatContextProvider.propTypes = {
+@@ -47,5 +393,5 @@ ChatContextProvider.propTypes = {
    options: PropTypes.object.isRequired,
    children: PropTypes.element.isRequired,
    socketIoUrl: PropTypes.string.isRequired,
@@ -458,7 +828,7 @@ index 0000000..609e264
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 5388ef0..584d864 100644
+index 5388ef0..b5140fd 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -10,7 +10,7 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
@@ -494,7 +864,7 @@ index 5388ef0..584d864 100644
            }, 1000 * (1+tries * 2));
          }
 +      } else {
-+        ctx.saveMessageToDB(conversation.id, contents, socket.chat_user_id)
++        ctx.saveMessageToDB(conversation, contents, socket.chat_user_id)
        }
      });
    },[]);
@@ -539,15 +909,29 @@ index 5388ef0..584d864 100644
        bufferSize: 81920,
        sampleRate: 44100,
        bitsPerChannel: 8,
-@@ -227,6 +232,7 @@ export default function ChatForm({ conversation }) {
+@@ -227,15 +232,28 @@ export default function ChatForm({ conversation }) {
      });
  
      Recording.start();
 +    */
    };
-   
+-  
++  /*const microphoneIcon = <TouchableOpacity onPress={recordAudio} style={styles.micBtn}>
++    <Icon name="microphone" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
++  </TouchableOpacity>;*/
++  /*
++  const galleryButtons = <TouchableOpacity style={styles.btnIcon} onPress={openCamera}>
++        <Icon name="camera" style={styles.btnIconStyles} />
++      </TouchableOpacity>
++      <TouchableOpacity style={styles.btnImage} onPress={openImageGallery}>
++        <Image source={imageIcon} style={styles.btnImageStyles} />
++      </TouchableOpacity>
++  */
++  const microphoneIcon = null;
++  const galleryButtons = null;
    return (
-@@ -235,7 +241,7 @@ export default function ChatForm({ conversation }) {
+     <View style={styles.container}>
+       <Image source={messageIcon} style={styles.messageIcon} />
        <TextInput
          textAlignVertical={"top"}
          numberOfLines={5}
@@ -556,16 +940,30 @@ index 5388ef0..584d864 100644
          value={message}
          style={styles.txt}
          onSubmitEditing={submit}
-@@ -243,7 +249,6 @@ export default function ChatForm({ conversation }) {
+@@ -243,19 +261,11 @@ export default function ChatForm({ conversation }) {
          placeholderTextColor={"rgb(125,125,125)"}
          blurOnSubmit={true}
          onChangeText={onChangeText} />
 -      <AudioRecord setWebView={setWebView} setLoading={setAudioLoaded}/>
-       <TouchableOpacity onPress={recordAudio} style={styles.micBtn}>
-         <Icon name="microphone" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
+-      <TouchableOpacity onPress={recordAudio} style={styles.micBtn}>
+-        <Icon name="microphone" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
+-      </TouchableOpacity>
++      {microphoneIcon}
+       <TouchableOpacity style={styles.btnImage} onPress={submit}>
+         <Image source={sendButton} style={styles.btnImageStyles} />
        </TouchableOpacity>
+-      <TouchableOpacity style={styles.btnIcon} onPress={openCamera}>
+-        <Icon name="camera" style={styles.btnIconStyles} />
+-      </TouchableOpacity>
+-      <TouchableOpacity style={styles.btnImage} onPress={openImageGallery}>
+-        <Image source={imageIcon} style={styles.btnImageStyles} />
+-      </TouchableOpacity>
++      {galleryButtons}
+     </View>
+   );
+ }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index bbdff8a..e5423af 100644
+index bbdff8a..c80025c 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,5 +1,5 @@
@@ -588,7 +986,7 @@ index bbdff8a..e5423af 100644
  const styles = StyleSheet.create({
    container: {
      flex: 1,
-@@ -30,8 +36,142 @@ const styles = StyleSheet.create({
+@@ -30,8 +36,95 @@ const styles = StyleSheet.create({
    wallpaper: {
      width: "100%",
      height: "100%"
@@ -679,67 +1077,77 @@ index bbdff8a..e5423af 100644
 +  }
 +};
 +
-+const MenuButton = ({event, text, Icon, iconName, size, style, viewRef, setSelectedEvent={setSelectedEvent}}) => {
-+  return (
-+    <TouchableOpacity onPress={()=>{
-+      setTimeout(() => {
-+        setSelectedEvent(false);
-+      }, 100);
-+      if (text === "Star") {
-+        Alert.alert("Starred message");
-+      }
-+      if (text === "Reply") {
-+        Clipboard.setString(event.text);
-+      }
-+      if (text === "Copy") {
-+        Clipboard.setString(event.text);
-+        Alert.alert("Message copied to clipboard");
-+      }
-+      if (text === "Forward") {
-+        Clipboard.setString(event.text);
-+        Alert.alert("Select contact");
-+      }
-+      if (text === "Save") {
-+        setTimeout(() => {
-+          shareImage(viewRef);
-+        },1);
-+      }
-+    }}>
-+      <View style={style}>
-+        <Text style={styles.menuText}>{text}</Text>
-+        <Icon name={iconName} color={"white"} size={size} style={text==="Forward" ? styles.forwardIconStyle : styles.iconStyle} />
-+      </View>
-+    </TouchableOpacity>
-+  );
-+}
-+const Menu = ({event, Icon, setSelectedEvent, viewRef, tapEvent}) => {
-+  const ctx = React.useContext(ChatContext);
-+  const username = ctx.getUsername();
-+  const author = event?.owner?.username;
-+  const isOwn = author === username;
-+  return (
-+    <View style={{...(isOwn ? styles.ownMenuBox : styles.menuBox), top: tapEvent.nativeEvent.pageY - 170}}>
-+      <MenuButton style={styles.menuButton} event={event} text={"Star"} Icon={Icon} iconName={"star-icon"} size={15} setSelectedEvent={setSelectedEvent} />
-+      <MenuButton style={styles.menuButton} event={event} text={"Reply"} Icon={Icon} iconName={"reply-icon"} size={12} setSelectedEvent={setSelectedEvent} />
-+      <MenuButton style={styles.menuButton} event={event} text={"Forward"} Icon={Icon} iconName={"reply-icon"} size={12} setSelectedEvent={setSelectedEvent} />
-+      <MenuButton style={styles.menuButton} event={event} text={"Copy"} Icon={Icon} iconName={"copy-icon"} size={15} setSelectedEvent={setSelectedEvent} />
-+      <MenuButton viewRef={viewRef} style={styles.lastMenuButton} event={event} text={"Save"} Icon={Icon} iconName={"save-download-icon"} size={15} setSelectedEvent={setSelectedEvent} />
-+    </View>
-+  );
-+}
++
 +
  const chatWallpaper = require("../images/chat_background.png");
  export default function ChatScreen({ navigation, route }) {
  
-@@ -41,6 +181,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -41,7 +134,9 @@ export default function ChatScreen({ navigation, route }) {
      return null;
    }
    const insets = useSafeArea();
 +  const [selectedEvent, setSelectedEvent] = React.useState(false);
    const [showMenu, setShowMenu] = React.useState(false);
++  const [reply, setReply] = React.useState(false);
    const [lastpage, setLastPage] = React.useState(false);
    const ctx = React.useContext(ChatContext);
-@@ -103,12 +244,25 @@ export default function ChatScreen({ navigation, route }) {
+   const settings = ctx.getSettings();
+@@ -49,6 +144,54 @@ export default function ChatScreen({ navigation, route }) {
+   const parseEvents = React.useCallback((events)=> {
+     return events;
+   });
++
++  const MenuButton = ({event, text, Icon, iconName, size, style, viewRef, setSelectedEvent={setSelectedEvent}}) => {
++    return (
++      <TouchableOpacity onPress={()=>{
++        setTimeout(() => {
++          setSelectedEvent(false);
++        }, 100);
++        if (text === "Star") {
++          ctx.markMessage(event.id, "starred");
++        }
++        if (text === "Reply") {
++          setReply({text: event.text, event: event.id});
++        }
++        if (text === "Copy") {
++          Clipboard.setString(event.text);
++          Alert.alert("Message copied to clipboard");
++        }
++        if (text === "Forward") {
++          navigation.navigate('ContactsScreen', {event});
++        }
++        if (text === "Save") {
++          setTimeout(() => {
++            shareImage(viewRef);
++          },1);
++        }
++      }}>
++        <View style={style}>
++          <Text style={styles.menuText}>{text}</Text>
++          <Icon name={iconName} color={"white"} size={size} style={text==="Forward" ? styles.forwardIconStyle : styles.iconStyle} />
++        </View>
++      </TouchableOpacity>
++    );
++  }
++  const Menu = ({event, Icon, setSelectedEvent, viewRef, tapEvent}) => {
++    const username = ctx.getUsername();
++    const author = event?.owner?.username;
++    const isOwn = author === username;
++    return (
++      <View style={{...(isOwn ? styles.ownMenuBox : styles.menuBox), top: tapEvent.nativeEvent.pageY - 170}}>
++        <MenuButton style={styles.menuButton} event={event} text={"Star"} Icon={Icon} iconName={"star-icon"} size={15} setSelectedEvent={setSelectedEvent} />
++        <MenuButton style={styles.menuButton} event={event} text={"Reply"} Icon={Icon} iconName={"reply-icon"} size={12} setSelectedEvent={setSelectedEvent} />
++        <MenuButton style={styles.menuButton} event={event} text={"Forward"} Icon={Icon} iconName={"reply-icon"} size={12} setSelectedEvent={setSelectedEvent} />
++        <MenuButton style={styles.menuButton} event={event} text={"Copy"} Icon={Icon} iconName={"copy-icon"} size={15} setSelectedEvent={setSelectedEvent} />
++        <MenuButton viewRef={viewRef} style={styles.lastMenuButton} event={event} text={"Save"} Icon={Icon} iconName={"save-download-icon"} size={15} setSelectedEvent={setSelectedEvent} />
++      </View>
++    );
++  }
++
+   React.useEffect(() => {
+     const socket = getSocket();
+ 
+@@ -103,12 +246,25 @@ export default function ChatScreen({ navigation, route }) {
        ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents)});
      });
    }
@@ -767,7 +1175,7 @@ index bbdff8a..e5423af 100644
            title={conversation.name || "Chat"} />
          <View style={styles.inner}>
            <View style={styles.list}>
-@@ -117,7 +271,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -117,7 +273,7 @@ export default function ChatScreen({ navigation, route }) {
                  if (events.length >= 20) {
                    fetchMoreMessages();
                  }
@@ -776,7 +1184,7 @@ index bbdff8a..e5423af 100644
                <TypingIndicator conversation={conversation} />
                <View style={styles.form}>
                  <ChatForm conversation={conversation} />
-@@ -125,7 +279,8 @@ export default function ChatScreen({ navigation, route }) {
+@@ -125,7 +281,8 @@ export default function ChatScreen({ navigation, route }) {
              </ImageBackground>
            </View>
          </View>
@@ -1264,7 +1672,7 @@ index a3184cd..f8d6377 100644
          </View>
          {getPreviewDate(conversation)}
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
-index fa4d21e..b15d67d 100644
+index fa4d21e..da1ae2c 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 @@ -16,6 +16,7 @@ const closeIcon = require("../images/close.png");
@@ -1409,11 +1817,11 @@ index fa4d21e..b15d67d 100644
    const ctx = React.useContext(ChatContext);
 -  const conversations = ctx.getConversations().filter(c => c.hidden == undefined || !c.hidden);
 +  const swiper = React.useRef();
-+  const conversations = ctx.getConversations()
++  const filter = route.params?.filter;
++  const conversations = filter == 'groups' ? [] : ctx.getConversations()
 +  .filter(c => c.hidden == undefined || !c.hidden)
 +  .filter(c => route.params?.type == 'archived' ? c.archived : !c.archived)
 +  //.filter(c => route.params.type == 'pinned' && !c.pinned)
-+  
    const [results, setResults] = React.useState([]);
    const onPress = (conversation) => {
      navigation.navigate("ChatScreen", { conversation });
@@ -1422,10 +1830,16 @@ index fa4d21e..b15d67d 100644
    const [query, setQuery] = React.useState("");
  
    function searchAsyncForMessages(ctx, query) {
-@@ -182,32 +194,110 @@ export default function ConversationList({ navigation }) {
-     <PillButton text="New Public Channel" onPress={() => navigation.navigate("SearchContactsScreen")} />
-     <PillButton text="New 1 to 1 Chat" onPress={() => navigation.navigate("SearchContactsScreen")} />
-   </>
+@@ -177,37 +189,111 @@ export default function ConversationList({ navigation }) {
+       return convMatches;
+     }
+   }, [query, conversations, results]);
+-  const buttons = <>
+-    <PillButton text="Add contacts" onPress={() => navigation.navigate("PhoneContactsScreen")} />
+-    <PillButton text="New Public Channel" onPress={() => navigation.navigate("SearchContactsScreen")} />
+-    <PillButton text="New 1 to 1 Chat" onPress={() => navigation.navigate("SearchContactsScreen")} />
+-  </>
++
 +  const keyExtractor = item => item.id;
 +
 +  const renderConversation = ({item}) => {
@@ -1442,7 +1856,7 @@ index fa4d21e..b15d67d 100644
 +        ctx.muteConversation(conversation.id, !conversation.muted);
 +        break;
 +      case 'delete':
-+        ctx.deleteConversation(conversation.id, !conversation.deleted);
++        ctx.deleteConversation(conversation.id, false);
 +        break;
 +      case 'archive':
 +        ctx.archiveConversation(conversation.id, !conversation.archived);
@@ -1544,10 +1958,10 @@ index fa4d21e..b15d67d 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 731a30e..64f0a00 100644
+index 731a30e..7cbfc76 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-@@ -6,6 +6,14 @@ import { ChatContext } from "../ChatContext";
+@@ -6,6 +6,15 @@ import { ChatContext } from "../ChatContext";
  import { NavigationPropType } from "../PropTypes";
  import LinearGradient from "react-native-linear-gradient";
  import { TouchableHighlight } from "react-native-gesture-handler";
@@ -1557,12 +1971,13 @@ index 731a30e..64f0a00 100644
 +import APIService from "../../../src/service/APIService";
 +import {ClientContext} from '../../../src/context/ClientContext';
 +import { clearPhoneNumber } from "../../../src/utils/phonehelpers";
++import trans from "../../../src/utils/trans";
 +
 +
  const styles = StyleSheet.create({
    container: {
      flex: 1,
-@@ -100,9 +108,18 @@ const styles = StyleSheet.create({
+@@ -100,9 +109,18 @@ const styles = StyleSheet.create({
      width: 20,
      height: 20,
      borderRadius: 20,
@@ -1582,7 +1997,7 @@ index 731a30e..64f0a00 100644
    headerStyle: {
      backgroundColor: "rgb(125,125,125)",
      padding: 20,
-@@ -111,65 +128,136 @@ const styles = StyleSheet.create({
+@@ -111,65 +129,153 @@ const styles = StyleSheet.create({
    },
    headerButtonStyle: {
      color: "white",
@@ -1656,19 +2071,36 @@ index 731a30e..64f0a00 100644
 +  const clientctx = React.useContext(ClientContext);
 +  const Icon = ctx.icon;
 +  const [selectedContacts, setSelectedContacts] = React.useState([]);
-+  const [existingUsers, setExistingUsers] = React.useState({existing:[],contacts:[]});
++  const [existingUsers, setExistingUsers] = React.useState({existing:[],contacts:[],friendCounts: []});
    const contacts = ctx.contacts;
++  
 +  const getNumbers = () => {
-+    return ctx.contacts.map(c => clearPhoneNumber(clientctx.geo.geo.country_code, c.label));
++    const numbers = [];
++    
++    ctx.contacts.forEach(c => {
++      if (!c.labels) {
++        numbers.push(clearPhoneNumber(clientctx.geo.geo.country_code, c.label))
++      } else {
++        c.labels.forEach(l => {
++          numbers.push(clearPhoneNumber(clientctx.geo.geo.country_code, l))
++        })
++      }
++    });
++    return numbers;
 +  };
 +  React.useEffect(() => {
++    const friends = [];
++    const friendCounts = [];
 +    APIService('phone-contacts/sync/',{numbers: getNumbers()}).then((r)=>{
-+      const friends = [];
-+      r.contacts.forEach(u => friends[u.phone_number] = u.users);
++      r.contacts.forEach(u => {
++        friends.push(u.phone_number);
++        friendCounts.push(u.users);
++      });
 +      setExistingUsers(
 +        {
 +          existing: r.users.map(u => u.phone_number),
 +          contacts: friends,
++          friendCounts: friendCounts,
 +        }
 +      );
 +    });
@@ -1683,13 +2115,13 @@ index 731a30e..64f0a00 100644
 +  const Contact = ({item, marked}) => {
 +    const cleanedNumber = clearPhoneNumber(clientctx.geo.geo.country_code, item.label);
 +    const alreadyExists = existingUsers.existing.indexOf(cleanedNumber) !== -1;
-+    const numberOfFriends = existingUsers.contacts && existingUsers.contacts.indexOf(cleanedNumber) !== -1 ? existingUsers.contacts[cleanedNumber] - 1 : 0;
++    const numberOfFriends = existingUsers.contacts && existingUsers.contacts.indexOf(cleanedNumber) !== -1 ? existingUsers.friendCounts[existingUsers.contacts.indexOf(cleanedNumber)] - 1 : 0;
 +    return (
 +      <TouchableOpacity onPress={()=>!alreadyExists && toggleSelected(item, marked)}>
 +        <LinearGradient style={styles.listItemContainer} colors={['#fff','#f3f3f3']}>
 +          <Text style={styles.listItemLabel}>{item.value}</Text>
 +          {alreadyExists && <Text style={styles.alreadyExists}>Wevive user</Text>}
-+          {!alreadyExists && numberOfFriends > 0 && <Text style={styles.numberOfFriends}>Friend of {numberOfFriends} wevive users</Text>}
++          {!alreadyExists && numberOfFriends > 0 && <Text style={styles.numberOfFriends}>{trans('chats.friend_of_',{count:numberOfFriends})}</Text>}
 +          {!alreadyExists && <View style={selectedContacts.indexOf(item.label) >= 0 ? styles.markedContactToggle : styles.contactToggle}>
 +            {selectedContacts.indexOf(item.label) >= 0 && <Icon name="ticks" style={styles.markTick}/>}
 +          </View>}
@@ -1755,7 +2187,7 @@ index 731a30e..64f0a00 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
-index b708a42..5298b57 100644
+index b708a42..61ba43c 100644
 --- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 @@ -1,5 +1,5 @@
@@ -1849,8 +2281,22 @@ index b708a42..5298b57 100644
    const update = (success, contacts, dispatcher) => {
      if (!success || (contacts && contacts.length === 0)) {
        dispatcher(dispatch, contacts);
-@@ -51,11 +93,11 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -49,13 +91,25 @@ export default function SearchContactsScreen({ navigation }) {
+     }
+   };
  
++  const clientctx = React.useContext(ClientContext);
++  const contacts = ctx.contacts;
++  const [friends, setFriends] = React.useState([]);
++  React.useEffect(() =>{
++    const ffriends = {};
++    contacts.forEach(c => {
++      const cleanedNumber = clearPhoneNumber(clientctx.geo.geo.country_code, c.label);
++      ffriends[cleanedNumber] = c.value;
++    });
++    setFriends(ffriends);
++  },[]);
++
    const getUsers = () => {
      if (!query) {
 -      socket.emit("users:get_followings", { page: 1 }, function ({ success, followings }) {
@@ -1863,7 +2309,7 @@ index b708a42..5298b57 100644
          if (followings) {
            followings = followings.filter((follower) => {
              return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -69,11 +111,11 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -69,11 +123,11 @@ export default function SearchContactsScreen({ navigation }) {
    const getMoreUsers = () => {
      if (state.page > 0) {
        if (!query) {
@@ -1877,7 +2323,7 @@ index b708a42..5298b57 100644
            if (followings) {
              followings = followings.filter((follower) => {
                return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -88,7 +130,7 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -88,18 +142,20 @@ export default function SearchContactsScreen({ navigation }) {
    React.useEffect(() => {
      const timer = setTimeout(() => {
        getUsers();
@@ -1886,29 +2332,37 @@ index b708a42..5298b57 100644
  
      return () => clearTimeout(timer);
    }, [query]);
-@@ -121,20 +163,27 @@ export default function SearchContactsScreen({ navigation }) {
+-
++  const getSocketAction = () => {
++    return "conversations:create"
++  }
+   const createChat = () => {
+     setLoading(true);
+-    socket.emit("conversations:create", { participants: state.selected }, ({ success, conversation }) => {
+-      const encrypted = conversation.participants.filter(participant => participant.public_key && participant.public_key.length).length == conversation.participants.length;
+-      if (encrypted) {
+-        initEncryption(ctx, conversation, socket);
+-      }
++    socket.emit(getSocketAction(), { participants: state.selected, conversationId: route.params.conversationId }, ({ success, conversation }) => {
++      //const encrypted = conversation.participants.filter(participant => participant.public_key && participant.public_key.length).length == conversation.participants.length;
++      //if (encrypted) {
++      //  initEncryption(ctx, conversation, socket);
++      //}
+       if (success) {
+         ctx.addConversation(conversation);
+         navigation.replace("ChatScreen", { conversation });
+@@ -121,20 +177,17 @@ export default function SearchContactsScreen({ navigation }) {
        </View>
      );
    }
 -
-+  const clientctx = React.useContext(ClientContext);
-+  const contacts = ctx.contacts;
-+  const [friends, setFriends] = React.useState([]);
-+  React.useEffect(() =>{
-+    const ffriends = {};
-+    contacts.forEach(c => {
-+      const cleanedNumber = clearPhoneNumber(clientctx.geo.geo.country_code, c.label);
-+      ffriends[cleanedNumber] = c.value;
-+    });
-+    setFriends(ffriends);
-+  },[]);
    return (
      <View style={styles.container}>
        <Header
 -        left={<PillButton text="Cancel" onPress={() => navigation.goBack()} />}
          right={<PillButton text="Next" onPress={createChat} />}
          title="Add participants" />
--
+ 
 -      <TextInput placeholder={"Search"} onChangeText={query => setQuery(query)} />
 -
 +      <TextInput multiline={true} placeholder={"Search"} onChangeText={query => setQuery(query)} />
@@ -1940,7 +2394,7 @@ index b245cc3..677a838 100644
        {
          contact.selected
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index 0d59b81..16a7c19 100644
+index 0d59b81..4cf65fa 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
 @@ -7,29 +7,45 @@ export { addUnreadCountListener, updateCount } from "./utils/unread-counter";
@@ -1983,13 +2437,13 @@ index 0d59b81..16a7c19 100644
 +      )
 +      .then((err)=> {
 +        Contacts.getAllWithoutPhotos().then(fetchedContacts => {
-+          setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, label: r.phoneNumbers[0].number})));
++          setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, labels:r.phoneNumbers.map(p=>p.number), label: r.phoneNumbers[0].number})));
 +        });
 +      }
 +      );
 +    } else {
 +      Contacts.getAllWithoutPhotos().then(fetchedContacts => {
-+        setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, label: r.phoneNumbers[0].number})));
++        setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, labels:r.phoneNumbers.map(p=>p.number), label: r.phoneNumbers[0].number})));
 +      });
 +    }
 +  },[]);
@@ -2004,8 +2458,20 @@ index 0d59b81..16a7c19 100644
      </ChatContextProvider>
    );
  }
+diff --git a/node_modules/react-native-chat-plugin/utils/ChatEncryption.js b/node_modules/react-native-chat-plugin/utils/ChatEncryption.js
+index 7caec69..041c3fd 100644
+--- a/node_modules/react-native-chat-plugin/utils/ChatEncryption.js
++++ b/node_modules/react-native-chat-plugin/utils/ChatEncryption.js
+@@ -400,6 +400,7 @@ export async function decryptEvents(conversationId, events, private_key, ctx) {
+ function sendInitMessage(context, socket, participant, conversationId, conversationKey, public_key, sender_private_key, sender_public_key) {
+   return new Promise((resolve, reject) => {
+     const initMessage = "G|" + conversationId + "|" + conversationKey;
++    console.warn(initMessage);
+     encryptMessage(initMessage, public_key, sender_private_key).then(({ encryptedMessage, nonce }) => {
+       socket.emit("conversations:create", { participants: [participant] }, ({ success, conversation }) => {
+         if (success) {
 diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
-index 8cb4565..657908d 100644
+index 8cb4565..db49ae0 100644
 --- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 +++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 @@ -4,7 +4,7 @@ SQLite.DEBUG(false);
@@ -2025,7 +2491,38 @@ index 8cb4565..657908d 100644
    /**
       Creating new chat:
       1) Generate and save the group_key
-@@ -77,12 +78,17 @@ function initDB(token) {
+@@ -62,6 +63,30 @@ function initDB(token) {
+ 
+      */
+   return Promise.all([
++    db.executeSql(
++      `CREATE TABLE files (
++          id INTEGER PRIMARY KEY,
++          created_at INTEGER NOT NULL,
++          path TEXT,
++          contents TEXT,
++          url TEXT,
++          type TEXT,
++          refId TEXT,
++          size INTEGER
++        );`,
++    ),
++    db.executeSql(
++      `CREATE TABLE users (
++          id INTEGER PRIMARY KEY,
++          userId INTEGER,
++          created_at INTEGER NOT NULL,
++          username TEXT,
++          avatarUrl TEXT NOT NULL,
++          avatarPath TEXT NOT NULL,
++          phone_number TEXT,
++          seen_at INTEGER
++        );`,
++    ),
+     db.executeSql(
+       `CREATE TABLE chats (
+           id INTEGER PRIMARY KEY,
+@@ -77,11 +102,26 @@ function initDB(token) {
      db.executeSql(
        `CREATE TABLE conversations (
            id INTEGER PRIMARY KEY,
@@ -2035,27 +2532,53 @@ index 8cb4565..657908d 100644
            name TEXT NOT NULL,
            avatar TEXT,
            created_by TEXT NOT NULL,
--          created_at INTEGER NOT NULL
 +          created_at INTEGER NOT NULL,
 +          is_pin INTEGER,
 +          is_starred INTEGER,
 +          is_archive INTEGER,
 +          is_mute INTEGER,
 +          is_delete INTEGER
++        );`,
++    ),
++    
++    db.executeSql(
++      `CREATE TABLE calls (
++          id INTEGER PRIMARY KEY,
++          group_id TEXT UNIQUE NOT NULL,
++          name TEXT NOT NULL,
++          created_by TEXT NOT NULL,
+           created_at INTEGER NOT NULL
          );`,
      ),
-     db.executeSql(
-@@ -92,7 +98,8 @@ function initDB(token) {
+@@ -92,7 +132,12 @@ function initDB(token) {
            group_id TEXT NOT NULL,
            author_id TEXT NOT NULL,
            text TEXT NOT NULL,
 -          created_at TEXT NOT NULL
 +          created_at TEXT NOT NULL,
-+          starred INTEGER
++          is_starred INTEGER,
++          is_delivered INTEGER,
++          is_read INTEGER,
++          tries INTEGER,
++          retry_at INTEGER
          );`,
      ),
      db.executeSql(
-@@ -146,9 +153,9 @@ export function SQLCipherClient(options) {
+@@ -112,6 +157,13 @@ function initDB(token) {
+           private_key BLOB NOT NULL
+         );`,
+     ),
++    db.executeSql(
++      `CREATE TABLE settings (
++          id INTEGER PRIMARY KEY,
++          settings TEXT,
++          name TEXT UNIQUE NOT NULL
++        );`,
++    ),
+   ]);
+ }
+ 
+@@ -146,9 +198,9 @@ export function SQLCipherClient(options) {
    return new Promise((resolve, reject) => {
      if (!db) {
        SQLite.openDatabase({
@@ -2067,7 +2590,7 @@ index 8cb4565..657908d 100644
        }).then(
          (dbInstance) => {
            db = dbInstance;
-@@ -165,13 +172,7 @@ export function SQLCipherClient(options) {
+@@ -165,13 +217,7 @@ export function SQLCipherClient(options) {
          },
        );
      } else {

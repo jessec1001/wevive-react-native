@@ -360,6 +360,13 @@ const styles = (keyboard) => {
       alignItems: 'center',
       marginHorizontal: responsiveWidth(10),
     },
+    countryFlag2: {
+      width: responsiveWidth(14.5),
+      height: responsiveWidth(6),
+      position: 'absolute',
+      top: responsiveWidth(4.5),
+      left: responsiveWidth(12.5),
+    },
     countryFlag: {
       width: responsiveWidth(14.5),
       height: responsiveWidth(6),

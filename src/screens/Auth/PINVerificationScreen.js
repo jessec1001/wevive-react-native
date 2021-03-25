@@ -76,6 +76,11 @@ export default class PINVerificationScreen extends Component {
                   <Button onPress={handleSubmit} title="NEXT" />
                 </View>
               )}
+              {!!errors.pin && (
+                <View style={styles.buttonContainerStyle}>
+                  <Button onPress={this.props.navigation.back()} title="BACK" />
+                </View>
+              )}
             </>
           )}
         </Formik>

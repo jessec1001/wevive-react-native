@@ -11,12 +11,15 @@ import {
 import {MenuItem, MenuDivider} from '../../components/Menu';
 import {ChatContext} from '../../../node_modules/react-native-chat-plugin/ChatContext';
 import CallHistoryItem from '../../components/CallHistoryItem';
-const chatWallpaper = require("../../../node_modules/react-native-chat-plugin/images/chat_background.png");
+const chatWallpaper = require('../../../node_modules/react-native-chat-plugin/images/chat_background.png');
 export default function CallHistory({navigation, route}) {
   //const calls = [];
   const keyExtractor = (item) => item.id;
   const ctx = React.useContext(ChatContext);
-  const calls = ctx.getConversations();
+  const [calls, setCalls] = React.useState([]);
+  ctx.getCallsFromDB().then((DBcalls) => {
+    setCalls(DBcalls);
+  });
   const swiper = React.useRef();
   const onPress = (conversation) => {
     navigation.navigate('ChatScreen', {conversation});
@@ -28,15 +31,10 @@ export default function CallHistory({navigation, route}) {
         <View style={styles.deleteContainer}>
           <TouchableOpacity
             style={styles.deleteViewParent}
-            onPress={() => markConversation(item, 'delete')}>
+            onPress={() => ctx.deleteCall(item)}>
             <View style={styles.deleteView}>
-              <Icon
-                name={'trash'}
-                style={styles.deleteText}
-              />
-              <Text style={styles.deleteTextText}>
-                {'Delete'}
-              </Text>
+              <Icon name={'trash'} style={styles.deleteText} />
+              <Text style={styles.deleteTextText}>{'Delete'}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -74,49 +72,49 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   buttonsContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginHorizontal: 20,
     marginBottom: 20,
   },
   rowStyle: {
     flex: 1,
-    flexDirection: "column",
+    flexDirection: 'column',
   },
   leftSwipeContainer: {
-    alignSelf: "flex-start",
-    flexDirection: "row",
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
     width: 120,
     zIndex: 10,
-    top: 5
-  }, 
+    top: 5,
+  },
   deleteContainer: {
-    alignSelf: "flex-end",
-    flexDirection: "row",
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
     width: 60,
     zIndex: 10,
-    top: 5
+    top: 5,
   },
   deleteViewParent: {
     flex: 1,
-    alignItems: "center",
-    flexDirection: "column",
-    justifyContent: "center",
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   deleteTextText: {
-    color: "white",
+    color: 'white',
     fontSize: 11,
     marginTop: 10,
   },
   deleteView: {
     width: 60,
-    height: "100%",
-    alignItems: "center",
-    flexDirection: "column",
-    justifyContent: "center",
-    backgroundColor: "rgb(201, 66, 59)"
+    height: '100%',
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    backgroundColor: 'rgb(201, 66, 59)',
   },
   deleteText: {
-    color: "white",
+    color: 'white',
     fontSize: 22,
   },
   chatBackground: {
@@ -126,21 +124,21 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   sectionHeaderContainer: {
-    backgroundColor: "rgb(125,125,125)",
+    backgroundColor: 'rgb(125,125,125)',
     paddingVertical: 7,
     paddingHorizontal: 20,
   },
   sectionHeaderLabel: {
-    fontWeight: "700",
-    color: "white",
+    fontWeight: '700',
+    color: 'white',
   },
   alphabetContainer: {
-    backgroundColor: "rgb(145,145,145)",
+    backgroundColor: 'rgb(145,145,145)',
     borderRadius: 30,
     height: 400,
   },
   hiddenItemContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
 });

@@ -1,5 +1,15 @@
 {
+  "chats": {
+    "friend_of_": {
+      "one": "Friend of 1 Wevive user",
+      "few": "Friend of {{count}} Wevive users",
+      "many": "Friend of {{count}} Wevive users",
+      "other": "Friend of {{count}} Wevive users",
+      "zero": "Friend of 0 Wevive users"
+    },
+  },
   "auth": {
+    "username": "Username",
     "country": "Country",
     "name": "Name",
     "email": "Email",

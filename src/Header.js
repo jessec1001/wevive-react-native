@@ -18,17 +18,35 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors} from '../app.json';
 import {UserContext} from './context/UserContext';
-const getTitle = (name) => {
+const getTitlePrefix = (name, params) => {
+  if (name == 'ContactsScreen' && params?.type == 'archived') {
+    return "Archived ";
+  } if (name == 'ContactsScreen' && params?.type == 'starred') {
+    return "Starred ";
+  } else {
+    return "";
+  }
+}
+const getTitle = (name, params) => {
   if (name.indexOf("PrivacySettings") !== -1) return "Privacy Settings";
   switch (name) {
     case 'PhoneUsernameSettings':
       return 'Photo & Username';
+    case 'PhoneContactsScreen':
+      return 'Contacts';
+    case 'CallHistory':
+      return 'Calls';
+    case 'SearchContactsScreen':
+      return 'Search Contacts';
     case 'ContactsScreen':
-      return 'Chats';
+    
+      return getTitlePrefix(name, params) + (params?.filter == 'groups' ? 'Group Chats' : "Chats");
     case 'ChatScreen':
       return false;
     case 'AccountSettings':
       return "Account";
+    case 'ChangeUsername':
+      return "Username";
     case 'ChangeNumber':
       return "Change Number";
     case 'SecuritySettings':
@@ -100,6 +118,8 @@ const getNextRoute = (name, params) => {
       return "ChangeNumberConfirmation"
     case "DeleteChats":
       return "DeleteChatsConfirmation"
+    case "ChangeUsername":
+    return ""
     default:
       return {};
   }
@@ -125,7 +145,7 @@ export default function Header(props) {
   const name = props.route.state?.routes[props.route.state.index].name;
   const params = props.route.state?.routes[props.route.state.index].params;
   //console.warn(name, params);
-  const title = name ? getTitle(name) : false;
+  const title = name ? getTitle(name, params) : false;
   const styleSuffix = getStyleSuffix(name);
   const style = name ? styles[`headerTitle${styleSuffix}`] : styles.headerTitle;
   const logo = getLogo(name);

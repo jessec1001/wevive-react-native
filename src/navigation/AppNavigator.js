@@ -15,6 +15,7 @@ import AccountSettings from '../screens/Settings/AccountSettings';
 import BlockedPrivacySettings from '../screens/Settings/BlockedPrivacySettings';
 import ChatPrivacySettings from '../screens/Settings/ChatPrivacySettings';
 import ChangeNumber from '../screens/Settings/ChangeNumber';
+import ChangeUsername from '../screens/Settings/ChangeUsername';
 import ChangeNumberVerification from '../screens/Settings/ChangeNumberVerification';
 import DeleteAccountConfirmation from '../screens/Settings/DeleteAccountConfirmation';
 import ChangeNumberConfirmation from '../screens/Settings/ChangeNumberConfirmation';
@@ -166,6 +167,11 @@ const AppNavigator = () => {
       <Stack.Screen
         component={ChatPrivacySettings}
         name={'ChatPrivacySettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={ChangeUsername}
+        name={'ChangeUsername'}
         options={defaultConfig}
       />
       <Stack.Screen

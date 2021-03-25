@@ -233,7 +233,7 @@ export default class SignIn extends Component {
                           {values.country && (
                             <ImageBackground
                               source={getFlag(values.country)}
-                              style={styles.countryFlag}
+                              style={styles.countryFlag2}
                               resizeMode={'contain'}
                             />
                           )}

@@ -67,12 +67,6 @@ export default class Settings extends Component {
         </MenuItem>
         <MenuItem
           onPress={() => {
-            this.props.navigation.navigate('ChatsSettings');
-          }}>
-          Chats
-        </MenuItem>
-        <MenuItem
-          onPress={() => {
             this.props.navigation.navigate('NotificationSettings');
           }}>
           Notifications

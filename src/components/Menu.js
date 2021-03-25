@@ -57,7 +57,10 @@ export const MenuItem = (props) => {
           value={toggle}
           accessibilityRole="button"
           style={styles.toggleStyle}
-          onValueChange={(value) => setToggle(value)}
+          onValueChange={(value) =>  {
+            setToggle(value);
+            typeof props.onChange !== 'undefined' && props.onChange(value)
+          }}
         />
       )}
     </TouchableOpacity>
