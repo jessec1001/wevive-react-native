@@ -38,6 +38,14 @@ const getTitle = (name, params) => {
       return 'Calls';
     case 'SearchContactsScreen':
       return 'Search Contacts';
+    case 'SocialStatusSettings':
+      return 'Status';
+    case 'HelpCentre':
+      return 'Help Centre';
+    case 'StorageSettings':
+      return 'Storage Settings';
+    case 'NetworkUsage':
+      return 'Network Usage';
     case 'ContactsScreen':
     
       return getTitlePrefix(name, params) + (params?.filter == 'groups' ? 'Group Chats' : "Chats");

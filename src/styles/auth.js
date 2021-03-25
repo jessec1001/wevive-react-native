@@ -13,7 +13,36 @@ const backgroundColor = 'rgb(240,240,240)';
 
 const styles = (keyboard) => {
   return StyleSheet.create({
-    bigHeadlineText: {
+    alertName: {
+      textAlign: "left",
+      justifyContent: "flex-start",
+      alignSelf: "flex-start",
+      paddingHorizontal: responsiveWidth(0),
+      paddingVertical: responsiveWidth(3),
+      width: responsiveWidth(100),
+      color: "rgb(100,100,100)",
+      backgroundColor: "rgb(220,220,220)",
+    },
+    alertHeadline: {
+      textAlign: "left",
+      justifyContent: "flex-start",
+      alignSelf: "flex-start",
+      paddingHorizontal: responsiveWidth(10),
+      paddingBottom: responsiveWidth(3),
+      fontSize: responsiveFontSize(2.3),
+    },
+    alertText: {
+      textAlign: "left",
+      justifyContent: "flex-start",
+      alignSelf: "flex-start",
+      paddingHorizontal: responsiveWidth(10),
+    },
+    alertTriangle: {
+      color: "rgb(220,67,57)",
+      fontSize: responsiveFontSize(10),
+      marginVertical: responsiveWidth(4),
+    },
+    bigHeadlcineText: {
       fontSize: responsiveFontSize(3),
       //fontFamily: 'Adelle-Bold',
     },

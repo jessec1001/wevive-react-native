@@ -8,9 +8,9 @@ export default class VideoDataSettings extends Component {
     return (
       <>
         <MenuDivider text="Video" />
-        <MenuItem>Never</MenuItem>
-        <MenuItem>Wi-Fi</MenuItem>
-        <MenuItem>Wi-Fi & Cellular</MenuItem>
+        <MenuItem type={"selection"}>Never</MenuItem>
+        <MenuItem type={"selection"}>Wi-Fi</MenuItem>
+        <MenuItem type={"selection"} selected>Wi-Fi & Cellular</MenuItem>
       </>
     );
   }

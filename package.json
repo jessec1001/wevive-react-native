@@ -8,10 +8,7 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
-    "postinstall": "./postinstall.sh",
-    "preparesim": "cp ./libCardIO_Universal.a ./ios/Pods/CardIO/CardIO/libCardIO.a",
-    "prepareprod": "cp ./libCardIO.a ./ios/Pods/CardIO/CardIO/libCardIO.a",
-    "prepareorig": "cp ./libCardIO_Original.a ./ios/Pods/CardIO/CardIO/libCardIO.a"
+    "postinstall": "./postinstall.sh"
   },
   "copyFilesSettings": {
     "whenFileExists": "overwrite"

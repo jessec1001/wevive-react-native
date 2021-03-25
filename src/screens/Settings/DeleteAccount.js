@@ -27,6 +27,7 @@ Object.keys(allCountries)
 import {AuthContext} from '../../context/AuthContext';
 import {ClientContext} from '../../context/ClientContext';
 import { getCountryPhoneCode, removeTrunkPrefix } from '../../utils/phonehelpers';
+import Icon from '../../components/Icon';
 const countryPhoneCode = (country) => {
     if (!country || !phoneCodes[country]) {
       return;
@@ -101,27 +102,30 @@ export default class DeleteAccount extends Component {
               handleSubmit,
               setFieldValue,
             }}>
-              <Text>
+              <Text style={styles.alertName}>
                 You are deleting your wevive account:
               </Text>
-              <Text>
-                Cancel
-              </Text>
-<Text>
+              <Icon name='alert-triangle' style={styles.alertTriangle} />
+<Text style={styles.alertHeadline}>
   Deleting your account will:
 </Text>
-<Text>
+<Text style={styles.alertText}>
 •Delete your account info and profile photo
 </Text>
-<Text>
+<Text style={styles.alertText}>
 •Delete you from all wevive groups
 </Text>
-<Text>
+<Text style={styles.alertText}>
 •Delete your message history on this phone
 </Text>
-<Text>
+<Text style={styles.alertText}>
 •Delete your iCloud backup
 </Text>
+
+<Text style={styles.alertHeadline}>
+</Text>
+<Text style={styles.alertName}>
+              </Text>
               <Text style={styles.pageHeadlineStyle}>Enter your PIN</Text>
               <Text style={styles.pageTextStyle}>
                 Please enter the PIN number that you saved after registration.

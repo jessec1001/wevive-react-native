@@ -3,13 +3,14 @@ import {Share, ScrollView, Text} from 'react-native';
 
 import {MenuItem, MenuDivider} from '../../components/Menu';
 
-export default class ChatPrivacySettings extends Component {
+export default class SocialStatusSettings extends Component {
   render() {
     return (
       <>
         <MenuDivider />
-        <MenuItem type={"selection"} selected>Everyone</MenuItem>
-        <MenuItem type={"selection"}>My contacts</MenuItem>
+        <MenuItem type={"selection"}>Active</MenuItem>
+        <MenuItem type={"selection"} selected>At home</MenuItem>
+        <MenuItem type={"selection"}>Do not disturb</MenuItem>
         <MenuItem type={"selection"}>None</MenuItem>
       </>
     );

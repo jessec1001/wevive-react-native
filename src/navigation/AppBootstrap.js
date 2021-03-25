@@ -17,7 +17,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {colors} from '../../app.json';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-const logo = require('../images/PNG/wetalk_logo.png');
+const logo = require('../images/PNG/logo-line.png');
 const background = require('../images/PNG/wevive_bg.png');
 
 export default class AppBootstrap extends Component {

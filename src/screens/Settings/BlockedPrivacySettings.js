@@ -8,9 +8,9 @@ export default class BlockedPrivacySettings extends Component {
     return (
       <>
         <MenuDivider />
-        <MenuItem>Everyone</MenuItem>
-        <MenuItem>My contacts</MenuItem>
-        <MenuItem>None</MenuItem>
+        <MenuItem type={"selection"} selected>Everyone</MenuItem>
+        <MenuItem type={"selection"}>My contacts</MenuItem>
+        <MenuItem type={"selection"}>None</MenuItem>
       </>
     );
   }

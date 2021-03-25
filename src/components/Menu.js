@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Icon from './Icon';
-import {StyleSheet, Text, View, TouchableOpacity, Switch} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, Switch, TextInput} from 'react-native';
 
 import {
   responsiveHeight,
@@ -34,12 +34,18 @@ export const MenuDivider = (props) => {
 
 export const MenuItem = (props) => {
   const [toggle, setToggle] = React.useState(false);
-
+  const input = React.useRef();
   return (
     <TouchableOpacity
       style={styles.menuRow}
-      onPress={props.onPress ? props.onPress : () => {}}>
+      onPress={props.onPress ? props.onPress : () => {
+        if (props.type == 'textinput') {
+          input.current.focus();
+        }
+      }}>
+      <View style={styles.menuContainer}>
       <Icon size={25} name={'w-watermark'} style={styles.menuIcon} />
+      {props.type !== 'textinput' && (
       <Text
         style={
           !props.important
@@ -50,24 +56,60 @@ export const MenuItem = (props) => {
         }>
         {props.children}
       </Text>
+      )}
+      {props.type == 'textinput' && (
+        <TextInput
+          ref={input}
+          textAlignVertical={"top"}
+          numberOfLines={1}
+          multiline={false}
+          style={styles.textInput}
+          onSubmitEditing={props.onChange}
+          placeholder={props.children}
+          placeholderTextColor={"rgb(125,125,125)"}
+          blurOnSubmit={true}
+          onChangeText={props.onChangeText} />
+      )}
+      
+      </View>
+      {props.type !== 'selection' && props.type !== 'toggle' && props.type !== 'textinput' && (
+      <Icon size={25} name={'arrow'} style={styles.nextIcon} />
+      )}
+      {props.selected && (
+      <Icon size={25} name={'ticks'} style={styles.ticksIcon} />
+      )}
       {props.type == 'toggle' && (
-        <Switch
-          trackColor={{true: '#2bbb50', false: '#bababa'}}
-          thumbColor="#ffffff"
-          value={toggle}
-          accessibilityRole="button"
-          style={styles.toggleStyle}
-          onValueChange={(value) =>  {
-            setToggle(value);
-            typeof props.onChange !== 'undefined' && props.onChange(value)
-          }}
-        />
+        <View style={styles.toggleContainer}>
+          <Switch
+            trackColor={{true: '#2bbb50', false: '#bababa'}}
+            thumbColor="#ffffff"
+            value={toggle}
+            accessibilityRole="button"
+            style={styles.toggleStyle}
+            onValueChange={(value) =>  {
+              setToggle(value);
+              typeof props.onChange !== 'undefined' && props.onChange(value)
+            }}
+          />
+        </View>
       )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
+  nextIcon: {
+    fontSize: responsiveFontSize(0.7),
+    transform: [{rotate: "270deg"}],
+    alignSelf: "center",
+    color: "rgb(100,100,100)",
+  },
+  ticksIcon: {
+    fontSize: responsiveFontSize(1.5),
+    alignSelf: "center",
+    color: "rgb(100,100,100)",
+    color: 'rgb(230, 142, 67)',
+  },
   menuDividerText: {
     paddingHorizontal: responsiveWidth(7.5),
     fontWeight: '700',
@@ -77,9 +119,9 @@ const styles = StyleSheet.create({
   },
   toggleStyle: {
     alignSelf: 'flex-end',
-    position: 'absolute',
-    top: responsiveWidth(3),
-    right: responsiveWidth(5),
+  },
+  toggleContainer: {
+    alignSelf: 'flex-end',
   },
   menuTextContainer: {
     paddingHorizontal: responsiveWidth(8),
@@ -102,6 +144,9 @@ const styles = StyleSheet.create({
     height: responsiveWidth(12.5),
     justifyContent: 'center',
   },
+  menuContainer: {
+    flexDirection: 'row',
+  },
   menuRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
@@ -109,6 +154,7 @@ const styles = StyleSheet.create({
     paddingVertical: responsiveWidth(4),
     paddingHorizontal: responsiveWidth(7.5),
     backgroundColor: 'white',
+    justifyContent: "space-between",
   },
   menuIcon: {
     color: 'rgb(230, 142, 67)',
@@ -130,5 +176,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: responsiveWidth(4.5),
     fontFamily: "SFProDisplay-Regular",
-  }
+  },
+  textInput: {
+    fontSize: responsiveFontSize(2.3),
+  },
 });

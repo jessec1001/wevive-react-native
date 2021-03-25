@@ -23,7 +23,7 @@ import {ScrollContext} from '../context/ScrollContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AppThemeContext} from '../context/UserContext';
 
-const logo = require('../images/PNG/wetalk_logo.png');
+const logo = require('../images/PNG/logo-line.png');
 const background = require('../images/PNG/wevive_bg.png');
 const mainHeadline = 'Register';
 export default class AuthView extends Component {

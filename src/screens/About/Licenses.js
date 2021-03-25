@@ -22,7 +22,7 @@ const defaultMITLicense = `Permission is hereby granted, free of charge, to any 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`;
-const weviveWhiteLogo = require('../../images/PNG/wetalk_logo.png');
+const weviveWhiteLogo = require('../../images/PNG/logo-line.png');
 export default class About extends Component {
   state = {
     contentStyles: contentStyles(),
@@ -85,7 +85,7 @@ export default class About extends Component {
   }
   render() {
     return (
-      <ContentWrapper title="Licenses" paddingHorizontal={0} details={
+      <ContentWrapper paddingHorizontal={0} details={
         <ImageBackground source={aboutbg} style={styles.aboutbg}>
           <ImageBackground resizeMode={"contain"} source={weviveWhiteLogo} style={styles.weviveWhiteLogo}/>
           <View><Text style={styles.aboutText}>"You cannot hope to build a better world without improving the individuals. To that end, each of us must work for his [or her] own improvement and,

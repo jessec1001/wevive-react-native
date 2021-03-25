@@ -8,25 +8,25 @@ export default class NetworkUsage extends Component {
     return (
       <ScrollView>
         <MenuDivider text="Messages" />
-        <MenuItem>Sent</MenuItem>
-        <MenuItem>Received</MenuItem>
-        <MenuItem>Bytes Sent</MenuItem>
-        <MenuItem>Bytes Received</MenuItem>
+        <MenuItem type={'info'}>Sent</MenuItem>
+        <MenuItem type={'info'}>Received</MenuItem>
+        <MenuItem type={'info'}>Bytes Sent</MenuItem>
+        <MenuItem type={'info'}>Bytes Received</MenuItem>
         <MenuDivider text="Chat Media" />
-        <MenuItem>Bytes Sent</MenuItem>
-        <MenuItem>Bytes Received</MenuItem>
+        <MenuItem type={'info'}>Bytes Sent</MenuItem>
+        <MenuItem type={'info'}>Bytes Received</MenuItem>
         <MenuDivider text="Status Media" />
-        <MenuItem>Bytes Sent</MenuItem>
-        <MenuItem>Bytes Received</MenuItem>
+        <MenuItem type={'info'}>Bytes Sent</MenuItem>
+        <MenuItem type={'info'}>Bytes Received</MenuItem>
         <MenuDivider text="Wevive Calls" />
-        <MenuItem>Outgoing</MenuItem>
-        <MenuItem>Incoming</MenuItem>
-        <MenuItem>Bytes Sent</MenuItem>
-        <MenuItem>Bytes Received</MenuItem>
-        <MenuItem>Total Time</MenuItem>
+        <MenuItem type={'info'}>Outgoing</MenuItem>
+        <MenuItem type={'info'}>Incoming</MenuItem>
+        <MenuItem type={'info'}>Bytes Sent</MenuItem>
+        <MenuItem type={'info'}>Bytes Received</MenuItem>
+        <MenuItem type={'info'}>Total Time</MenuItem>
         <MenuDivider text="Total Bytes" />
-        <MenuItem>Sent</MenuItem>
-        <MenuItem>Received</MenuItem>
+        <MenuItem type={'info'}>Sent</MenuItem>
+        <MenuItem type={'info'}>Received</MenuItem>
         <MenuDivider />
         <MenuItem important>Reset Statistics</MenuItem>
       </ScrollView>

@@ -1,3 +1,4 @@
+import 'react-native-get-random-values';
 import './react/features/mobile/polyfills';
 import './react/features/app/middlewares';
 import './react/features/app/reducers';

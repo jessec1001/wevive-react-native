@@ -252,11 +252,13 @@ function _conferenceLeft({ getState }, next, action) {
  */
 function _conferenceWillJoin({ dispatch, getState }, next, action) {
     const result = next(action);
+    
 
     if (!isCallIntegrationEnabled(getState)) {
+        console.warn('hey hey');
         return result;
     }
-
+    console.warn('hey');
     const { conference } = action;
     const state = getState();
     const { callHandle, callUUID } = state['features/base/config'];

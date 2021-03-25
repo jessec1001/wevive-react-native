@@ -10,6 +10,7 @@ import ContactUs from '../screens/About/ContactUs';
 import CallHistory from '../screens/CallHistory/CallHistory';
 import Settings from '../screens/Settings/Settings';
 
+import SocialStatusSettings from '../screens/Settings/SocialStatusSettings';
 import AboutPrivacySettings from '../screens/Settings/AboutPrivacySettings';
 import AccountSettings from '../screens/Settings/AccountSettings';
 import BlockedPrivacySettings from '../screens/Settings/BlockedPrivacySettings';
@@ -152,6 +153,11 @@ const AppNavigator = () => {
       <Stack.Screen
         component={AboutPrivacySettings}
         name={'AboutPrivacySettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={SocialStatusSettings}
+        name={'SocialStatusSettings'}
         options={defaultConfig}
       />
       <Stack.Screen

@@ -1,4 +1,5 @@
 import React, {Component, useContext} from 'react';
+import {View} from 'react-native';
 import {
   Share,
   ScrollView,
@@ -6,17 +7,22 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Text,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {MenuItem, MenuDivider} from '../../components/Menu';
 import {UserContext} from '../../context/UserContext';
 import ImagePicker from 'react-native-image-crop-picker';
-import {responsiveWidth} from 'react-native-responsive-dimensions';
+import {responsiveFontSize, responsiveWidth} from 'react-native-responsive-dimensions';
+import APIService from '../../service/APIService';
 
 export default function PhoneUsernameSettings(props) {
-  const {authData, avatarUrl} = useContext(UserContext);
-  const [image, setImage] = React.useState({});
+  const {authData, avatarUrl, updateMe} = useContext(UserContext);
+  const [image, setImage] = React.useState({
+    avatarImage: avatarUrl,
+    default: true,
+  });
   const pickImage = () => {
     ImagePicker.openPicker({
       width: 500,
@@ -34,23 +40,62 @@ export default function PhoneUsernameSettings(props) {
         avatarImage: image.path,
         avatarFile: imageFilename,
         avatarMime: image.mime,
+        default: false,
       });
+    });
+  };
+
+  const saveImage = () => {
+    APIService('user-photo/update_photo/', {
+      photo: image.avatarImage,
+      filename: image.avatarFile,
+      mime: image.avatarMime,
+      name: "",
+    }).then((result) => {
+      global.appIsNotLoading();
+      if (result) {
+        AsyncStorage.setItem('avatarUrl', result);
+        updateMe();
+        setImage({
+          ...image,
+          default: true,
+        });
+        //AsyncStorage.setItem('userName', values.name);
+      }
+    });
+  };
+
+  const onUsernameChange = () => {
+    setImage({
+      ...image,
+      default: false,
     });
   };
   return (
     <ScrollView>
-      <TouchableOpacity onPress={pickImage}>
+      <View style={styles.avatarBox}>
+      <TouchableOpacity onPress={image.default ? pickImage : saveImage} style={styles.avatarContainer}>
         <Image
           resizeMode="cover"
-          source={{uri: image.avatarFile}}
+          source={{uri: image.avatarImage}}
           style={styles.profileImage}
         />
       </TouchableOpacity>
+
+      <TouchableOpacity onPress={image.default ? pickImage : saveImage} style={styles.avatarContainer}>
+          <Text style={styles.editText}>
+            {image.default ? "Edit" : "Save"}
+          </Text>
+      </TouchableOpacity>
+        <Text style={styles.editDescription}>
+        {image.default ? "Enter your name and add an optional profile Photo." : ""}
+        </Text>
+      </View>
       <MenuDivider text="Profile Photo" />
       <MenuItem
-        onPress={() => {
-          props.navigation.navigate('ChangeUsername');
-        }}>
+        type={"textinput"}
+        onChange={onUsernameChange}
+        >
         User Name
       </MenuItem>
       <MenuDivider blank />
@@ -63,16 +108,42 @@ export default function PhoneUsernameSettings(props) {
       </MenuItem>
       <MenuDivider blank />
       <MenuDivider text="About" />
-      <MenuItem>At Work</MenuItem>
+      <MenuItem
+      onPress={() => {
+        props.navigation.navigate('SocialStatusSettings');
+      }}
+      >At Work</MenuItem>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   profileImage: {
-    width: responsiveWidth(12),
-    height: responsiveWidth(12),
+    width: responsiveWidth(25),
+    height: responsiveWidth(25),
     borderRadius: responsiveWidth(12),
+    marginLeft: responsiveWidth(5),
+    marginVertical: responsiveWidth(1),
     backgroundColor: 'rgba(30,30,30,0.1)',
+  },
+  editDescription: {
+    fontSize: responsiveFontSize(2.15),
+    paddingHorizontal: responsiveWidth(5),
+    flex: 1,
+    alignSelf: "center",
+    color: "rgb(100,100,100)",
+    fontWeight: "300",
+  },
+  avatarBox: {
+    flexDirection: "row",
+  },
+  avatarContainer: {
+    alignSelf: "center",
+  },
+  editText: {
+    fontSize: responsiveFontSize(3),
+    fontWeight: "200",
+    alignSelf: "center",
+    marginLeft: responsiveWidth(3),
   },
 });
