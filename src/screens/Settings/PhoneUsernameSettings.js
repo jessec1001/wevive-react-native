@@ -109,10 +109,12 @@ export default function PhoneUsernameSettings(props) {
       <MenuDivider blank />
       <MenuDivider text="About" />
       <MenuItem
+      type={"info"}
+      info={"At Work"}
       onPress={() => {
         props.navigation.navigate('SocialStatusSettings');
       }}
-      >At Work</MenuItem>
+      >Status</MenuItem>
     </ScrollView>
   );
 }

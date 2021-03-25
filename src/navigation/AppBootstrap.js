@@ -59,7 +59,7 @@ export default class AppBootstrap extends Component {
         opacity: 0.4,
       },
       logo: {
-        width: 417/93 * responsiveWidth(15),
+        width: 417/83 * responsiveWidth(15),
         height: responsiveWidth(15),
         top: -80,
       },

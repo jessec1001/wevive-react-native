@@ -93,13 +93,19 @@ export const MenuItem = (props) => {
           />
         </View>
       )}
+      {props.type == 'info' && (
+      <Text
+        style={styles.infoItem}>
+        {props.info}
+      </Text>
+      )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   nextIcon: {
-    fontSize: responsiveFontSize(0.7),
+    fontSize: responsiveFontSize(0.8),
     transform: [{rotate: "270deg"}],
     alignSelf: "center",
     color: "rgb(100,100,100)",
@@ -159,6 +165,17 @@ const styles = StyleSheet.create({
   menuIcon: {
     color: 'rgb(230, 142, 67)',
     marginRight: responsiveWidth(3),
+  },
+  infoItem: {
+    position: "absolute",
+    top: responsiveWidth(4.2),
+    right: responsiveWidth(12.4),
+    alignSelf: 'center',
+    textAlign: "right",
+    color: "rgb(150,150,150)",
+    fontWeight: "300",
+    fontSize: responsiveFontSize(2.1),
+    lineHeight: responsiveFontSize(3),
   },
   menuItem: {
     alignSelf: 'center',
