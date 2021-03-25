@@ -386,7 +386,7 @@ index c41797c..73d4762 100644
            return a.lastEvent.time < b.lastEvent.time;
          } else if (a.lastEvent) {
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
-index f9bc1dc..035829c 100644
+index f9bc1dc..ab5f488 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/index.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/index.js
 @@ -6,6 +6,7 @@ import combineReducers from "./combineReducers";
@@ -677,7 +677,7 @@ index f9bc1dc..035829c 100644
 +  },[]);
 +  const saveUserToDB = React.useCallback((userId, avatarUrl, username, phone_number) => {
 +    return new Promise((resolve, reject) => {
-+      getDB().then((db)=> {
++      getDB().then(async (db)=> {
 +        avatarFileId = await saveFile(avatarUrl,'avatar',userId);
 +        db.executeSql(
 +          "INSERT OR IGNORE INTO users (`userId`,`username`,`avatarUrl`, `avatarFileId`, `phone_number`, created_at) VALUES (?, ?, ?, ?, ?, ?)",
@@ -2471,7 +2471,7 @@ index 7caec69..041c3fd 100644
        socket.emit("conversations:create", { participants: [participant] }, ({ success, conversation }) => {
          if (success) {
 diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
-index 8cb4565..db49ae0 100644
+index 8cb4565..800ce54 100644
 --- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 +++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 @@ -4,7 +4,7 @@ SQLite.DEBUG(false);
@@ -2479,7 +2479,7 @@ index 8cb4565..db49ae0 100644
  
  let db = null;
 -let db_version = 20;
-+let db_version = 39;
++let db_version = 40;
  export function getEncryptionKeys(context) {
    return new Promise((resolve, reject) => {
      context.getDB().then((db) => {
