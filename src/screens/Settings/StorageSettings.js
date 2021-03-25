@@ -16,16 +16,28 @@ export default class StorageSettings extends Component {
         }}>Network Usage</MenuItem>
         <MenuItem type={"toggle"}>Use Less Data for Calls</MenuItem>
         <MenuDivider text={"Media Auto-download"} />
-        <MenuItem onPress={() => {
+        <MenuItem 
+        type="info"
+        info="Wi-Fi & Cellular"
+        onPress={() => {
             this.props.navigation.navigate('PhotosDataSettings');
         }}>Photos</MenuItem>
-        <MenuItem onPress={() => {
+        <MenuItem 
+        type="info"
+        info="Wi-Fi & Cellular"
+        onPress={() => {
             this.props.navigation.navigate('AudioDataSettings');
         }}>Audio</MenuItem>
-        <MenuItem onPress={() => {
+        <MenuItem 
+        type="info"
+        info="Wi-Fi & Cellular"
+        onPress={() => {
             this.props.navigation.navigate('VideoDataSettings');
         }}>Video</MenuItem>
-        <MenuItem onPress={() => {
+        <MenuItem
+        type="info"
+        info="Wi-Fi & Cellular"
+        onPress={() => {
             this.props.navigation.navigate('DocumentsDataSettings');
         }}>Documents</MenuItem>
         <MenuItem important>Reset Auto-download Settings</MenuItem>

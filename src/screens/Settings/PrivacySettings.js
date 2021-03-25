@@ -8,32 +8,46 @@ export default class PrivacySettings extends Component {
       <ScrollView>
         <MenuDivider />
         <MenuItem
+          type="info"
+          info="Everyone"
           onPress={() => {
             this.props.navigation.navigate('LastSeenPrivacySettings');
           }}>
           Last Seen
         </MenuItem>
         <MenuItem
+          type="info"
+          info="Everyone"
           onPress={() => {
             this.props.navigation.navigate('TypingPrivacySettings');
           }}>Typing</MenuItem>
         <MenuItem
+          type="info"
+          info="Everyone"
           onPress={() => {
             this.props.navigation.navigate('ProfilePhotoPrivacySettings');
           }}>Profile Photo</MenuItem>
         <MenuItem
+          type="info"
+          info="Everyone"
           onPress={() => {
             this.props.navigation.navigate('AboutPrivacySettings');
           }}>About</MenuItem>
         <MenuItem
+          type="info"
+          info="Everyone"
           onPress={() => {
             this.props.navigation.navigate('GroupsPrivacySettings');
           }}>Groups (who can add me)</MenuItem>
         <MenuItem
+          type="info"
+          info="Everyone"
           onPress={() => {
             this.props.navigation.navigate('ChatPrivacySettings');
           }}>Chats (who can add me)</MenuItem>
         <MenuItem
+          type="info"
+          info="Everyone"
           onPress={() => {
             this.props.navigation.navigate('BlockedPrivacySettings');
           }}>Blocked</MenuItem>
