@@ -19,7 +19,7 @@ const showActionSheet = () => {
 };
 
 export default function FooterTabs(props) {
-  const [unread, setUnread] = React.useState(2);
+  const [unread, setUnread] = React.useState(0);
   // useRoute doesn't work here
   addUnreadCountListener((value) => {
     setUnread(value);
@@ -195,7 +195,7 @@ export default function FooterTabs(props) {
               }>
               Chats
             </Text>
-            {unread > 0 && <View style={styles.unreadBox}><Text style={styles.unreadTitle}>{unread}</Text></View>}
+            {unread > 0 && <View style={styles.unreadBox}><Text style={styles.unreadText}>{unread}</Text></View>}
           </Pressable>
         </View>
         {groupsButton}
@@ -206,6 +206,23 @@ export default function FooterTabs(props) {
 const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
+  },
+  unreadText: {
+    color: "white",
+    fontSize: 9,
+    fontWeight: "400",
+    alignSelf: "center",
+    textAlign: "center",
+  },
+  unreadBox: {
+    backgroundColor: "rgb(200,30,30)",
+    justifyContent: "center",
+    position: "absolute",
+    borderRadius: 30,
+    width: 14,
+    height: 14,
+    right: 0,
+    bottom: 15,
   },
   menuText: {
     marginRight: responsiveWidth(3),
