@@ -16,11 +16,11 @@ export default class NotificationsScreen extends Component {
     bioAccessToken: null,
     avatarImage: null,
   };
-  navigateSuccess = () => {
+  navigateSuccess = (notificationsEnabled) => {
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: 'App'}],
+        routes: [{name: 'App', params: {notificationsEnabled}}],
       }),
     );
   };
@@ -36,21 +36,7 @@ export default class NotificationsScreen extends Component {
             pin: '',
           }}
           onSubmit={(values, actions) => {
-            global.appIsLoading();
-            APIService('users/sign_in/', {
-              email: values.email,
-              password: values.password,
-              remember_me: 1,
-              is_staff: false,
-            }).then((result) => {
-              global.appIsNotLoading();
-              this.navigateSuccess();
-              if (result) {
-                this.navigateSuccess();
-              } else {
-                actions.setFieldError('password', 'Wrong password.');
-              }
-            });
+            this.navigateSuccess(values.giftaid);
           }}
           validationSchema={yup.object().shape({
             //email: yup.string().email().required(),

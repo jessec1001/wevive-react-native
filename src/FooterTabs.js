@@ -12,13 +12,18 @@ import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import {ActionSheetCustom as ActionSheet} from '@alessiocancian/react-native-actionsheet';
 
 import {colors} from './../app.json';
+import { addUnreadCountListener } from 'react-native-chat-plugin';
 const actionSheetRef = createRef();
 const showActionSheet = () => {
   actionSheetRef.current.show();
 };
 
 export default function FooterTabs(props) {
+  const [unread, setUnread] = React.useState(2);
   // useRoute doesn't work here
+  addUnreadCountListener((value) => {
+    setUnread(value);
+  });
   const params = props.route.state?.routes[props.route.state.index].params;
   const ActionSheetElement = (props) => {
     return (
@@ -49,6 +54,7 @@ export default function FooterTabs(props) {
     }
   };
   let groupActions = [
+    <ActionSheetElement text="Private group" icon="lock" />,
     <ActionSheetElement text="Public group" icon="lock" />,
   ];
   //groupActions = [];
@@ -89,7 +95,7 @@ export default function FooterTabs(props) {
         options={[
           <ActionSheetElement text="Nearby contact" icon="mapmarker" />,
           ...groupActions,
-          <ActionSheetElement text="Private Chat" icon="lock" />,
+          <ActionSheetElement text="1-to-1 Chat" icon="lock" />,
           'Cancel',
         ]}
         onPress={createConversation}
@@ -189,6 +195,7 @@ export default function FooterTabs(props) {
               }>
               Chats
             </Text>
+            {unread > 0 && <View style={styles.unreadBox}><Text style={styles.unreadTitle}>{unread}</Text></View>}
           </Pressable>
         </View>
         {groupsButton}

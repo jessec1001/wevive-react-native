@@ -78,7 +78,7 @@ export default class PINVerificationScreen extends Component {
               )}
               {!!errors.pin && (
                 <View style={styles.buttonContainerStyle}>
-                  <Button onPress={this.props.navigation.back()} title="BACK" />
+                  <Button onPress={this.props.navigation.goBack} title="BACK" />
                 </View>
               )}
             </>

@@ -11,9 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 
-import {
-  UserContext,
-} from '../../context/UserContext';
+import {UserContext} from '../../context/UserContext';
 export default class VerificationScreen extends Component {
   state = {
     email: null,
@@ -124,6 +122,14 @@ export default class VerificationScreen extends Component {
                   {!errors.pin && values.pin.length > 0 && (
                     <View style={styles.buttonContainerStyle}>
                       <Button onPress={handleSubmit} title="NEXT" />
+                    </View>
+                  )}
+                  {!!errors.pin && (
+                    <View style={styles.buttonContainerStyle}>
+                      <Button
+                        onPress={this.props.navigation.goBack}
+                        title="BACK"
+                      />
                     </View>
                   )}
                 </View>
