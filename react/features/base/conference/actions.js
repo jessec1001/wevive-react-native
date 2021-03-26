@@ -440,7 +440,6 @@ export function createConference() {
         connection[JITSI_CONNECTION_CONFERENCE_KEY] = conference;
 
         conference[JITSI_CONFERENCE_URL_KEY] = locationURL;
-
         dispatch(_conferenceWillJoin(conference));
 
         _addConferenceListeners(conference, dispatch);

@@ -31,7 +31,9 @@ function HeadlessCheck({isHeadless, url}) {
   return <App url={url} isHeadless={isHeadless} />;
 }
 //_initLogging();
-
+nextButton = () => {
+  console.log('nextButton');
+};
 AppRegistry.registerComponent('App', () => HeadlessCheck);
 // Register the main/root Component of IncomingCallView.
 AppRegistry.registerComponent('IncomingCallApp', () => IncomingCallApp);

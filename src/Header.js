@@ -20,15 +20,16 @@ import {colors} from '../app.json';
 import {UserContext} from './context/UserContext';
 const getTitlePrefix = (name, params) => {
   if (name == 'ContactsScreen' && params?.type == 'archived') {
-    return "Archived ";
-  } if (name == 'ContactsScreen' && params?.type == 'starred') {
-    return "Starred ";
-  } else {
-    return "";
+    return 'Archived ';
   }
-}
+  if (name == 'ContactsScreen' && params?.type == 'starred') {
+    return 'Starred ';
+  } else {
+    return '';
+  }
+};
 const getTitle = (name, params) => {
-  if (name.indexOf("PrivacySettings") !== -1) return "Privacy Settings";
+  if (name.indexOf('PrivacySettings') !== -1) {return "Privacy Settings";}
   switch (name) {
     case 'PhoneUsernameSettings':
       return 'Photo & Username';
@@ -37,7 +38,9 @@ const getTitle = (name, params) => {
     case 'CallHistory':
       return 'Calls';
     case 'SearchContactsScreen':
-      return 'Search Contacts';
+      return params?.type == 'private' || params?.type == 'public'
+        ? 'Create group'
+        : 'Search Contacts';
     case 'SocialStatusSettings':
       return 'Status';
     case 'HelpCentre':
@@ -47,27 +50,27 @@ const getTitle = (name, params) => {
     case 'NetworkUsage':
       return 'Network Usage';
     case 'ContactsScreen':
-    
-      return getTitlePrefix(name, params) + (params?.filter == 'groups' ? 'Group Chats' : "Chats");
+
+      return getTitlePrefix(name, params) + (params?.filter == 'groups' ? 'Group Chats' : 'Chats');
     case 'ChatScreen':
       return false;
     case 'AccountSettings':
-      return "Account";
+      return 'Account';
     case 'ChangeUsername':
-      return "Username";
+      return 'Username';
     case 'ChangeNumber':
-      return "Change Number";
+      return 'Change Number';
     case 'SecuritySettings':
-      return "Settings";
+      return 'Settings';
     case 'DeleteAccount':
-      return "Delete Account";
+      return 'Delete Account';
     case 'DeleteChats':
-      return "Delete Chats";
+      return 'Delete Chats';
     case 'PrivacySettings':
-      return "Privacy Settings";
+      return 'Privacy Settings';
     case 'ContactUs':
-      return "Contact Us";
-    case 'ChangeNumberVerification': 
+      return 'Contact Us';
+    case 'ChangeNumberVerification':
       return 'Change Phone Number';
     case 'ChangeNumberConfirmation':
       return 'Verify new number';
@@ -84,70 +87,93 @@ const getStyleSuffix = (name) => {
     case 'PhoneUsernameSettings':
       return 'Big';
     case 'ContactsScreen':
-      return "";
+      return '';
     case 'ChatScreen':
-      return "";
+      return '';
     case 'AccountSettings':
-      return "Big";
+      return 'Big';
     case 'ChangeNumber':
-      return "Big";
+      return 'Big';
     case 'SecuritySettings':
-      return "Big";
+      return 'Big';
     case 'DeleteAccount':
-      return "Big";
+      return 'Big';
     case 'DeleteChats':
-      return "Big";
+      return 'Big';
     case 'PrivacySettings':
-      return "Big";
+      return 'Big';
     case 'ChangeNumberVerification':
-      return "Big";
+      return 'Big';
     case 'ChangeNumberConfirmation':
-      return "Big";
+      return 'Big';
     case 'ContactUs':
-      return "Big";
+      return 'Big';
     default:
       break;
   }
-  return "";
+  return '';
 };
 const getLogo = (name) => {
   const styleSuffix = getStyleSuffix(name);
-  const logoStyle = name ? styles[`mainLogoStyle${styleSuffix}`] : styles.mainLogoStyle;
-  return styleSuffix !== 'Big' ? <ClientLogo
-    style={logoStyle}
-    imageStyle={styles.mainLogoImageStyle}
-  /> : <Icon style={logoStyle} name='w-watermark' />
-}
+  const logoStyle = name
+    ? styles[`mainLogoStyle${styleSuffix}`]
+    : styles.mainLogoStyle;
+  return styleSuffix !== 'Big' ? (
+    <ClientLogo style={logoStyle} imageStyle={styles.mainLogoImageStyle} />
+  ) : (
+    <Icon style={logoStyle} name="w-watermark" />
+  );
+};
 const getNextRoute = (name, params) => {
   switch (name) {
-    case "ChangeNumber":
-      return "ChangeNumberVerification"
-    case "ChangeNumberVerification":
-      return "ChangeNumberConfirmation"
-    case "DeleteChats":
-      return "DeleteChatsConfirmation"
-    case "ChangeUsername":
-    return ""
+    case 'ChangeNumber':
+      return 'ChangeNumberVerification';
+    case 'ChangeNumberVerification':
+      return 'ChangeNumberConfirmation';
+    case 'DeleteChats':
+      return 'DeleteChatsConfirmation';
+    case 'ChangeUsername':
+      return '';
     default:
-      return {};
+      return '';
   }
-}
-const getNextParams = (name, params) => {
-  
-}
+};
+const getNextParams = (name, params) => {};
 const getNextOrProfile = (props, name, params, avatarUrl) => {
   const styleSuffix = getStyleSuffix(name);
   const next = [
-    "ChangeNumber",
-    "ChangeNumberVerification",
+    'ChangeNumber',
+    'ChangeNumberVerification',
+    'SearchContactsScreen',
   ];
-  const logoStyle = name ? styles[`mainLogoStyle${styleSuffix}`] : styles.mainLogoStyle;
-  return next.indexOf(name) === -1  ? <TouchableOpacity onPress={() => props.navigate('Settings')}>
-  <Image resizeMode="cover" source={{uri: avatarUrl}} style={styles.headerProfileImage} />
-</TouchableOpacity> : <TouchableOpacity onPress={() => props.navigate(getNextRoute(name, params),getNextParams(name, params))}>
-  <Text style={styles.goNextText}>Next</Text>
-</TouchableOpacity> 
-}
+  const logoStyle = name
+    ? styles[`mainLogoStyle${styleSuffix}`]
+    : styles.mainLogoStyle;
+  return next.indexOf(name) === -1 ? (
+    <TouchableOpacity onPress={() => props.navigate('Settings')}>
+      <Image
+        resizeMode="cover"
+        source={{uri: avatarUrl}}
+        style={styles.headerProfileImage}
+      />
+    </TouchableOpacity>
+  ) : (
+    <TouchableOpacity
+      onPress={() => {
+        const nextRoute = getNextRoute(name, params);
+        if (nextRoute !== '') {
+          props.navigate(nextRoute, getNextParams(name, params));
+        } else {
+          if (typeof nextButton == 'function') {
+            // eslint-disable-next-line no-undef
+            nextButton();
+          }
+        }
+      }}>
+      <Text style={styles.goNextText}>Next</Text>
+    </TouchableOpacity>
+  );
+};
 export default function Header(props) {
   const ctx = React.useContext(UserContext);
   const name = props.route.state?.routes[props.route.state.index].name;
@@ -158,7 +184,7 @@ export default function Header(props) {
   const style = name ? styles[`headerTitle${styleSuffix}`] : styles.headerTitle;
   const logo = getLogo(name);
   const nextOrProfile = getNextOrProfile(props, name, params, ctx.avatarUrl);
-  
+
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar
@@ -188,9 +214,7 @@ export default function Header(props) {
           {logo}
           {title && <Text style={style}>{title}</Text>}
         </View>
-        <View style={styles.right}>
-          {nextOrProfile}
-        </View>
+        <View style={styles.right}>{nextOrProfile}</View>
       </View>
     </SafeAreaView>
   );
@@ -224,7 +248,7 @@ const styles = StyleSheet.create({
   mainLogoStyleBig: {
     borderRadius: 7,
     marginTop: responsiveWidth(1),
-    alignSelf: "center",
+    alignSelf: 'center',
     fontSize: responsiveFontSize(4),
     color: 'rgb(227,140,57)',
   },
@@ -257,5 +281,5 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2.3),
     marginRight: responsiveWidth(1),
     fontWeight: '100',
-  }
+  },
 });

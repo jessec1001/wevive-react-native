@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index c0d4abb..180fcee 100644
+index c0d4abb..fa7ae88 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
-@@ -2,116 +2,143 @@ import React from "react";
+@@ -2,116 +2,158 @@ import React from "react";
  import PropTypes from "prop-types";
  import { View, Text, StyleSheet, Alert } from "react-native";
  
@@ -18,9 +18,10 @@ index c0d4abb..180fcee 100644
  import Colors from "./constants/Colors";
  import { getEncryptionKeys } from "./utils/SQLCipherClient";
  import { decryptConversations, decryptEvents, recreateEncryptionKeys, resendEncryptionKeys} from "./utils/ChatEncryption";
--
--const Stack = createStackNavigator();
 +import Pressable from "react-native/Libraries/Components/Pressable/Pressable";
++import { responsiveFontSize, responsiveHeight, responsiveWidth } from "react-native-responsive-dimensions";
+ 
+-const Stack = createStackNavigator();
  const styles = StyleSheet.create({
    errorView: {
 -    flex: 1,
@@ -36,10 +37,10 @@ index c0d4abb..180fcee 100644
      color: Colors.TEXT,
 +    fontSize: 8,
 +    marginLeft: 3,
-   },
++  },
 +  errorIcon: {
 +    fontSize: 10,
-+  }
+   },
  });
  
 -const defaultOptions = {
@@ -67,6 +68,7 @@ index c0d4abb..180fcee 100644
 -          const conversations = await decryptConversations(res.conversations, socket.chat_private_key, ctx, recreateKeys);
 -          ctx.setConversations(conversations);
 -        }
++  const users = ctx.getUsers()
 +  const authenticationCallback = (res) => {
 +    setTimeout(() => {
 +      socket.chat_user_id = res.user.id;
@@ -135,7 +137,7 @@ index c0d4abb..180fcee 100644
 +      }
 +      */
 +      emitEvents();
-+    },10);
++    },100);
 +  };
 +  React.useEffect(() => {
      getEncryptionKeys(ctx).then(({ private_key, public_key, salt }) => {
@@ -152,14 +154,19 @@ index c0d4abb..180fcee 100644
 +const emitEvents = (recreateKeys = false) => {
 +  // get latest conversations from the server:
 +  ctx.getLatestEventFromDB().then((event)=> {
-+    //console.error(event);
 +    const options = event ? {since: 0} : {since: 0};
 +    socket.emit("conversations:fetch", options, async (res) => {
 +      if (res && res.success && Array.isArray(res.conversations)) {
 +        const conversations = await decryptConversations(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys);
 +        ctx.setConversations(conversations);
-+        //console.error(conversations);
-+        conversations.map(c=>ctx.saveConversationToDB(c));
++        conversations.map(c=>{
++          ctx.saveConversationToDB(c)
++          c.participants.map(u=>{
++            //console.error('adding', u);
++            ctx.saveUserToDB(u.id, u.avatar, u.username);
++            ctx.addUser(u);
++          });
++        });
 +      }
 +    });
 +  });
@@ -175,6 +182,13 @@ index c0d4abb..180fcee 100644
 +  }, []);
 +  React.useEffect(() => {
 +    // get latest conversations from the DB:
++    ctx.getUsersFromDB().then((users)=> {
++      //console.error(users);
++      for (let i=0;i<users.length;i++) {
++        let user = users.item(i);
++        ctx.addUser(user);
++      }
++    });
 +    ctx.getConversationsFromDB().then((conversations)=> {
 +      for (let i=0;i<conversations.length;i++) {
 +        let conversation = conversations.item(i);
@@ -214,7 +228,7 @@ index c0d4abb..180fcee 100644
      socket.on("events:event_created", handleEventCreated);
      socket.on("conversations:created", handleConversationCreated);
      const cleanAuthenticationHooks = ctx.setUpAuthenticationHooks(authenticationCallback);
-@@ -141,29 +168,20 @@ export default function ChatContainer({ options }) {
+@@ -141,29 +183,20 @@ export default function ChatContainer({ options }) {
  
      return () => timer && clearTimeout(timer);
    }, [authError]);
@@ -253,7 +267,7 @@ index c0d4abb..180fcee 100644
  
  ChatContainer.propTypes = {
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
-index 8e9472a..7073df8 100644
+index 8e9472a..53a5315 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
 @@ -27,7 +27,6 @@ export function createAuthActions(state, dispatch) {
@@ -264,7 +278,27 @@ index 8e9472a..7073df8 100644
      socket.emit("users:authenticate", options, function handleAuthSuccess(res) {
        if (res && res.success) {
          setAuthInfo(options, res.user);
-@@ -104,7 +103,7 @@ export function createAuthActions(state, dispatch) {
+@@ -58,10 +57,18 @@ export function createAuthActions(state, dispatch) {
+     };
+   }
+ 
+-  function createSocketDisconnectedHandler() {
++  function createSocketDisconnectedHandler(callback) {
+     return function handleSocketDisconnected(error) {
++      if (authenticationTimeout) {
++        clearTimeout(authenticationTimeout);
++      }
+       setAuthenticationError("Lost connection to the server.");
+       console.warn("Socket disconnected:", error);
++      if (error == 'ping timeout') {
++        authenticationTimeout = setTimeout(function () {
++          authenticate(state.options, callback);
++        }, 100);
++      }
+     };
+   }
+ 
+@@ -104,7 +111,7 @@ export function createAuthActions(state, dispatch) {
        const handleRequireAuthentication = createRequireAuthenticationHandler(callback);
        const handleSocketDisconnected = createSocketDisconnectedHandler();
        socket.on('connect', () => {
@@ -274,10 +308,19 @@ index 8e9472a..7073df8 100644
        // handle connection error.
        socket.on("error", handleSocketError);
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
-index 787b10d..8660f8c 100644
+index 787b10d..4632dea 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
-@@ -14,12 +14,41 @@ export function ChatReducer(state, action) {
+@@ -5,6 +5,8 @@ export const ChatInitialState = {
+   loading: false,
+   options: {},
+   user: {},
++  users: [],
++  contacts: [],
+ };
+ 
+ export function ChatReducer(state, action) {
+@@ -14,12 +16,41 @@ export function ChatReducer(state, action) {
      const { conversationId, events, page  } = action.payload;
      const conversationIdx = state.conversations.findIndex((c) => c.id === conversationId);
      const conversations = [...state.conversations];
@@ -320,7 +363,7 @@ index 787b10d..8660f8c 100644
    case "new_event": {
      const event = action.payload.event;
      const conversationId = event.conversationId || event.conversation.id;
-@@ -54,6 +83,12 @@ export function createChatActions(state, dispatch) {
+@@ -54,6 +85,12 @@ export function createChatActions(state, dispatch) {
      addEvent(event) {
        dispatch({ type: "new_event", payload: { event } });
      },
@@ -334,7 +377,7 @@ index 787b10d..8660f8c 100644
        dispatch({ type: "update_events", payload: { conversationId, events }});
      },
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
-index c41797c..73d4762 100644
+index c41797c..50f0d9f 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 @@ -1,3 +1,5 @@
@@ -352,7 +395,26 @@ index c41797c..73d4762 100644
    }
    return { ...state, conversations: newConversations };
  };
-@@ -82,12 +84,47 @@ export function conversationReducer(state, action) {
+@@ -74,6 +76,18 @@ const unsetTyping = (state, conversationId, userId) => {
+ 
+ export function conversationReducer(state, action) {
+   switch(action.type) {
++  case "add_user": {
++    // delete conversation by id.
++    const user = action.payload.user;
++    const users = [...state.users];
++    const userIdx = state.users.findIndex(u => u.userId === user.userId);
++    if (userIdx != -1) {
++      users[userIdx] = user;
++    } else {
++      users.push(user);
++    }
++    return { ...state, users };
++  }
+   case "delete_conversation": {
+     // delete conversation by id.
+     const conversationId = action.payload.conversationId;
+@@ -82,12 +96,47 @@ export function conversationReducer(state, action) {
    }
  
    case "mute_conversation": {
@@ -401,7 +463,7 @@ index c41797c..73d4762 100644
    case "update_conversations":
      return { ...state, conversations: action.payload.conversations };
  
-@@ -120,11 +157,14 @@ export function conversationReducer(state, action) {
+@@ -120,11 +169,14 @@ export function conversationReducer(state, action) {
  
  export function createConversationActions(state, dispatch) {
    const socket = getSocket();
@@ -418,7 +480,7 @@ index c41797c..73d4762 100644
        }
      });
    }
-@@ -132,11 +172,26 @@ export function createConversationActions(state, dispatch) {
+@@ -132,11 +184,53 @@ export function createConversationActions(state, dispatch) {
      dispatch({ type: "mute_conversation", payload: { conversationId }});
    }
  
@@ -439,14 +501,51 @@ index c41797c..73d4762 100644
 +    pinConversation,
 +    unreadConversation,
 +    archiveConversation,
++    getCallname(conversationId) {
++      const ctx = this;
++      const conversationIdx = state.conversations.findIndex(c => c.id == conversationId);
++      return ctx.getChatname(state.conversations[conversationIdx]);
++    },
++    getChatname(conversation) {
++      const user = state.user;
++      if (!conversation) return "";
++      if (typeof conversation.participants !== "undefined" && (conversation.name == "" || !conversation.name)) {
++        const notOwner = conversation.participants.filter(f=>f.id !== user.id)
++        const name = notOwner[0] ? this.getContactName(notOwner[0].username) : "Me";
++        return name;
++      } return conversation.name;
++    },
++    getContactName(phone_number) {
++      const ctx = this;
++      const contactIdx = ctx.contacts.findIndex(c => c.labels.indexOf(phone_number) !== -1);
++      return contactIdx !== -1 ? ctx.contacts[contactIdx].value : (state.user.username !== phone_number && phone_number != 'Me' ? phone_number : "Me");
++    },
++    getUsernameByUserId(userId) {
++      const users = state.users;
++      const userIdx = users.findIndex(u => u.id === userId);
++      return userIdx !== -1 ? this.getContactName(users[userIdx].username) : `Wevive user`; 
++    },
++    getUsers() {
++      return state.users || [];
++    },
      getConversations() {
        state.conversations.sort((a,b)=>{
 +        if (a.pinned && !b.pinned) return false;
          if (a.lastEvent && b.lastEvent) {
            return a.lastEvent.time < b.lastEvent.time;
          } else if (a.lastEvent) {
+@@ -152,6 +246,9 @@ export function createConversationActions(state, dispatch) {
+         dispatch({ type: "add_conversations", payload: { conversations }});
+       }
+     },
++    addUser(user) {
++      dispatch({ type: "add_user", payload: { user }});
++    },
+     addConversation(conversation) {
+       dispatch({ type: "add_conversation", payload: { conversation }});
+     },
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
-index f9bc1dc..8e051ce 100644
+index f9bc1dc..f0cef5e 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/index.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/index.js
 @@ -6,7 +6,8 @@ import combineReducers from "./combineReducers";
@@ -459,7 +558,7 @@ index f9bc1dc..8e051ce 100644
  
  export const ChatContext = React.createContext({...ChatInitialState});
  
-@@ -17,8 +18,350 @@ const reducer = combineReducers(
+@@ -17,8 +18,355 @@ const reducer = combineReducers(
    settingsReducer
  );
  
@@ -689,7 +788,10 @@ index f9bc1dc..8e051ce 100644
 +  const _saveFileToDisk = React.useCallback((url, path) => {
 +    return new Promise((resolve, reject) => {
 +      //TODO fetch and save to path
-+      console.error(url,path);
++      //console.error(url,path);
++      if (url == null || !url) {
++        resolve("");
++      }
 +      fetch(url).then(()=> {
 +        resolve(path);
 +      });
@@ -723,11 +825,11 @@ index f9bc1dc..8e051ce 100644
 +
 +  const saveFile = React.useCallback((url, filetype, refId) => {
 +    return new Promise(async (resolve, reject) => {
-+      if (!url) {
++      if (!url || url == '') {
 +        resolve("0");
 +      }
 +      const path = await saveFileToDisk(url, filetype);
-+      if (!path) {
++      if (!path || path == "") {
 +        resolve("0");
 +      }
 +      const size = await getFileSize(path);
@@ -755,14 +857,16 @@ index f9bc1dc..8e051ce 100644
 +    })
 +  },[]);
 +  const saveUserToDB = React.useCallback((userId, avatarUrl, username, phone_number) => {
++    //console.error(userId, avatarUrl, username, phone_number);
 +    return new Promise((resolve, reject) => {
 +      getDB().then(async (db)=> {
 +        avatarFileId = await saveFile(avatarUrl,'avatar',userId);
-+        console.error('avatar file = ',avatarFileId);
++        //console.error('avatar file = ',avatarFileId);
 +        db.executeSql(
 +          "INSERT OR IGNORE INTO users (`userId`,`username`,`avatarUrl`, `avatarFileId`, `phone_number`, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-+          [userId, username, avatarUrl, avatarFileId, Math.floor(Date.now() / 1000)]
++          [userId, username, avatarUrl, avatarFileId, phone_number, Math.floor(Date.now() / 1000)]
 +        ).then(([results])=> {
++          //console.error(results);
 +          return results;
 +        });
 +      })
@@ -811,7 +915,7 @@ index f9bc1dc..8e051ce 100644
    const context = React.useMemo(
      () => {
        return ({
-@@ -26,11 +369,32 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
+@@ -26,11 +374,32 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
          ...createAuthActions(state, dispatch),
          ...createChatActions(state, dispatch),
          ...createConversationActions(state, dispatch),
@@ -848,7 +952,7 @@ index f9bc1dc..8e051ce 100644
        });
      },
      [state]
-@@ -47,5 +411,5 @@ ChatContextProvider.propTypes = {
+@@ -47,5 +416,5 @@ ChatContextProvider.propTypes = {
    options: PropTypes.object.isRequired,
    children: PropTypes.element.isRequired,
    socketIoUrl: PropTypes.string.isRequired,
@@ -908,7 +1012,7 @@ index 0000000..609e264
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 5388ef0..b2845bf 100644
+index 5388ef0..f68395d 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -10,7 +10,7 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
@@ -951,7 +1055,7 @@ index 5388ef0..b2845bf 100644
 +    setMessage("");
 +    const localMsg = await ctx.saveMessageToDB(conversation, contents, socket.chat_user_id, 0);
 +    const newMessage = {
-+      id: localMsg,
++      id: String(localMsg),
 +      conversationId: conversation.id,
 +      type: "MESSAGE",
 +      nonce: localMsg,
@@ -1078,7 +1182,7 @@ index 5388ef0..b2845bf 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index bbdff8a..53bdd9f 100644
+index bbdff8a..73c9360 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,5 +1,5 @@
@@ -1262,7 +1366,7 @@ index bbdff8a..53bdd9f 100644
    React.useEffect(() => {
      const socket = getSocket();
  
-@@ -103,12 +246,25 @@ export default function ChatScreen({ navigation, route }) {
+@@ -103,13 +246,26 @@ export default function ChatScreen({ navigation, route }) {
        ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents)});
      });
    }
@@ -1286,10 +1390,12 @@ index bbdff8a..53bdd9f 100644
 +      <View style={styles.container}>
          <Header
 -          left={<PillButton text="Back" onPress={() => navigation.goBack()} />}
+-          title={conversation.name || "Chat"} />
 +          right={buttons}
-           title={conversation.name || "Chat"} />
++          title={ctx.getChatname(conversation)} />
          <View style={styles.inner}>
            <View style={styles.list}>
+             <ImageBackground source={chatWallpaper} style={styles.wallpaper}>
 @@ -117,7 +273,7 @@ export default function ChatScreen({ navigation, route }) {
                  if (events.length >= 20) {
                    fetchMoreMessages();
@@ -1310,10 +1416,10 @@ index bbdff8a..53bdd9f 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-index 50d322e..ac3a55f 100644
+index 50d322e..4403813 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-@@ -6,9 +6,7 @@ import { ChatContext } from "../ChatContext";
+@@ -6,10 +6,9 @@ import { ChatContext } from "../ChatContext";
  import { EventPropType } from "../PropTypes";
  import Colors from "../constants/Colors";
  
@@ -1322,9 +1428,11 @@ index 50d322e..ac3a55f 100644
 -import Share from "react-native-share";
 +
  import ReactNativeHapticFeedback from "react-native-haptic-feedback";
++import { ClientContext } from "../../../src/context/ClientContext";
  
  
-@@ -20,7 +18,8 @@ const styles = StyleSheet.create({
+ const chatSelf = require("../images/chat_gray.png");
+@@ -20,7 +19,8 @@ const styles = StyleSheet.create({
    message: {
      borderRadius: 15,
      backgroundColor: "rgb(223,223,223)",
@@ -1334,7 +1442,7 @@ index 50d322e..ac3a55f 100644
      marginLeft: 25,
      marginRight: 80,
      marginVertical: 8,
-@@ -32,9 +31,6 @@ const styles = StyleSheet.create({
+@@ -32,9 +32,6 @@ const styles = StyleSheet.create({
      shadowOpacity: 0.1,
      shadowRadius: 6.27,
  
@@ -1344,7 +1452,7 @@ index 50d322e..ac3a55f 100644
    },
    selfMessage: {
      borderRadius: 25,
-@@ -51,9 +47,6 @@ const styles = StyleSheet.create({
+@@ -51,9 +48,6 @@ const styles = StyleSheet.create({
      },
      shadowOpacity: 0.15,
      shadowRadius: 6.27,
@@ -1354,7 +1462,7 @@ index 50d322e..ac3a55f 100644
    },
    author: {
      fontWeight: "bold",
-@@ -65,22 +58,27 @@ const styles = StyleSheet.create({
+@@ -65,22 +59,27 @@ const styles = StyleSheet.create({
    },
    time: {
      textAlign: "right",
@@ -1391,7 +1499,7 @@ index 50d322e..ac3a55f 100644
    },
    likeIndicatorBox: {
      position: "absolute",
-@@ -128,121 +126,10 @@ const styles = StyleSheet.create({
+@@ -128,123 +127,13 @@ const styles = StyleSheet.create({
      right : 10,
      top: 10,
      opacity: 0.2
@@ -1465,7 +1573,7 @@ index 50d322e..ac3a55f 100644
 -    console.log("error", error);
 -  }
 -}
--
+ 
 -function MenuButton({event, text, Icon, iconName, size, style, viewRef, setShowMenu={setShowMenu}}) {
 -  return (
 -    <TouchableOpacity onPress={()=>{
@@ -1508,13 +1616,16 @@ index 50d322e..ac3a55f 100644
 -    </View>
 -  );
 -}
- 
+-
 -function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMenu, Icon }) {
 +function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent, Icon }) {
    const viewRef = React.useRef();
    const [likes, setLikes] = React.useState(0);
++  const ctx = React.useContext(ChatContext);
    const options = {
-@@ -257,32 +144,37 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
+     enableVibrateFallback: true,
+     ignoreAndroidSystemSettings: false
+@@ -257,32 +146,37 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
      setLikes(likes - 1);
      ReactNativeHapticFeedback.trigger("impactMedium", options);
    }
@@ -1558,7 +1669,7 @@ index 50d322e..ac3a55f 100644
 +        setSelectedEvent({event, viewRef, tapEvent:evt});
 +      }}>
 +        <>
-+          <Text style={styles.author}>{author}</Text>
++          <Text style={styles.author}>{ctx.getContactName(ctx.getUsernameByUserId(author))}</Text>
 +          <Text style={styles.body}>{text}</Text>
 +          {encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
 +          <View style={styles.timeBox}>
@@ -1577,7 +1688,7 @@ index 50d322e..ac3a55f 100644
    );
  }
  Message.propTypes = {
-@@ -294,15 +186,15 @@ Message.propTypes = {
+@@ -294,15 +188,15 @@ Message.propTypes = {
    setShowMenu: PropTypes.func,
  };
  
@@ -1725,10 +1836,32 @@ index 42efb16..f2714f7 100644
    buttonText: {
      color: Colors.BACKGROUND,
 diff --git a/node_modules/react-native-chat-plugin/Components/TextInput.js b/node_modules/react-native-chat-plugin/Components/TextInput.js
-index 64f1ea6..80c79c8 100644
+index 64f1ea6..3658991 100644
 --- a/node_modules/react-native-chat-plugin/Components/TextInput.js
 +++ b/node_modules/react-native-chat-plugin/Components/TextInput.js
-@@ -30,12 +30,12 @@ const styles = StyleSheet.create({
+@@ -1,8 +1,21 @@
+ import React from "react";
+ import PropTypes from "prop-types";
+ import { TextInput as RNTextInput, View, StyleSheet, Image } from "react-native";
++import { responsiveWidth } from "react-native-responsive-dimensions";
+ const searchIcon = require("../images/search_icon.png");
+ const styles = StyleSheet.create({
++  textContainer: {
++    margin: 10,
++    marginHorizontal: 22,
++    backgroundColor: "rgb(235,235,235)",
++    padding: 10,
++    borderRadius: 6,
++    paddingLeft: 10,
++    borderWidth:1,
++    borderColor: "#c2c2c2",
++    width: responsiveWidth(63),
++    top: 10,
++  },
+   searchContainer: {
+     margin: 10,
+     marginHorizontal: 22,
+@@ -30,12 +43,12 @@ const styles = StyleSheet.create({
    }
  });
  
@@ -1737,14 +1870,15 @@ index 64f1ea6..80c79c8 100644
    const [query, setQuery] = React.useState(defaultValue);
    return (
      <View style={styles.searchParent}>
-       <View style={styles.searchContainer}>
+-      <View style={styles.searchContainer}>
 -        <Image source={searchIcon} style={styles.searchIcon} />
++      <View style={!hideIcon ? styles.searchContainer : styles.textContainer}>
 +        {!hideIcon && <Image source={searchIcon} style={styles.searchIcon} /> }
          <RNTextInput
            style={styles.searchText}
            blurOnSubmit={true}
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
-index a3184cd..f8d6377 100644
+index a3184cd..b524565 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
 @@ -7,6 +7,7 @@ import Fonts from "../constants/Fonts";
@@ -1780,25 +1914,32 @@ index a3184cd..f8d6377 100644
      }
    }
  );
-@@ -88,16 +95,23 @@ export default function ContactComponent({ conversation, onPress }) {
+@@ -84,20 +91,29 @@ export default function ContactComponent({ conversation, onPress }) {
+   const unreadCount = conversation.unreadCount ? parseInt(conversation.unreadCount) : 0;
+   const ctx = useContext(ChatContext);
+   const user = ctx.getUser();
++  const users = ctx.getUsers();
+   let participants = conversation.participants;
    if (user && Array.isArray(participants) && participants.length > 1) {
      participants = participants.filter(p => p.id !== user.id);
    }
 -
 +  const Icon = ctx.icon;
-+  //console.warn(conversation);
++  const chatName = ctx.getChatname(conversation);
    return (
      <TouchableHighlight
        onPress={() => (onPress && onPress(conversation))}
        underlayColor="#F8E2DD">
        <LinearGradient style={styles.container} colors={['#ffffff', '#f3f3f3']}>
-         <ProfilePreview text={conversation.name} contacts={participants} />
+-        <ProfilePreview text={conversation.name} contacts={participants} />
 -        {conversation.encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
++        <Text></Text>
++        <ProfilePreview text={chatName} contacts={participants} />
 +        
          <View>
 -          <Text style={styles.name}>{conversation.name}</Text>
 +          <View style={styles.conversationName}>
-+            <Text style={styles.name}>{conversation.name}</Text>
++            <Text style={styles.name}>{chatName}</Text>
 +            {conversation.encrypted ? <Image source={lockIcon} style={styles.conversationIcon} /> : null }
 +            {conversation.muted && <Icon name="mute-icon" style={styles.conversationIcon} />}
 +            {conversation.pinned && <Icon name="office-push-pin" style={styles.conversationIcon} />}
@@ -1808,7 +1949,7 @@ index a3184cd..f8d6377 100644
          </View>
          {getPreviewDate(conversation)}
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
-index fa4d21e..befcc66 100644
+index fa4d21e..b1e5d22 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 @@ -16,6 +16,7 @@ const closeIcon = require("../images/close.png");
@@ -1911,7 +2052,7 @@ index fa4d21e..befcc66 100644
    },
    chatBackground: {
      flex: 1,
-@@ -101,43 +130,26 @@ const styles = StyleSheet.create({
+@@ -101,45 +130,27 @@ const styles = StyleSheet.create({
      backgroundColor: "rgb(145,145,145)",
      borderRadius: 30,
      height: 400,
@@ -1964,9 +2105,11 @@ index fa4d21e..befcc66 100644
    };
 -
    const [query, setQuery] = React.useState("");
- 
+-
    function searchAsyncForMessages(ctx, query) {
-@@ -177,37 +189,111 @@ export default function ConversationList({ navigation }) {
+     searchForMessages(ctx, query).then((resultsFromDB) => {
+       if (JSON.stringify(resultsFromDB) != JSON.stringify(results)) {
+@@ -177,37 +188,111 @@ export default function ConversationList({ navigation }) {
        return convMatches;
      }
    }, [query, conversations, results]);
@@ -2323,13 +2466,13 @@ index 731a30e..7cbfc76 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
-index b708a42..6a01285 100644
+index b708a42..763c8a3 100644
 --- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 @@ -1,5 +1,5 @@
  import React from "react";
 -import { FlatList, View, StyleSheet, ActivityIndicator, Alert } from "react-native";
-+import { FlatList, View, StyleSheet, ActivityIndicator, Alert, Text } from "react-native";
++import { FlatList, View, StyleSheet, Image, ActivityIndicator, Alert, Text, TouchableOpacity } from "react-native";
  
  import { NavigationPropType } from "../PropTypes";
  import PillButton from "../Components/PillButton";
@@ -2342,18 +2485,22 @@ index b708a42..6a01285 100644
  import {
    SearchReducer,
    SearchInitialState,
-@@ -18,7 +18,9 @@ import {
+@@ -18,6 +18,14 @@ import {
    dispatchAppendContactsAction,
    dispatchEndReachedAction
  } from "./SearchReducers";
--
 +import { useRoute } from "@react-navigation/native";
 +import { clearPhoneNumber } from "../../../src/utils/phonehelpers";
 +import {ClientContext} from '../../../src/context/ClientContext';
++
++import ImagePicker from 'react-native-image-crop-picker';
++import { responsiveWidth } from "react-native-responsive-dimensions";
++import APIService from "../../../src/service/APIService";
++
+ 
  const styles = StyleSheet.create({
    container: {
-     flex: 1,
-@@ -27,19 +29,61 @@ const styles = StyleSheet.create({
+@@ -27,19 +35,102 @@ const styles = StyleSheet.create({
      flex: 1,
      justifyContent: "center",
    },
@@ -2392,10 +2539,34 @@ index b708a42..6a01285 100644
 +    height: 20,
 +    width: 30,
 +  },
++  avatarContainer: {
++    alignSelf: "center",
++    justifyContent: "center",
++  },
++  profileImage: {
++    width: responsiveWidth(20),
++    height: responsiveWidth(20),
++    borderRadius: responsiveWidth(10),
++    marginLeft: responsiveWidth(5),
++    marginVertical: responsiveWidth(1),
++    backgroundColor: "rgb(227,165,57)",
++    justifyContent: "center",
++    alignSelf: "center",
++  },
++  profilePlaceholder: {
++    color: "white",
++    justifyContent: "center",
++    textAlign: "center",
++    alignSelf: "center",
++  },
++  groupRow: {
++    flexDirection: "row",
++  }
  });
  
 -const renderContact = (contact, onPress) => {
 -  return <SearchResultComponent contact={contact} onPress={onPress} />;
++
 +const renderSectionHeader = (ctx, section) => {
 +  const Icon = ctx.icon;
 +  return (
@@ -2411,15 +2582,32 @@ index b708a42..6a01285 100644
    const [query, setQuery] = React.useState("");
    const [loading, setLoading] = React.useState(false);
 +  const [conversationName, setConversationName] = React.useState("");
-+  const [conversationAvatar, setConversationAvatar] = React.useState("");
    const [state, dispatch] = React.useReducer(SearchReducer, SearchInitialState);
    const ctx = React.useContext(ChatContext);
    const socket = getSocket();
 -
++  const [conversationAvatar, setConversationAvatar] = React.useState({
++    avatarImage: "",
++    default: true,
++  });
++  const Icon = ctx.icon;
++  const createGroup = async(name) => {
++    return APIService('group', {
++      photo: conversationAvatar.avatarImage,
++      filename: conversationAvatar.avatarFile,
++      mime: conversationAvatar.avatarMime,
++      name: name,
++    }).then((result) => {
++      //console.error('createGroup', name,result);
++      if (result) {
++        return result;
++      }
++    });
++  };
    const update = (success, contacts, dispatcher) => {
      if (!success || (contacts && contacts.length === 0)) {
        dispatcher(dispatch, contacts);
-@@ -49,13 +93,25 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -49,13 +140,25 @@ export default function SearchContactsScreen({ navigation }) {
      }
    };
  
@@ -2447,7 +2635,7 @@ index b708a42..6a01285 100644
          if (followings) {
            followings = followings.filter((follower) => {
              return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -69,11 +125,11 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -69,11 +172,11 @@ export default function SearchContactsScreen({ navigation }) {
    const getMoreUsers = () => {
      if (state.page > 0) {
        if (!query) {
@@ -2461,7 +2649,7 @@ index b708a42..6a01285 100644
            if (followings) {
              followings = followings.filter((follower) => {
                return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -88,18 +144,20 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -88,32 +191,59 @@ export default function SearchContactsScreen({ navigation }) {
    React.useEffect(() => {
      const timer = setTimeout(() => {
        getUsers();
@@ -2475,35 +2663,100 @@ index b708a42..6a01285 100644
 +    return "conversations:create"
 +  }
    const createChat = () => {
++    nextButton = () => {};
      setLoading(true);
 -    socket.emit("conversations:create", { participants: state.selected }, ({ success, conversation }) => {
 -      const encrypted = conversation.participants.filter(participant => participant.public_key && participant.public_key.length).length == conversation.participants.length;
 -      if (encrypted) {
 -        initEncryption(ctx, conversation, socket);
 -      }
-+    socket.emit(getSocketAction(), { participants: state.selected, name: conversationName,avatar: conversationAvatar, conversationId: route.params.conversationId }, ({ success, conversation }) => {
-+      //const encrypted = conversation.participants.filter(participant => participant.public_key && participant.public_key.length).length == conversation.participants.length;
-+      //if (encrypted) {
-+      //  initEncryption(ctx, conversation, socket);
-+      //}
-       if (success) {
-         ctx.addConversation(conversation);
-         navigation.replace("ChatScreen", { conversation });
-@@ -121,20 +179,18 @@ export default function SearchContactsScreen({ navigation }) {
+-      if (success) {
+-        ctx.addConversation(conversation);
+-        navigation.replace("ChatScreen", { conversation });
+-      } else {
+-        Alert.alert("Error", "Creating new conversation failed, please try again.");
+-        setLoading(false);
+-      }
+-    });
++    createGroup(conversationName).then((group) =>{
++      socket.emit(getSocketAction(), { participants: state.selected, name:conversationName, avatar: conversationAvatar, conversationId: route.params.conversationId }, ({ success, conversation }) => {
++        //const encrypted = conversation.participants.filter(participant => participant.public_key && participant.public_key.length).length == conversation.participants.length;
++        //if (encrypted) {
++        //  initEncryption(ctx, conversation, socket);
++        //}
++        if (success) {
++          ctx.addConversation(conversation);
++          navigation.replace("ChatScreen", { conversation });
++        } else {
++          Alert.alert("Error", "Creating new conversation failed, please try again.");
++          setLoading(false);
++        }
++      });
++    })
+   };
+ 
+   const onPress = contact => {
+     dispatchToggleSelectionAction(dispatch, contact);
+   };
+ 
++  const pickImage = () => {
++    ImagePicker.openPicker({
++      width: 500,
++      height: 500,
++      cropping: true,
++      cropperCircleOverlay: true,
++      avoidEmptySpaceAroundImage: true,
++    }).then((image) => {
++      let imageFilename =
++        Platform.OS == 'android'
++          ? image.path.replace(/^.*\//, '')
++          : image.filename.toLowerCase();
++      imageFilename = imageFilename.replace(/\.heic$/, '.jpg');
++      setConversationAvatar({
++        avatarImage: image.path,
++        avatarFile: imageFilename,
++        avatarMime: image.mime,
++        default: false,
++      });
++    });
++  };
++
+   if (loading) {
+     return (
+       <View style={styles.loadingContainer}>
+@@ -121,20 +251,32 @@ export default function SearchContactsScreen({ navigation }) {
        </View>
      );
    }
 -
++  nextButton = createChat;
    return (
      <View style={styles.container}>
-       <Header
+-      <Header
 -        left={<PillButton text="Cancel" onPress={() => navigation.goBack()} />}
-         right={<PillButton text="Next" onPress={createChat} />}
-         title="Add participants" />
- 
+-        right={<PillButton text="Next" onPress={createChat} />}
+-        title="Add participants" />
+-
 -      <TextInput placeholder={"Search"} onChangeText={query => setQuery(query)} />
 -
++        <View style={styles.groupRow}>
++      {(route.params.type == 'private' || route.params.type == 'public') &&
++      (<TouchableOpacity onPress={conversationAvatar.default ? pickImage : pickImage} style={styles.avatarContainer}>
++        {conversationAvatar.avatarImage ? 
++        <Image
++          resizeMode="cover"
++          source={{uri: conversationAvatar.avatarImage}}
++          style={styles.profileImage}
++        />
++        :
++        <View style={styles.profileImage}>
++          <Icon name="plus-icon" style={styles.profilePlaceholder}/>
++        </View>
++        }
++      </TouchableOpacity>
++      )}
 +      {(route.params.type == 'private' || route.params.type == 'public') && <TextInput hideIcon={true} multiline={false} placeholder={"Group Name"} onChangeText={query => setConversationName(query)} /> }
++      </View>
 +      <TextInput multiline={true} placeholder={"Search"} onChangeText={query => setQuery(query)} />
        <FlatList
          style={styles.container}
@@ -2598,19 +2851,19 @@ index 0d59b81..4cf65fa 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/utils/ChatEncryption.js b/node_modules/react-native-chat-plugin/utils/ChatEncryption.js
-index 7caec69..041c3fd 100644
+index 7caec69..068c73b 100644
 --- a/node_modules/react-native-chat-plugin/utils/ChatEncryption.js
 +++ b/node_modules/react-native-chat-plugin/utils/ChatEncryption.js
 @@ -400,6 +400,7 @@ export async function decryptEvents(conversationId, events, private_key, ctx) {
  function sendInitMessage(context, socket, participant, conversationId, conversationKey, public_key, sender_private_key, sender_public_key) {
    return new Promise((resolve, reject) => {
      const initMessage = "G|" + conversationId + "|" + conversationKey;
-+    console.warn(initMessage);
++    console.error('ERROR', initMessage);
      encryptMessage(initMessage, public_key, sender_private_key).then(({ encryptedMessage, nonce }) => {
        socket.emit("conversations:create", { participants: [participant] }, ({ success, conversation }) => {
          if (success) {
 diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
-index 8cb4565..0555fe4 100644
+index 8cb4565..b0bf67c 100644
 --- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 +++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 @@ -4,7 +4,7 @@ SQLite.DEBUG(false);
@@ -2618,7 +2871,7 @@ index 8cb4565..0555fe4 100644
  
  let db = null;
 -let db_version = 20;
-+let db_version = 43;
++let db_version = 44;
  export function getEncryptionKeys(context) {
    return new Promise((resolve, reject) => {
      context.getDB().then((db) => {
@@ -2649,7 +2902,7 @@ index 8cb4565..0555fe4 100644
 +    db.executeSql(
 +      `CREATE TABLE users (
 +          id INTEGER PRIMARY KEY,
-+          userId INTEGER,
++          userId INTEGER UNIQUE NOT NULL,
 +          created_at INTEGER NOT NULL,
 +          username TEXT,
 +          avatarUrl TEXT,

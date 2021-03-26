@@ -11,10 +11,15 @@ import {
 import {App} from '../../../react/features/app/components';
 import { UserContext } from '../../context/UserContext';
 import { useRoute } from '@react-navigation/native';
-
+import { ChatContext } from 'react-native-chat-plugin/ChatContext';
+import uuid from 'react-native-uuid'
 export default function VideoCalls() {
   const {authData} = React.useContext(UserContext);
   const r = useRoute();
+  const ctx = React.useContext(ChatContext);
+  const displayName = ctx.getCallname(r.params.callId);
+  const callUUID = uuid.v4();
+  //return <></>;
   return (
     <>
       <App
@@ -24,6 +29,9 @@ export default function VideoCalls() {
           'pip.enabled': 0,
           resolution: 360,
           'welcomepage.enabled': 1,
+          subject: displayName,
+          callHandle: displayName, 
+          callUUID: callUUID,
         }}
         serverURL={'https://webrtc.wevive.com'}
         settings={{

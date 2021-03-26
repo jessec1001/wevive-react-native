@@ -1,4 +1,5 @@
 #!/bin/sh
+yarn patch-package
 npx copy-files-from-to
 mkdir node_modules/lib-jitsi-meet
 cp lib-jitsi-meet.min.js node_modules/lib-jitsi-meet
