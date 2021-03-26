@@ -183,7 +183,6 @@ function _conferenceJoined({ getState }, next, action) {
     }
 
     const callUUID = getCallUUID(getState);
-    console.error('joined', callUUID);
     if (callUUID) {
         CallIntegration.reportConnectedOutgoingCall(callUUID)
             .then(() => {
@@ -257,11 +256,9 @@ function _conferenceWillJoin({ dispatch, getState }, next, action) {
     if (!isCallIntegrationEnabled(getState)) {
         return result;
     }
-    //console.error('hey hoy');
     const { conference } = action;
     const state = getState();
     const { callHandle, callUUID } = state['features/base/flags'];
-    //console.error('willJoin', callUUID);
     const url = getInviteURL(state);
     const handle = callHandle || url.toString();
     const hasVideo = !isVideoMutedByAudioOnly(state);
@@ -276,7 +273,6 @@ function _conferenceWillJoin({ dispatch, getState }, next, action) {
 
     CallIntegration.startCall(conference.callUUID, handle, hasVideo)
         .then(() => {
-            console.error('started call integration call');
             const displayName = getConferenceName(state);
 
             CallIntegration.updateCall(
@@ -293,7 +289,6 @@ function _conferenceWillJoin({ dispatch, getState }, next, action) {
             }
         })
         .catch(error => {
-            console.error(error);
             // Currently this error codes are emitted only by Android.
             //
             if (error.code === 'CREATE_OUTGOING_CALL_FAILED') {
