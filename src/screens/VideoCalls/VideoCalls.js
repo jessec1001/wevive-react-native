@@ -28,8 +28,10 @@ export default function VideoCalls() {
           resolution: 360,
           'welcomepage.enabled': 1,
           subject: displayName,
-          callHandle: displayName, 
+          callHandle: displayName,
           callUUID: r.params.callId,
+          author: authData.id,
+          conferenceId: r.params.callId,
         }}
         serverURL={'https://webrtc.wevive.com'}
         settings={{

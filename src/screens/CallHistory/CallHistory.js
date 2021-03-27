@@ -16,13 +16,22 @@ export default function CallHistory({navigation, route}) {
   //const calls = [];
   const keyExtractor = (item) => item.id;
   const ctx = React.useContext(ChatContext);
-  const [calls, setCalls] = React.useState([]);
-  ctx.getCallsFromDB().then((DBcalls) => {
-    setCalls(DBcalls);
-  });
+  const calls = ctx.getCalls();
+
+  React.useEffect(() => {
+    async function getCalls() {
+      const calls_db = await ctx.getCallsFromDB();
+      if (calls_db.length) {
+        ctx.addCalls(calls_db);
+      }
+    }
+    getCalls();
+  }, []);
   const swiper = React.useRef();
   const onPress = (conversation) => {
-    navigation.navigate('ChatScreen', {conversation});
+    navigation.navigate('ChatScreen', {
+      conversation: {id: conversation.group_id},
+    });
   };
   const renderHiddenItem = ({item}) => {
     const Icon = ctx.icon;
@@ -42,7 +51,7 @@ export default function CallHistory({navigation, route}) {
     );
   };
   const renderConversation = ({item}) => {
-    return <CallHistoryItem conversation={item} onPress={onPress} />;
+    return <CallHistoryItem call={item} onPress={onPress} />;
   };
   return (
     <ImageBackground source={chatWallpaper} style={styles.chatBackground}>

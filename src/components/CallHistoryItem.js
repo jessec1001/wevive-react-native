@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import ProfilePreview from '../../node_modules/react-native-chat-plugin/Components/ProfilePreview';
 import Colors from '../../node_modules/react-native-chat-plugin/constants/Colors';
 import Fonts from '../../node_modules/react-native-chat-plugin/constants/Fonts';
-import {ConversationPropType} from '../../node_modules/react-native-chat-plugin/PropTypes';
+import {CallProptype, ConversationPropType} from '../../node_modules/react-native-chat-plugin/PropTypes';
 import {ChatContext} from '../../node_modules/react-native-chat-plugin/ChatContext';
 import LinearGradient from 'react-native-linear-gradient';
 import {responsiveFontSize} from 'react-native-responsive-dimensions';
@@ -23,12 +23,24 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Light,
     marginTop: 0,
   },
+  icons: {
+    flexDirection: "row",
+  }, 
+  icon: {
+    color: "rgb(200,200,200)",
+    fontSize: 18,
+  },
   date: {
     fontSize: 10,
     position: 'absolute',
     fontFamily: Fonts.Light,
     right: 10,
     top: 2,
+  },
+  duration: {
+    fontSize: 9,
+    fontFamily: Fonts.Light,
+    color: 'rgb(150,150,150)',
   },
   preview: {
     fontSize: 14,
@@ -63,7 +75,7 @@ const styles = StyleSheet.create({
     width: 20,
   },
   conversationName: {
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
   conversationIcon: {
     top: 7,
@@ -72,13 +84,24 @@ const styles = StyleSheet.create({
     color: 'rgb(150,150,150)',
   },
 });
-function getPreviewDate(conversation) {
-  let event = conversation.lastEvent;
-  const time = typeof event?.time === 'string' ? event.time : conversation.time;
+function getCallDate(call) {
+  const time = call.created_at;
   return (
     <Text style={styles.date}>
       {new Date(time).toLocaleDateString()}{' '}
       {new Date(time).toLocaleTimeString()}
+    </Text>
+  );
+}
+function getSeconds(duration) {
+  const seconds = String(duration % 60);
+  return seconds.substr(0,1) ? "0" + seconds : seconds; 
+}
+function getCallDuration(call) {
+  const durationString =  Math.floor(call.duration / 3600) + ":" + getSeconds(call.duration)
+  return (
+    <Text style={styles.duration}>
+      {durationString}
     </Text>
   );
 }
@@ -95,55 +118,32 @@ function getPreview(conversation) {
   return `${prefix}${preview}`;
 }
 const lockIcon = require('../../node_modules/react-native-chat-plugin/images/lock_icon.png');
-export default function ContactComponent({conversation, onPress}) {
-  const unreadCount = conversation.unreadCount
-    ? parseInt(conversation.unreadCount)
-    : 0;
+export default function CallHistoryItem({call, onPress}) {
   const ctx = useContext(ChatContext);
-  const user = ctx.getUser();
-  let participants = conversation.participants;
-  if (user && Array.isArray(participants) && participants.length > 1) {
-    participants = participants.filter((p) => p.id !== user.id);
-  }
   const Icon = ctx.icon;
   return (
     <TouchableHighlight
-      onPress={() => onPress && onPress(conversation)}
+      onPress={() => onPress && onPress(call)}
       underlayColor="#F8E2DD">
       <LinearGradient style={styles.container} colors={['#ffffff', '#f3f3f3']}>
-        <ProfilePreview text={conversation.name} contacts={participants} />
-
+        <ProfilePreview text={call.name} />
         <View>
           <View style={styles.conversationName}>
-            <Text style={styles.name}>{conversation.name}</Text>
-            {conversation.encrypted ? (
-              <Image source={lockIcon} style={styles.conversationIcon} />
-            ) : null}
-            {conversation.muted && (
-              <Icon name="mute-icon" style={styles.conversationIcon} />
-            )}
-            {conversation.pinned && (
-              <Icon name="office-push-pin" style={styles.conversationIcon} />
-            )}
-            {conversation.archived && (
-              <Icon name="archive" style={styles.conversationIcon} />
-            )}
-            <TypingIndicator conversation={conversation} short />
+            <Text style={styles.name}>{call.name}
+              <Icon name="medium-call-icon" style={styles.icon} /></Text>
+            <View style={styles.icons}>
+              {getCallDuration(call)}
+            </View>
           </View>
-          <Text style={styles.preview}>{getPreview(conversation)}</Text>
         </View>
-        {getPreviewDate(conversation)}
-        {unreadCount ? (
-          <View style={styles.unreadCount}>
-            <Text style={styles.unreadCountText}>{unreadCount}</Text>
-          </View>
-        ) : null}
+        {getCallDate(call)}
+        
       </LinearGradient>
     </TouchableHighlight>
   );
 }
 
-ContactComponent.propTypes = {
-  conversation: ConversationPropType,
+CallHistoryItem.propTypes = {
+  call: CallProptype,
   onPress: PropTypes.func.isRequired,
 };

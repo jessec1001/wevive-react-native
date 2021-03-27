@@ -1,159 +1,158 @@
 // @flow
 
-import { Component } from 'react';
+import {Component} from 'react';
+import { SQLCipherClient } from 'react-native-chat-plugin/utils/SQLCipherClient';
 
-import { renderConferenceTimer } from '../';
-import { getConferenceTimestamp } from '../../base/conference/functions';
-import { getLocalizedDurationFormatter } from '../../base/i18n';
-import { connect } from '../../base/redux';
+import {renderConferenceTimer} from '../';
+import {getConferenceTimestamp, updateConferenceDuration} from '../../base/conference/functions';
+import {getLocalizedDurationFormatter} from '../../base/i18n';
+import {connect} from '../../base/redux';
 
 /**
  * The type of the React {@code Component} props of {@link ConferenceTimer}.
  */
 type Props = {
+  /**
+   * The UTC timestamp representing the time when first participant joined.
+   */
+  _startTimestamp: ?number,
+  updateConferenceDuration: Function,
 
-    /**
-     * The UTC timestamp representing the time when first participant joined.
-     */
-    _startTimestamp: ?number,
-
-    /**
-     * The redux {@code dispatch} function.
-     */
-    dispatch: Function
+  /**
+   * The redux {@code dispatch} function.
+   */
+  dispatch: Function,
 };
 
 /**
  * The type of the React {@code Component} state of {@link ConferenceTimer}.
  */
 type State = {
-
-    /**
-     * Value of current conference time.
-     */
-    timerValue: string
+  /**
+   * Value of current conference time.
+   */
+  timerValue: string,
 };
 
 /**
  * ConferenceTimer react component.
  *
  * @class ConferenceTimer
- * @extends Component
+ * @augments Component
  */
 class ConferenceTimer extends Component<Props, State> {
+  /**
+   * Handle for setInterval timer.
+   */
+  _interval;
 
-    /**
-     * Handle for setInterval timer.
-     */
-    _interval;
+  /**
+   * Initializes a new {@code ConferenceTimer} instance.
+   *
+   * @param {Props} props - The read-only properties with which the new
+   * instance is to be initialized.
+   */
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      timerValue: getLocalizedDurationFormatter(0),
+    };
+  }
 
-    /**
-     * Initializes a new {@code ConferenceTimer} instance.
-     *
-     * @param {Props} props - The read-only properties with which the new
-     * instance is to be initialized.
-     */
-    constructor(props: Props) {
-        super(props);
+  /**
+   * Starts the conference timer when component will be
+   * mounted.
+   *
+   * @inheritdoc
+   */
+  componentDidMount() {
+    this._startTimer();
+  }
 
-        this.state = {
-            timerValue: getLocalizedDurationFormatter(0)
-        };
+  /**
+   * Stops the conference timer when component will be
+   * unmounted.
+   *
+   * @inheritdoc
+   */
+  componentWillUnmount() {
+    this._stopTimer();
+  }
+
+  /**
+   * Implements React's {@link Component#render()}.
+   *
+   * @inheritdoc
+   * @returns {ReactElement}
+   */
+  render() {
+    const {timerValue} = this.state;
+    const {_startTimestamp} = this.props;
+
+    if (!_startTimestamp) {
+      return null;
     }
 
-    /**
-     * Starts the conference timer when component will be
-     * mounted.
-     *
-     * @inheritdoc
-     */
-    componentDidMount() {
-        this._startTimer();
+    return renderConferenceTimer(timerValue);
+  }
+
+  /**
+   * Sets the current state values that will be used to render the timer.
+   *
+   * @param {number} refValueUTC - The initial UTC timestamp value.
+   * @param {number} currentValueUTC - The current UTC timestamp value.
+   *
+   * @returns {void}
+   */
+  _setStateFromUTC(refValueUTC, currentValueUTC) {
+    if (!refValueUTC || !currentValueUTC) {
+      return;
     }
 
-    /**
-     * Stops the conference timer when component will be
-     * unmounted.
-     *
-     * @inheritdoc
-     */
-    componentWillUnmount() {
-        this._stopTimer();
+    if (currentValueUTC < refValueUTC) {
+      return;
     }
 
-    /**
-     * Implements React's {@link Component#render()}.
-     *
-     * @inheritdoc
-     * @returns {ReactElement}
-     */
-    render() {
-        const { timerValue } = this.state;
-        const { _startTimestamp } = this.props;
+    const timerMsValue = currentValueUTC - refValueUTC;
+    if (Math.round(timerMsValue / 1000) % 2 === 0) {
+      this.props.updateConferenceDuration(timerMsValue / 1000);
+    }
+    const localizedTime = getLocalizedDurationFormatter(timerMsValue);
 
-        if (!_startTimestamp) {
-            return null;
-        }
+    this.setState({
+      timerValue: localizedTime,
+    });
+  }
 
-        return renderConferenceTimer(timerValue);
+  /**
+   * Start conference timer.
+   *
+   * @returns {void}
+   */
+  _startTimer() {
+    if (!this._interval) {
+      this._setStateFromUTC(this.props._startTimestamp, new Date().getTime());
+
+      this._interval = setInterval(() => {
+        this._setStateFromUTC(this.props._startTimestamp, new Date().getTime());
+      }, 1000);
+    }
+  }
+
+  /**
+   * Stop conference timer.
+   *
+   * @returns {void}
+   */
+  _stopTimer() {
+    if (this._interval) {
+      clearInterval(this._interval);
     }
 
-    /**
-     * Sets the current state values that will be used to render the timer.
-     *
-     * @param {number} refValueUTC - The initial UTC timestamp value.
-     * @param {number} currentValueUTC - The current UTC timestamp value.
-     *
-     * @returns {void}
-     */
-    _setStateFromUTC(refValueUTC, currentValueUTC) {
-
-        if (!refValueUTC || !currentValueUTC) {
-            return;
-        }
-
-        if (currentValueUTC < refValueUTC) {
-            return;
-        }
-
-        const timerMsValue = currentValueUTC - refValueUTC;
-
-        const localizedTime = getLocalizedDurationFormatter(timerMsValue);
-
-        this.setState({
-            timerValue: localizedTime
-        });
-    }
-
-    /**
-     * Start conference timer.
-     *
-     * @returns {void}
-     */
-    _startTimer() {
-        if (!this._interval) {
-            this._setStateFromUTC(this.props._startTimestamp, (new Date()).getTime());
-
-            this._interval = setInterval(() => {
-                this._setStateFromUTC(this.props._startTimestamp, (new Date()).getTime());
-            }, 1000);
-        }
-    }
-
-    /**
-     * Stop conference timer.
-     *
-     * @returns {void}
-     */
-    _stopTimer() {
-        if (this._interval) {
-            clearInterval(this._interval);
-        }
-
-        this.setState({
-            timerValue: getLocalizedDurationFormatter(0)
-        });
-    }
+    this.setState({
+      timerValue: getLocalizedDurationFormatter(0),
+    });
+  }
 }
 
 /**
@@ -167,10 +166,10 @@ class ConferenceTimer extends Component<Props, State> {
  * }}
  */
 export function _mapStateToProps(state: Object) {
-
-    return {
-        _startTimestamp: getConferenceTimestamp(state)
-    };
+  return {
+    _startTimestamp: getConferenceTimestamp(state),
+    updateConferenceDuration: updateConferenceDuration(state),
+  };
 }
 
 export default connect(_mapStateToProps)(ConferenceTimer);
