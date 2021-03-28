@@ -10162,6 +10162,11 @@ react-native-cache-store@^1.0.2:
   version "2.0.0"
   resolved "https://codeload.github.com/jitsi/react-native-calendar-events/tar.gz/df48ecdc4e1e90c5352f803ddbab1fa7269b74a7"
 
+react-native-callkeep@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-callkeep/-/react-native-callkeep-4.1.0.tgz#58b796bf0d8ae46e0fdd968ab36e451103ddd345"
+  integrity sha512-pEIrTQVT40+mc3oGvkLpFjfzzCxkTYjJq9emLxHGZ/k4Ig8amasQTqgdA6SZK+1z4R686eoAX2kHZfR+qmesjg==
+
 "react-native-chat-plugin@git+ssh://git@gitlab.com/wevive/chat-plugin#master":
   version "0.0.22"
   resolved "git+ssh://git@gitlab.com/wevive/chat-plugin#db96f3026a5b5771f84192078f8cc156de6575b8"
@@ -10574,6 +10579,11 @@ react-native-view-shot@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/react-native-view-shot/-/react-native-view-shot-3.1.2.tgz#8c8e84c67a4bc8b603e697dbbd59dbc9b4f84825"
   integrity sha512-9u9fPtp6a52UMoZ/UCPrCjKZk8tnkI9To0Eh6yYnLKFEGkRZ7Chm6DqwDJbYJHeZrheCCopaD5oEOnRqhF4L2Q==
+
+react-native-voip-push-notification@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-voip-push-notification/-/react-native-voip-push-notification-3.1.0.tgz#51a7af6c5cbba00c13f3d34da67fa433ed032997"
+  integrity sha512-F28Y1luWaYLq38cRYue+TICz6TaEMWuesSHhSlQFPb1/sCVqwmGOZiMhmne1zCAyoW8OkuuaJl2rrosM2UsTMQ==
 
 react-native-watch-connectivity@0.4.3:
   version "0.4.3"
