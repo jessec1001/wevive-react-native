@@ -21,6 +21,7 @@
 #import "ViewController.h"
 #import <PushKit/PushKit.h>
 #import "RNVoipPushNotificationManager.h"
+#import "RNCallKeep.h"
 
 @import Firebase;
 @import JitsiMeetSDK;
@@ -151,10 +152,19 @@
 
   // --- Process the received push
   [RNVoipPushNotificationManager didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];
-
-  // --- You should make sure to report to callkit BEFORE execute `completion()`
-  [RNCallKeep reportNewIncomingCall:uuid handle:handle handleType:@"generic" hasVideo:false localizedCallerName:callerName fromPushKit: YES payload:nil];
-  
+  [RNCallKeep reportNewIncomingCall: uuid
+                           handle: handle
+                       handleType: @"generic"
+                         hasVideo: false
+              localizedCallerName: callerName
+                  supportsHolding: false
+                     supportsDTMF: false
+                 supportsGrouping: false
+               supportsUngrouping: false
+                      fromPushKit: YES
+                          payload: nil
+            withCompletionHandler: nil];
+  //  --- You should make sure to report to callkit BEFORE execute `completion()`
   // --- You don't need to call it if you stored `completion()` and will call it on the js side.
   completion();
 }

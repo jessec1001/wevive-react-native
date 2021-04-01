@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index c0d4abb..a0feaaa 100644
+index c0d4abb..9a6dbf4 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
-@@ -2,116 +2,158 @@ import React from "react";
+@@ -2,116 +2,164 @@ import React from "react";
  import PropTypes from "prop-types";
  import { View, Text, StyleSheet, Alert } from "react-native";
  
@@ -97,15 +97,14 @@ index c0d4abb..a0feaaa 100644
 +            socket.chat_private_key = private_key;
 +            emitEvents();
            }
-+            
-         });
+-        });
 -      });
 -    };
 -    const authenticationCallback = (res) => {
 -      setTimeout(() => {
 -        socket.chat_user_id = res.user.id;
 -        /*resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
--
+             
 -        }).catch((error) => {
 -          //console.error('error');
 -        });*/
@@ -124,6 +123,7 @@ index c0d4abb..a0feaaa 100644
 -              socket.chat_public_key = public_key;
 -              socket.chat_private_key = private_key;
 -              emitEvents();
++        });
 +      } else {
 +        emitEvents();
 +      }
@@ -149,9 +149,11 @@ index c0d4abb..a0feaaa 100644
 +        ctx.setConversations(conversations);
 +        conversations.map(c=>{
 +          ctx.saveConversationToDB(c)
++          //console.error(c);
 +          c.participants.map(u=>{
 +            if (u.id) {
 +              ctx.saveUserToDB(u.id, u.avatar, u.username);
++              //console.error(u);
 +              ctx.addUser(u);
              }
 -            
@@ -181,21 +183,26 @@ index c0d4abb..a0feaaa 100644
 +    //ctx.setAuthenticationError("Connecting..");
 +  }, []);
 +  React.useEffect(() => {
-+    // get latest conversations from the DB:
++    // get latest users from the DB:
 +    ctx.getUsersFromDB().then((users)=> {
 +      for (let i=0;i<users.length;i++) {
 +        let user = users.item(i);
 +        ctx.addUser(user);
 +      }
-+    });
+     });
++    // get latest conversations from the DB:
 +    ctx.getConversationsFromDB().then((conversations)=> {
 +      for (let i=0;i<conversations.length;i++) {
 +        let conversation = conversations.item(i);
-+        ctx.addConversation({...conversation, id: conversation.group_id, time: new Date(conversation.created_at * 1000)});
++       /* ctx.addConversation({
++          ...conversation, 
++          id: conversation.group_id,
++          time: new Date(conversation.created_at * 1000),
++        });*/
 +      }
-     });
- 
-+  
++    });
++
+   
      async function handleEventCreated ({ event }) {
        if (event && event.id) {
          const [decryptedEvent] = await decryptEvents(event.conversationId, [event], socket.chat_private_key, ctx);
@@ -208,7 +215,6 @@ index c0d4abb..a0feaaa 100644
            );
 +          ctx.saveMessageToDB(event.conversationId, event.text, event.owner ? event.owner.id : 0);
 +        } else {
-+          //ctx.updateEvent(event.conversationId, decryptedEvent.nonce, decryptedEvent);
          }
 +        await ctx.saveUserToDB(event.owner.id, event.owner.avatar, event.owner.username, "");
 +      }
@@ -227,7 +233,7 @@ index c0d4abb..a0feaaa 100644
      socket.on("events:event_created", handleEventCreated);
      socket.on("conversations:created", handleConversationCreated);
      const cleanAuthenticationHooks = ctx.setUpAuthenticationHooks(authenticationCallback);
-@@ -141,29 +183,20 @@ export default function ChatContainer({ options }) {
+@@ -141,29 +189,20 @@ export default function ChatContainer({ options }) {
  
      return () => timer && clearTimeout(timer);
    }, [authError]);
@@ -266,10 +272,10 @@ index c0d4abb..a0feaaa 100644
  
  ChatContainer.propTypes = {
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
-index 8e9472a..53a5315 100644
+index 8e9472a..73e18e5 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
-@@ -27,7 +27,6 @@ export function createAuthActions(state, dispatch) {
+@@ -27,12 +27,11 @@ export function createAuthActions(state, dispatch) {
      if (authenticationTimeout) {
        clearTimeout(authenticationTimeout);
      }
@@ -277,6 +283,12 @@ index 8e9472a..53a5315 100644
      socket.emit("users:authenticate", options, function handleAuthSuccess(res) {
        if (res && res.success) {
          setAuthInfo(options, res.user);
+         setAuthenticationError("");
+-        callback(res);
++        if (typeof callback == 'function') callback(res);
+       } else {
+         setAuthenticationError("Authentication failed!");
+       }
 @@ -58,10 +57,18 @@ export function createAuthActions(state, dispatch) {
      };
    }
@@ -307,7 +319,7 @@ index 8e9472a..53a5315 100644
        // handle connection error.
        socket.on("error", handleSocketError);
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
-index 787b10d..1cdc39f 100644
+index 787b10d..15ddd17 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
 @@ -1,10 +1,13 @@
@@ -324,14 +336,7 @@ index 787b10d..1cdc39f 100644
  };
  
  export function ChatReducer(state, action) {
-@@ -14,12 +17,41 @@ export function ChatReducer(state, action) {
-     const { conversationId, events, page  } = action.payload;
-     const conversationIdx = state.conversations.findIndex((c) => c.id === conversationId);
-     const conversations = [...state.conversations];
--    conversations[conversationIdx].lastEvent = events[0];
-     conversations[conversationIdx].events = events.reverse();
-+    conversations[conversationIdx].lastEvent = conversations[conversationIdx].events[0];
-     conversations[conversationIdx].page = page;
+@@ -20,6 +23,39 @@ export function ChatReducer(state, action) {
      return { ...state, conversations };
    }
  
@@ -341,8 +346,11 @@ index 787b10d..1cdc39f 100644
 +    if (conversationIdx == -1) return state;
 +    const conversations = [...state.conversations];
 +    const eventsIdx =  conversations[conversationIdx].events.findIndex((c) => c.id == nonce);
-+    
-+    if (eventsIdx == -1) return state;
++    conversations[conversationIdx].lastEvent = event
++    if (eventsIdx == -1) {
++      conversations[conversationIdx].events.push(event);
++      return { ...state, conversations };
++    }
 +    conversations[conversationIdx].events[eventsIdx] = event;
 +    return { ...state, conversations };
 +  }
@@ -352,6 +360,7 @@ index 787b10d..1cdc39f 100644
 +    const conversationIdx = state.conversations.findIndex((c) => c.id === conversationId);
 +    if (conversationIdx == -1) return state;
 +    const conversations = [...state.conversations];
++    if (typeof conversations[conversationIdx] == 'object' &&  typeof conversations[conversationIdx].events == 'undefined') return state;
 +    const eventsIdx =  conversations[conversationIdx].events.findIndex((c) => c.id == eventId);
 +    if (eventsIdx == -1) return state;
 +    const event = conversations[conversationIdx].events[eventsIdx];
@@ -367,7 +376,20 @@ index 787b10d..1cdc39f 100644
    case "new_event": {
      const event = action.payload.event;
      const conversationId = event.conversationId || event.conversation.id;
-@@ -54,6 +86,12 @@ export function createChatActions(state, dispatch) {
+@@ -30,7 +66,11 @@ export function ChatReducer(state, action) {
+     const conversationIdx = state.conversations.findIndex((c) => c.id === conversationId);
+     const conversations = [...state.conversations];
+     if (conversations[conversationIdx]) {
+-      conversations[conversationIdx].lastEvent = event;
++      if (!conversations[conversationIdx].lastEvent || typeof conversations[conversationIdx].lastEvent.created_at == 'undefined') {
++        conversations[conversationIdx].lastEvent = event;
++      } else if (conversations[conversationIdx].lastEvent.created_at < event.created_at) {
++        conversations[conversationIdx].lastEvent = event;
++      }
+       if (Array.isArray(conversations[conversationIdx].events)) {
+         conversations[conversationIdx].events.push(event);
+       }
+@@ -54,6 +94,12 @@ export function createChatActions(state, dispatch) {
      addEvent(event) {
        dispatch({ type: "new_event", payload: { event } });
      },
@@ -612,7 +634,7 @@ index c41797c..85e23c8 100644
    };
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
-index f9bc1dc..983efbc 100644
+index f9bc1dc..ce7a152 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/index.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/index.js
 @@ -6,7 +6,8 @@ import combineReducers from "./combineReducers";
@@ -625,7 +647,7 @@ index f9bc1dc..983efbc 100644
  
  export const ChatContext = React.createContext({...ChatInitialState});
  
-@@ -17,8 +18,374 @@ const reducer = combineReducers(
+@@ -17,8 +18,452 @@ const reducer = combineReducers(
    settingsReducer
  );
  
@@ -804,7 +826,19 @@ index f9bc1dc..983efbc 100644
 +        db.executeSql(
 +          "SELECT * FROM groups ORDER BY created_at DESC"
 +        ).then(([results])=> {
-+          resolve(results.rows.length > 0 ? results.rows : false);
++          if (results.rows.length > 0) {
++            groups = [];
++            for (let i=0; i<results.rows.length; i++) {
++              const group = results.rows.item(i);
++              groups.push({
++                ...group,
++                created_at: group.created_at * 1000,
++              });
++            }
++            resolve(groups)
++          } else {
++            resolve([]);
++          }
 +        });
 +      })
 +    });
@@ -815,7 +849,19 @@ index f9bc1dc..983efbc 100644
 +        db.executeSql(
 +          "SELECT * FROM posts ORDER BY created_at DESC"
 +        ).then(([results])=> {
-+          resolve(results.rows.length > 0 ? results.rows : false);
++          if (results.rows.length > 0) {
++            posts = [];
++            for (let i=0; i<results.rows.length; i++) {
++              const post = results.rows.item(i);
++              posts.push({
++                ...post,
++                created_at: post.created_at * 1000,
++              });
++            }
++            resolve(posts)
++          } else {
++            resolve([]);
++          }
 +        });
 +      })
 +    });
@@ -837,6 +883,7 @@ index f9bc1dc..983efbc 100644
 +        db.executeSql(
 +          "SELECT * FROM conversations ORDER BY created_at DESC"
 +        ).then(([results])=> {
++          
 +          resolve(results.rows.length > 0 ? results.rows : false);
 +        });
 +      })
@@ -849,7 +896,19 @@ index f9bc1dc..983efbc 100644
 +          "SELECT * FROM messages WHERE group_id = ? ORDER BY created_at DESC",
 +          [conversationId]
 +        ).then(([results])=> {
-+          resolve(results.rows.length > 0 ? results.rows : false);
++          if (results.rows.length > 0) {
++            messages = [];
++            for (let i=0; i<results.rows.length; i++) {
++              const message = results.rows.item(i);
++              messages.push({
++                ...message,
++                created_at: message.created_at * 1000,
++              });
++            }
++            resolve(messages)
++          } else {
++            resolve([]);
++          }
 +        });
 +      })
 +    });
@@ -860,35 +919,45 @@ index f9bc1dc..983efbc 100644
 +        db.executeSql(
 +          "SELECT created_at FROM messages UNION ALL SELECT created_at FROM conversations ORDER BY created_at DESC"
 +        ).then(([results])=> {
-+          resolve(results.rows.length > 0 ? results.rows.item(0) : 0);
++          resolve(results.rows.length > 0 ? results.rows.item(0).created_at : 0);
 +        });
 +      })
 +    });
 +  },[]);
 +  const _saveFileToDisk = React.useCallback((url, path) => {
 +    return new Promise((resolve, reject) => {
-+      //TODO fetch and save to path
 +      if (url == null || !url) {
 +        resolve("");
++        return;
 +      }
-+      fetch(url).then(()=> {
-+        resolve(path);
++      const destPath = RNFS.DocumentDirectoryPath + '/' + path;
++      
++      let option = {
++        fromUrl: url,
++        toFile: destPath
++      };
++      RNFS.downloadFile(option).promise.then(res => {
++        resolve(res);
 +      });
 +    });
 +  });
 +  const saveFileToDisk = React.useCallback((url, filetype) => {
-+    //TODO implement fileExists
 +    return new Promise(async (resolve, reject) => {
 +      if (!url) {
 +        resolve("");
++        return;
 +      }
 +      const path = filetype + "/" + SHA512(url);
-+      const fileExists = await RNFS.exists(path)
++      const dirExists = await RNFS.exists(RNFS.DocumentDirectoryPath + '/' + filetype);
++      if (!dirExists) {
++        await RNFS.mkdir(RNFS.DocumentDirectoryPath + '/' + filetype);
++      }
++      const fileExists = await RNFS.exists(RNFS.DocumentDirectoryPath + '/' + path);
 +      if (fileExists !== false) {
-+        resolve(path);
++        resolve(RNFS.DocumentDirectoryPath + '/' + path);
 +      } else { 
-+        _saveFileToDisk(url, path, filetype).then((path)=>{
-+          resolve(path);
++        _saveFileToDisk(url, path, filetype).then(()=>{
++          resolve(RNFS.DocumentDirectoryPath + '/' + path);
 +        });
 +      }
 +    });
@@ -906,21 +975,35 @@ index f9bc1dc..983efbc 100644
 +    return new Promise(async (resolve, reject) => {
 +      if (!url || url == '') {
 +        resolve("0");
++        return;
 +      }
 +      const path = await saveFileToDisk(url, filetype);
 +      if (!path || path == "") {
 +        resolve("0");
++        return;
 +      }
 +      const size = await getFileSize(path);
 +      if (size == '0' || size < 0) {
 +        resolve("0");
++        return;
 +      }
 +      getDB().then((db)=> {
 +        return db.executeSql(
-+          "INSERT OR IGNORE INTO files (`url`,`type`, `path` ,`size`,`contents`, `refId`, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-+          [url, type, path, size, refId, Math.floor(Date.now() / 1000)]
++          "SELECT id FROM files WHERE path = ?",
++          [path]
 +        ).then(([results])=> {
-+          resolve(results);
++          const alreadyExists = results.rows.length > 0 ? results.rows.item(0).id : false;
++          const contents = "";
++          if (alreadyExists) {
++            resolve(results.rows.item(0).id);
++          } else {
++            return db.executeSql(
++              "INSERT OR IGNORE INTO files (`url`,`type`, `path` ,`size`,`contents`, `refId`, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
++              [url, filetype, path, size, refId, contents, Math.floor(Date.now() / 1000)]
++            ).then(([results])=> {
++              resolve(results.insertId);
++            });
++          }
 +        });
 +      })
 +    });
@@ -948,13 +1031,24 @@ index f9bc1dc..983efbc 100644
 +  const saveUserToDB = React.useCallback((userId, avatarUrl, username, phone_number) => {
 +    return new Promise((resolve, reject) => {
 +      getDB().then(async (db)=> {
-+        avatarFileId = await saveFile(avatarUrl,'avatar',userId);
-+        db.executeSql(
-+          "INSERT OR IGNORE INTO users (`userId`,`username`,`avatarUrl`, `avatarFileId`, `phone_number`, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-+          [userId, username, avatarUrl, avatarFileId, phone_number, Math.floor(Date.now() / 1000)]
-+        ).then(([results])=> {
-+          return results;
-+        });
++        const existingUser = await db.executeSql(
++          "SELECT * FROM users WHERE userId = ? ORDER BY created_at DESC",
++          [userId]
++        );
++        if (existingUser[0].rows.length > 0) {
++          const avatarFileId = avatarUrl !== null ? await saveFile(avatarUrl,'avatar',userId) : existingUser[0].rows.item(0).avatarFileId;
++          const avatar = avatarUrl !== null ? avatarUrl : existingUser[0].rows.item(0).avatarUrl;
++          const update = await db.executeSql(
++            "UPDATE users SET username=?, avatarUrl=?, avatarFileId=?, phone_number=? WHERE userId=?",
++            [ username, avatarUrl, avatarFileId, phone_number, userId]
++          );
++        } else {
++          const avatarFileId = avatarUrl !== null ? await saveFile(avatarUrl,'avatar',userId) : 0;
++          return await db.executeSql(
++            "INSERT OR IGNORE INTO users (`userId`,`username`,`avatarUrl`, `avatarFileId`, `phone_number`, created_at) VALUES (?, ?, ?, ?, ?, ?)",
++            [userId, username, avatarUrl, avatarFileId, phone_number, Math.floor(Date.now() / 1000)]
++          );
++        }
 +      })
 +    });
 +  },[]);
@@ -968,12 +1062,18 @@ index f9bc1dc..983efbc 100644
 +      });
 +    })
 +  },[]);
-+  const saveConversationToDB = React.useCallback((conversation, name) => {
++  const saveConversationToDB = React.useCallback((conversation) => {
 +    getDB().then((db)=> {
 +      db.executeSql(
 +        "INSERT OR IGNORE INTO conversations(`group_id`,`group_key`,`name`,`created_by`,`created_at`) VALUES (?, ?, ?, ?, ?)",
 +        [conversation.id, "", conversation.name, conversation.participants[conversation.participants.length-1].id, Math.floor(Date.now() / 1000)]
 +      ).then(([results])=> {
++        conversation.participants.map(p =>  
++          db.executeSql(
++            "INSERT OR IGNORE INTO participants(`group_id`,`user_id`, `created_at`) VALUES (?, ?, ?)",
++            [conversation.id, p.id, Math.floor(Date.now() / 1000)]
++          )
++        );
 +        return results;
 +      });
 +    })
@@ -1001,7 +1101,7 @@ index f9bc1dc..983efbc 100644
    const context = React.useMemo(
      () => {
        return ({
-@@ -26,11 +393,33 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
+@@ -26,11 +471,33 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
          ...createAuthActions(state, dispatch),
          ...createChatActions(state, dispatch),
          ...createConversationActions(state, dispatch),
@@ -1039,7 +1139,7 @@ index f9bc1dc..983efbc 100644
        });
      },
      [state]
-@@ -47,5 +436,5 @@ ChatContextProvider.propTypes = {
+@@ -47,5 +514,5 @@ ChatContextProvider.propTypes = {
    options: PropTypes.object.isRequired,
    children: PropTypes.element.isRequired,
    socketIoUrl: PropTypes.string.isRequired,
@@ -1269,7 +1369,7 @@ index 5388ef0..f68395d 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index bbdff8a..73c9360 100644
+index bbdff8a..98a0443 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,5 +1,5 @@
@@ -1453,7 +1553,32 @@ index bbdff8a..73c9360 100644
    React.useEffect(() => {
      const socket = getSocket();
  
-@@ -103,13 +246,26 @@ export default function ChatScreen({ navigation, route }) {
+@@ -58,15 +201,16 @@ export default function ChatScreen({ navigation, route }) {
+         const parsedEvents = await parseEvents(decryptedEvents);
+         ctx.setEvents({ conversationId: conversation.id, events: parsedEvents });
+       });
+-      socket.emit("events:mark_read", { conversationId: conversation.id, public: !!settings.disable_read_events }, function ({ success }) {
+-        if (success) {
+-          if (conversation.unreadCount) {
+-            ctx.incrementUnreadCounts({ conversationId: conversation.id, count: -1 * conversation.unreadCount });
+-          }
+-          updateCount();
+-        }
+-      });
++      
+     }
++    socket.emit("events:mark_read", { conversationId: conversation.id, public: !!settings.disable_read_events }, function ({ success }) {
++      if (success) {
++        if (conversation.unreadCount) {
++          ctx.incrementUnreadCounts({ conversationId: conversation.id, count: -1 * conversation.unreadCount });
++        }
++        updateCount();
++      }
++    });
+ 
+     function handleUnread({ event }) {
+       if (event && event.id && event.conversationId === conversation.id) {
+@@ -103,13 +247,26 @@ export default function ChatScreen({ navigation, route }) {
        ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents)});
      });
    }
@@ -1483,7 +1608,7 @@ index bbdff8a..73c9360 100644
          <View style={styles.inner}>
            <View style={styles.list}>
              <ImageBackground source={chatWallpaper} style={styles.wallpaper}>
-@@ -117,7 +273,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -117,7 +274,7 @@ export default function ChatScreen({ navigation, route }) {
                  if (events.length >= 20) {
                    fetchMoreMessages();
                  }
@@ -1492,7 +1617,7 @@ index bbdff8a..73c9360 100644
                <TypingIndicator conversation={conversation} />
                <View style={styles.form}>
                  <ChatForm conversation={conversation} />
-@@ -125,7 +281,8 @@ export default function ChatScreen({ navigation, route }) {
+@@ -125,7 +282,8 @@ export default function ChatScreen({ navigation, route }) {
              </ImageBackground>
            </View>
          </View>
@@ -1503,7 +1628,7 @@ index bbdff8a..73c9360 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-index 50d322e..4403813 100644
+index 50d322e..0c38d64 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 @@ -6,10 +6,9 @@ import { ChatContext } from "../ChatContext";
@@ -1539,7 +1664,7 @@ index 50d322e..4403813 100644
    },
    selfMessage: {
      borderRadius: 25,
-@@ -51,9 +48,6 @@ const styles = StyleSheet.create({
+@@ -51,36 +48,53 @@ const styles = StyleSheet.create({
      },
      shadowOpacity: 0.15,
      shadowRadius: 6.27,
@@ -1549,8 +1674,27 @@ index 50d322e..4403813 100644
    },
    author: {
      fontWeight: "bold",
-@@ -65,22 +59,27 @@ const styles = StyleSheet.create({
+     color: Colors.AUTHOR,
+     marginBottom: 4,
++    justifyContent: "center",
++  },
++  textBox: {
++    flexDirection: "row",
++  },
++  authorBox: {
++    flexDirection: "row",
    },
+   body: {
+     marginTop: 5,
+   },
++  avatar: {
++    width:25,
++    height:25,
++    borderRadius: 20,
++    marginRight: 5,
++    top: -2,
++    justifyContent: "center",
++  },
    time: {
      textAlign: "right",
 -    fontSize: 10,
@@ -1586,7 +1730,7 @@ index 50d322e..4403813 100644
    },
    likeIndicatorBox: {
      position: "absolute",
-@@ -128,123 +127,13 @@ const styles = StyleSheet.create({
+@@ -128,123 +142,13 @@ const styles = StyleSheet.create({
      right : 10,
      top: 10,
      opacity: 0.2
@@ -1712,7 +1856,7 @@ index 50d322e..4403813 100644
    const options = {
      enableVibrateFallback: true,
      ignoreAndroidSystemSettings: false
-@@ -257,32 +146,37 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
+@@ -257,52 +161,71 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
      setLikes(likes - 1);
      ReactNativeHapticFeedback.trigger("impactMedium", options);
    }
@@ -1723,6 +1867,14 @@ index 50d322e..4403813 100644
 +    </>
 +  </TouchableOpacity>;*/
 +  const likesButton = null;
++
++  const users =  ctx.getUsers();
++  const getAvatar = React.useCallback((id) => {
++    const userId = users.findIndex(u => id == u.userId);
++    const userAvatar = users[userId].avatarUrl;
++    return userAvatar;
++  },[]);
++  const authorUrl = getAvatar(author);
    return (
 -    <TouchableHighlight ref={viewRef} underlayColor={"#bbb"} style={isOwn ? styles.selfMessage : styles.message} delayLongPress={1000} onPress={(evt) => {
 -      setShowMenu(false);
@@ -1756,16 +1908,22 @@ index 50d322e..4403813 100644
 +        setSelectedEvent({event, viewRef, tapEvent:evt});
 +      }}>
 +        <>
-+          <Text style={styles.author}>{ctx.getContactName(ctx.getUsernameByUserId(author))}</Text>
-+          <Text style={styles.body}>{text}</Text>
++          <View style={styles.authorBox}>
++            <Image source={{url: authorUrl}} style={styles.avatar} />
++            <Text style={styles.author}>{ctx.getContactName(ctx.getUsernameByUserId(author))}</Text>
++          </View>
++          <View style={styles.textBox}>
++            
++            <Text style={styles.body}>{text}</Text>
++          </View>
 +          {encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
 +          <View style={styles.timeBox}>
 +            <Text style={styles.time}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
 +            <Text style={styles.readIndicator}>
-+              <Icon name="ticks" color={!event.nonce || event.id != event.nonce ? (!event.readBy || !event.readBy.length ? "rgb(228,140,58)" : "rgb(90,113,90)") : "rgb(100,100,100)"} size={8} />
++              <Icon name="ticks" color={!event.nonce || event.id != event.nonce ? (!event.readBy || !event.readBy.length || event.readBy.length > 1 ? "rgb(228,140,58)" : "rgb(90,213,90)") : "rgb(100,100,100)"} size={8} />
 +            </Text>
 +            <Text style={styles.deliveryIndicator}>
-+              <Icon name="ticks" color={!event.nonce || event.id != event.nonce ? (!event.readBy || !event.readBy.length ? "rgb(228,140,58)" : "rgb(90,113,90)") : "rgb(100,100,100)"} size={8}/>
++              <Icon name="ticks" color={!event.nonce || event.id != event.nonce ? (!event.readBy || !event.readBy.length || event.readBy.length > 1 ? "rgb(228,140,58)" : "rgb(90,213,90)") : "rgb(100,100,100)"} size={8}/>
 +            </Text>
 +          </View>
 +          {likesButton}
@@ -1775,7 +1933,12 @@ index 50d322e..4403813 100644
    );
  }
  Message.propTypes = {
-@@ -294,15 +188,15 @@ Message.propTypes = {
+   text: PropTypes.string,
+-  time: PropTypes.string,
++  time: PropTypes.any,
+   author: PropTypes.string,
+   isOwn: PropTypes.bool,
+   encrypted: PropTypes.bool,
    setShowMenu: PropTypes.func,
  };
  
@@ -2553,23 +2716,32 @@ index 731a30e..7cbfc76 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/PropTypes.js b/node_modules/react-native-chat-plugin/PropTypes.js
-index c76b0d1..eb1185c 100644
+index c76b0d1..a5e3b06 100644
 --- a/node_modules/react-native-chat-plugin/PropTypes.js
 +++ b/node_modules/react-native-chat-plugin/PropTypes.js
+@@ -17,7 +17,7 @@ export const EventPropType = PropType.shape({
+   type: PropType.string,
+   text: PropType.string,
+   owner: UserPropType,
+-  time: PropType.string,
++  time: PropType.any,
+   conversationId: PropType.string,
+ });
+ 
 @@ -28,3 +28,11 @@ export const ConversationPropType = PropType.shape({
    participants: PropType.arrayOf(UserPropType),
    typing: PropType.arrayOf(PropType.string),
  });
 +
 +export const CallProptype = PropType.shape({
-+  id: PropType.string,
++  id: PropType.number,
 +  name: PropType.string,
-+  duration: PropType.string,
-+  created_at: PropType.string,
++  duration: PropType.number,
++  created_at: PropType.number,
 +  author: PropType.string,
 +});
 diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
-index b708a42..763c8a3 100644
+index b708a42..db0080f 100644
 --- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 @@ -1,5 +1,5 @@
@@ -2603,7 +2775,7 @@ index b708a42..763c8a3 100644
  
  const styles = StyleSheet.create({
    container: {
-@@ -27,19 +35,102 @@ const styles = StyleSheet.create({
+@@ -27,19 +35,101 @@ const styles = StyleSheet.create({
      flex: 1,
      justifyContent: "center",
    },
@@ -2701,7 +2873,6 @@ index b708a42..763c8a3 100644
 +      mime: conversationAvatar.avatarMime,
 +      name: name,
 +    }).then((result) => {
-+      //console.error('createGroup', name,result);
 +      if (result) {
 +        return result;
 +      }
@@ -2710,7 +2881,7 @@ index b708a42..763c8a3 100644
    const update = (success, contacts, dispatcher) => {
      if (!success || (contacts && contacts.length === 0)) {
        dispatcher(dispatch, contacts);
-@@ -49,13 +140,25 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -49,13 +139,25 @@ export default function SearchContactsScreen({ navigation }) {
      }
    };
  
@@ -2738,7 +2909,7 @@ index b708a42..763c8a3 100644
          if (followings) {
            followings = followings.filter((follower) => {
              return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -69,11 +172,11 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -69,11 +171,11 @@ export default function SearchContactsScreen({ navigation }) {
    const getMoreUsers = () => {
      if (state.page > 0) {
        if (!query) {
@@ -2752,7 +2923,7 @@ index b708a42..763c8a3 100644
            if (followings) {
              followings = followings.filter((follower) => {
                return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -88,32 +191,59 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -88,32 +190,59 @@ export default function SearchContactsScreen({ navigation }) {
    React.useEffect(() => {
      const timer = setTimeout(() => {
        getUsers();
@@ -2782,7 +2953,7 @@ index b708a42..763c8a3 100644
 -      }
 -    });
 +    createGroup(conversationName).then((group) =>{
-+      socket.emit(getSocketAction(), { participants: state.selected, name:conversationName, avatar: conversationAvatar, conversationId: route.params.conversationId }, ({ success, conversation }) => {
++      socket.emit(getSocketAction(), { participants: state.selected, name:conversationName, avatar: conversationAvatar.avatarImage, conversationId: route.params.conversationId }, ({ success, conversation }) => {
 +        //const encrypted = conversation.participants.filter(participant => participant.public_key && participant.public_key.length).length == conversation.participants.length;
 +        //if (encrypted) {
 +        //  initEncryption(ctx, conversation, socket);
@@ -2827,7 +2998,7 @@ index b708a42..763c8a3 100644
    if (loading) {
      return (
        <View style={styles.loadingContainer}>
-@@ -121,20 +251,32 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -121,20 +250,32 @@ export default function SearchContactsScreen({ navigation }) {
        </View>
      );
    }
@@ -2870,10 +3041,22 @@ index b708a42..763c8a3 100644
      </View>
    );
 diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
-index b245cc3..677a838 100644
+index b245cc3..aab586e 100644
 --- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
 +++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
-@@ -43,12 +43,12 @@ const styles = StyleSheet.create(
+@@ -22,7 +22,10 @@ const styles = StyleSheet.create(
+       justifyContent: "center",
+     },
+     name: {
+-      fontSize: 16,
++      fontSize: 18,
++    },
++    profileName: {
++      fontSize: 12,
+     },
+     preview: {
+       fontSize: 12,
+@@ -43,12 +46,13 @@ const styles = StyleSheet.create(
    }
  );
  
@@ -2884,7 +3067,8 @@ index b245cc3..677a838 100644
        <ProfilePreview text={contact.username} contacts={[contact]} />
        <View style={styles.nameContainer}>
 -        <Text style={styles.name}>{contact.username}</Text>
-+        <Text style={styles.name}>{contacts && Object.keys(contacts).indexOf(contact.username) !== -1 ? contacts[contact.username] : contact.username  }</Text>
++        <Text style={styles.name}>{contact.name}</Text>
++        <Text style={styles.profileName}>{contacts && Object.keys(contacts).indexOf(contact.username) !== -1 ? contacts[contact.username] : contact.username  }</Text>
        </View>
        {
          contact.selected
@@ -2966,7 +3150,7 @@ index 7caec69..068c73b 100644
        socket.emit("conversations:create", { participants: [participant] }, ({ success, conversation }) => {
          if (success) {
 diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
-index 8cb4565..10bfb35 100644
+index 8cb4565..d736292 100644
 --- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 +++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 @@ -4,7 +4,7 @@ SQLite.DEBUG(false);
@@ -2974,7 +3158,7 @@ index 8cb4565..10bfb35 100644
  
  let db = null;
 -let db_version = 20;
-+let db_version = 48;
++let db_version = 49;
  export function getEncryptionKeys(context) {
    return new Promise((resolve, reject) => {
      context.getDB().then((db) => {
@@ -2996,7 +3180,7 @@ index 8cb4565..10bfb35 100644
 +      `CREATE TABLE files (
 +          id INTEGER PRIMARY KEY,
 +          created_at INTEGER NOT NULL,
-+          path TEXT,
++          path TEXT UNIQUE,
 +          contents TEXT,
 +          url TEXT,
 +          type TEXT,
@@ -3020,7 +3204,7 @@ index 8cb4565..10bfb35 100644
      db.executeSql(
        `CREATE TABLE chats (
            id INTEGER PRIMARY KEY,
-@@ -77,22 +104,48 @@ function initDB(token) {
+@@ -77,22 +104,58 @@ function initDB(token) {
      db.executeSql(
        `CREATE TABLE conversations (
            id INTEGER PRIMARY KEY,
@@ -3038,6 +3222,16 @@ index 8cb4565..10bfb35 100644
 +          is_mute INTEGER,
 +          is_delete INTEGER
 +        );`,
++    ),
++
++    db.executeSql(
++      `CREATE TABLE participants (
++          id INTEGER PRIMARY KEY,
++          user_id TEXT NOT NULL,
++          group_id TEXT NOT NULL,
++          created_at INTEGER NOT NULL,
++          UNIQUE(user_id, group_id)
++      );`,
 +    ),
 +    
 +    db.executeSql(
@@ -3073,7 +3267,7 @@ index 8cb4565..10bfb35 100644
          );`,
      ),
      db.executeSql(
-@@ -112,6 +165,13 @@ function initDB(token) {
+@@ -112,6 +175,13 @@ function initDB(token) {
            private_key BLOB NOT NULL
          );`,
      ),
@@ -3087,7 +3281,7 @@ index 8cb4565..10bfb35 100644
    ]);
  }
  
-@@ -144,11 +204,11 @@ function createOrValidateDB(token) {
+@@ -144,11 +214,11 @@ function createOrValidateDB(token) {
  
  export function SQLCipherClient(options) {
    return new Promise((resolve, reject) => {
@@ -3102,7 +3296,7 @@ index 8cb4565..10bfb35 100644
        }).then(
          (dbInstance) => {
            db = dbInstance;
-@@ -165,13 +225,7 @@ export function SQLCipherClient(options) {
+@@ -165,13 +235,7 @@ export function SQLCipherClient(options) {
          },
        );
      } else {

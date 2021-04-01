@@ -14,10 +14,10 @@ import CallHistoryItem from '../../components/CallHistoryItem';
 const chatWallpaper = require('../../../node_modules/react-native-chat-plugin/images/chat_background.png');
 export default function CallHistory({navigation, route}) {
   //const calls = [];
-  const keyExtractor = (item) => item.id;
+  const keyExtractor = (item) => String(item.id);
   const ctx = React.useContext(ChatContext);
   const calls = ctx.getCalls();
-
+  const users = ctx.getUsers();
   React.useEffect(() => {
     async function getCalls() {
       const calls_db = await ctx.getCallsFromDB();

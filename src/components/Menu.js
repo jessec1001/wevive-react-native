@@ -65,7 +65,7 @@ export const MenuItem = (props) => {
           multiline={false}
           style={styles.textInput}
           onSubmitEditing={props.onChange}
-          placeholder={props.children}
+          placeholder={props.placeholder}
           placeholderTextColor={"rgb(125,125,125)"}
           blurOnSubmit={true}
           onChangeText={props.onChangeText} />

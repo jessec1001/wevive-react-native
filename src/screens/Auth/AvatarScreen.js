@@ -1,7 +1,14 @@
 import RNHeicConverter from 'react-native-heic-converter';
 
 import React, {Fragment, Component, useContext} from 'react';
-import {Text, TextInput, View, TouchableOpacity, Image, Platform} from 'react-native';
+import {
+  Text,
+  TextInput,
+  View,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from 'react-native';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import Button from '../../components/Button';
@@ -69,20 +76,24 @@ export default class AvatarScreen extends Component {
           }}
           onSubmit={(values, actions) => {
             global.appIsLoading();
-            APIService('user-photo/update_photo/', {
-              photo: this.state.avatarImage,
-              filename: this.state.avatarFile,
-              mime: this.state.avatarMime,
+            APIService('users/me', {
               name: values.name,
-            }).then((result) => {
-              global.appIsNotLoading();
-              if (result) {
-                AsyncStorage.setItem('avatarUrl', result);
-                AsyncStorage.setItem('userName', values.name);
-                this.navigateSuccess();
-              } else {
-                actions.setFieldError('name', 'Failed to upload.');
-              }
+            }).then(() => {
+              APIService('user-photo/update_photo/', {
+                photo: this.state.avatarImage,
+                filename: this.state.avatarFile,
+                mime: this.state.avatarMime,
+                name: values.name,
+              }).then((result) => {
+                global.appIsNotLoading();
+                if (result) {
+                  AsyncStorage.setItem('avatarUrl', result);
+                  AsyncStorage.setItem('userName', values.name);
+                  this.navigateSuccess();
+                } else {
+                  actions.setFieldError('name', 'Failed to upload.');
+                }
+              });
             });
           }}
           validationSchema={yup.object().shape({

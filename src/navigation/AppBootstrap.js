@@ -92,7 +92,7 @@ export default class AppBootstrap extends Component {
     }
     setTimeout(function () {
       $this._bootstrapAsync($this);
-    }, 1500);
+    }, 300);
   }
 
   _bootstrapAsync = async ($this) => {
