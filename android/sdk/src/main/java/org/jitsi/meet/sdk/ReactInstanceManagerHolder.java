@@ -61,7 +61,7 @@ class ReactInstanceManagerHolder {
                 new AndroidSettingsModule(reactContext),
                 new AppInfoModule(reactContext),
                 new AudioModeModule(reactContext),
-                new DropboxModule(reactContext),
+                //new DropboxModule(reactContext),
                 new ExternalAPIModule(reactContext),
                 new JavaScriptSandboxModule(reactContext),
                 new LocaleDetector(reactContext),
@@ -199,6 +199,8 @@ class ReactInstanceManagerHolder {
                 new com.rnbiometrics.ReactNativeBiometricsPackage(),
                 // react-native-calendar-events
                 new com.calendarevents.CalendarEventsPackage(),
+                // react-native-callkeep
+                new io.wazo.callkeep.RNCallKeepPackage(),
                 // react-native-chat-plugin
                 new com.ourengineroom.rnchatplugin.ChatPluginPackage(),
                 // react-native-contacts
@@ -209,8 +211,10 @@ class ReactInstanceManagerHolder {
                 new com.kevinresol.react_native_default_preference.RNDefaultPreferencePackage(),
                 // react-native-device-info
                 new com.learnium.RNDeviceInfo.RNDeviceInfo(),
+                // react-native-fs
+                new com.rnfs.RNFSPackage(),
                 // react-native-fast-image
-                new com.dylanvann.fastimage.FastImageViewPackage(),
+                //new com.dylanvann.fastimage.FastImageViewPackage(),
                 // react-native-gesture-handler
                 new com.swmansion.gesturehandler.react.RNGestureHandlerPackage(),
                 // react-native-get-random-values
@@ -239,6 +243,8 @@ class ReactInstanceManagerHolder {
                 new org.wonday.orientation.OrientationPackage(),
                 // react-native-permissions
                 new com.zoontek.rnpermissions.RNPermissionsPackage(),
+                // react-native-push-notification
+                new com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage(),
                 // react-native-reanimated
                 new com.swmansion.reanimated.ReanimatedPackage(),
                 // react-native-safe-area-context
