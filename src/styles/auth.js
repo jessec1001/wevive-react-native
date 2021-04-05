@@ -212,6 +212,10 @@ const styles = (keyboard) => {
       //fontFamily: 'Adelle',
       color: 'black',
     },
+    inputStyleAndroid: {
+      marginLeft: responsiveWidth(10),
+      fontSize: responsiveHeight(2.5),
+    },
     inputContainerStyle: {
       marginBottom: responsiveHeight(2),
       backgroundColor: 'transparent',
