@@ -71,7 +71,6 @@ export default class Main extends Component {
       this.onOpenNotification,
     );
     AsyncStorage.getItem('userToken').then((userToken) => {
-      //console.error(userToken);
       this.setState({userToken});
     });
     global.toggleDonationModal = this.toggleDonationModal;

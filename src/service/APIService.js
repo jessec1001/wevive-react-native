@@ -47,11 +47,13 @@ const APIService = async (endpoint, data, cache_time) => {
     };
     if (headers['Content-Type'] === 'multipart/form-data') {
       const formData = new FormData();
-      formData.append('photo', {
-        uri: data.photo,
-        type: data.mime,
-        name: data.filename,
-      });
+      if (data.photo && data.mime && data.filename) {
+        formData.append('photo', {
+          uri: data.photo,
+          type: data.mime,
+          name: data.filename,
+        });
+      }
       options.body = formData;
     } else {
       options.body = requestData;

@@ -64,6 +64,7 @@ export default class VerificationScreen extends Component {
                   if (result) {
                     if (result.access_token) {
                       setAuthData(result);
+                      AsyncStorage.setItem('userId', String(result.id));
                       AsyncStorage.setItem('userToken', result.access_token);
                       AsyncStorage.setItem(
                         'refreshToken',

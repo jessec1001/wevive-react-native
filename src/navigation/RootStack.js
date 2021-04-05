@@ -163,6 +163,13 @@ const RootStack = () => {
       setAvatarUrl(URL.slice(1, -1));
     }
   });
+  if (!authData) {
+    AsyncStorage.getItem('userId').then((userId) => {
+      if (userId) {
+        setAuthData({id: userId});
+      }
+    });
+  }
   const appUserContextValue = {authData, setAuthData, updateMe, avatarUrl};
   const insets = useSafeAreaInsets();
   return (

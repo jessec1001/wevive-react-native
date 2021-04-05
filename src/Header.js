@@ -18,6 +18,7 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors} from '../app.json';
 import {UserContext} from './context/UserContext';
+import { ChatContext } from 'react-native-chat-plugin/ChatContext';
 const getTitlePrefix = (name, params) => {
   if (name == 'ContactsScreen' && params?.type == 'archived') {
     return 'Archived ';
@@ -176,15 +177,20 @@ const getNextOrProfile = (props, name, params, avatarUrl) => {
 };
 export default function Header(props) {
   const ctx = React.useContext(UserContext);
+  const chatCtx = React.useContext(ChatContext);
+  const users = chatCtx.getUsers();
   const name = props.route.state?.routes[props.route.state.index].name;
   const params = props.route.state?.routes[props.route.state.index].params;
-  //console.warn(name, params);
   const title = name ? getTitle(name, params) : false;
   const styleSuffix = getStyleSuffix(name);
   const style = name ? styles[`headerTitle${styleSuffix}`] : styles.headerTitle;
   const logo = getLogo(name);
-  const nextOrProfile = getNextOrProfile(props, name, params, ctx.avatarUrl);
-
+  const userIdx = users.findIndex(u => u.userId == ctx.authData.id);
+  let avatarUrl = ctx.avatarUrl || ctx.authData.avatar;
+  if (userIdx !== -1) {
+    avatarUrl = users[userIdx].avatar;
+  }
+  const nextOrProfile = getNextOrProfile(props, name, params, avatarUrl);
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar

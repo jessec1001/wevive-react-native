@@ -19,13 +19,21 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import APIService from '../../service/APIService';
+import { ChatContext } from 'react-native-chat-plugin/ChatContext';
 
 export default function PhoneUsernameSettings(props) {
   const {authData, avatarUrl, updateMe} = useContext(UserContext);
+  const chatCtx = useContext(ChatContext);
+  const users = chatCtx.getUsers();
+  const userIdx = users.findIndex(u => u.userId == authData.id);
+  let avatarUrlToUse = avatarUrl || authData.avatar;
+  if (userIdx !== -1) {
+    avatarUrlToUse = users[userIdx].avatar;
+  }
   const [name, setName] = React.useState('');
   const [changedImage, setChangedImage] = React.useState(false);
   const [image, setImage] = React.useState({
-    avatarImage: avatarUrl,
+    avatarImage: avatarUrlToUse,
     default: true,
   });
   const pickImage = () => {
