@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index c0d4abb..9a6dbf4 100644
+index c0d4abb..178051c 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
-@@ -2,116 +2,164 @@ import React from "react";
+@@ -2,116 +2,237 @@ import React from "react";
  import PropTypes from "prop-types";
  import { View, Text, StyleSheet, Alert } from "react-native";
  
@@ -18,10 +18,12 @@ index c0d4abb..9a6dbf4 100644
  import Colors from "./constants/Colors";
  import { getEncryptionKeys } from "./utils/SQLCipherClient";
  import { decryptConversations, decryptEvents, recreateEncryptionKeys, resendEncryptionKeys} from "./utils/ChatEncryption";
+-
+-const Stack = createStackNavigator();
 +import Pressable from "react-native/Libraries/Components/Pressable/Pressable";
 +import { responsiveFontSize, responsiveHeight, responsiveWidth } from "react-native-responsive-dimensions";
- 
--const Stack = createStackNavigator();
++import { UserContext } from "../../src/context/UserContext";
++let init = false;
  const styles = StyleSheet.create({
    errorView: {
 -    flex: 1,
@@ -68,7 +70,8 @@ index c0d4abb..9a6dbf4 100644
 -          const conversations = await decryptConversations(res.conversations, socket.chat_private_key, ctx, recreateKeys);
 -          ctx.setConversations(conversations);
 -        }
-+  const users = ctx.getUsers()
++  const user = ctx.getUser();
++  const users = ctx.getUsers();
 +  const authenticationCallback = (res) => {
 +    setTimeout(() => {
 +      socket.chat_user_id = res.user.id;
@@ -77,26 +80,7 @@ index c0d4abb..9a6dbf4 100644
 -        socket.emit("events:get_unread_count", ({ success, stats }) => {
 -          if (success && stats && Array.isArray(stats) && stats.length > 0) {
 -            ctx.updateUnreadCounts({ stats });
-+      }).catch((error) => {
-+        //console.error('error');
-+      });*/
-+      /*
-+      if (res.user.public_key != socket.chat_public_key) {
-+        recreateEncryptionKeys(ctx, socket.chat_token, res.user.salt).then(({ public_key, private_key }) => {
-+          if (public_key != res.user.public_key) {
-+            socket.chat_public_key = public_key;
-+            socket.chat_private_key = private_key;
-+            socket.emit("users:updateKey", {public_key});
-+            resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
-+              emitEvents();
-+            }).catch(() => {
-+              emitEvents(true);
-+            });
-+          } else {
-+            socket.chat_public_key = public_key;
-+            socket.chat_private_key = private_key;
-+            emitEvents();
-           }
+-          }
 -        });
 -      });
 -    };
@@ -104,7 +88,7 @@ index c0d4abb..9a6dbf4 100644
 -      setTimeout(() => {
 -        socket.chat_user_id = res.user.id;
 -        /*resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
-             
+-
 -        }).catch((error) => {
 -          //console.error('error');
 -        });*/
@@ -122,7 +106,34 @@ index c0d4abb..9a6dbf4 100644
 -            } else {
 -              socket.chat_public_key = public_key;
 -              socket.chat_private_key = private_key;
--              emitEvents();
++      }).catch((error) => {
++        //console.error('error');
++      });*/
++      /*
++      if (res.user.public_key != socket.chat_public_key) {
++        recreateEncryptionKeys(ctx, socket.chat_token, res.user.salt).then(({ public_key, private_key }) => {
++          if (public_key != res.user.public_key) {
++            socket.chat_public_key = public_key;
++            socket.chat_private_key = private_key;
++            socket.emit("users:updateKey", {public_key});
++            resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
+               emitEvents();
+-            }
++            }).catch(() => {
++              emitEvents(true);
++            });
++          } else {
++            socket.chat_public_key = public_key;
++            socket.chat_private_key = private_key;
++            emitEvents();
++          }
+             
+-          });
+-        } else {
+-          emitEvents();
+-        }
+-      },10);
+-    };
 +        });
 +      } else {
 +        emitEvents();
@@ -132,42 +143,36 @@ index c0d4abb..9a6dbf4 100644
 +    },100);
 +  };
 +  React.useEffect(() => {
-+    getEncryptionKeys(ctx).then(({ private_key, public_key, salt }) => {
-+    socket.chat_public_key = public_key;
-+    socket.chat_private_key = private_key;
-+    socket.chat_token = options.token;
-+    ctx.authenticate({...options,public_key, salt}, authenticationCallback);
++    ctx.setAuthInfo(options, userContext.authData);
+     getEncryptionKeys(ctx).then(({ private_key, public_key, salt }) => {
+       socket.chat_public_key = public_key;
+       socket.chat_private_key = private_key;
+       socket.chat_token = options.token;
+       ctx.authenticate({...options,public_key, salt}, authenticationCallback);
++      //console.error(userContext.authData);
 +  });
 +},[]);
++const userContext = React.useContext(UserContext);
 +const emitEvents = (recreateKeys = false) => {
 +  // get latest conversations from the server:
 +  ctx.getLatestEventFromDB().then((event)=> {
 +    const options = event ? {since: 0} : {since: 0};
++    //return "OFFLINE";
 +    socket.emit("conversations:fetch", options, async (res) => {
 +      if (res && res.success && Array.isArray(res.conversations)) {
 +        const conversations = await decryptConversations(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys);
 +        ctx.setConversations(conversations);
 +        conversations.map(c=>{
 +          ctx.saveConversationToDB(c)
-+          //console.error(c);
 +          c.participants.map(u=>{
 +            if (u.id) {
-+              ctx.saveUserToDB(u.id, u.avatar, u.username);
-+              //console.error(u);
++              ctx.saveUserToDB(u.id, u.avatar, u.username, u.phone_number, u.lastOnline);
 +              ctx.addUser(u);
-             }
--            
-           });
--        } else {
--          emitEvents();
--        }
--      },10);
--    };
--    getEncryptionKeys(ctx).then(({ private_key, public_key, salt }) => {
--      socket.chat_public_key = public_key;
--      socket.chat_private_key = private_key;
--      socket.chat_token = options.token;
--      ctx.authenticate({...options,public_key, salt}, authenticationCallback);
++            }
++          });
++          const event = c.lastEvent;
++          ctx.saveMessageToDB(c.id, event?.text, event?.owner ? event.owner.id : 0, event?.type, event?.id, event?.time);
++          //c.lastEvent
 +        });
 +      }
 +    });
@@ -183,40 +188,107 @@ index c0d4abb..9a6dbf4 100644
 +    //ctx.setAuthenticationError("Connecting..");
 +  }, []);
 +  React.useEffect(() => {
++    if (init) return;
++    //init = true;
++    //return;
 +    // get latest users from the DB:
 +    ctx.getUsersFromDB().then((users)=> {
++      const usersList = {};
 +      for (let i=0;i<users.length;i++) {
 +        let user = users.item(i);
++        user.avatar = user.path;
++        delete user.path;
++        user.lastOnline = user.lastOnline * 1000;
 +        ctx.addUser(user);
++        usersList[user.id] = user;
 +      }
++      
++      ctx.getConversationsFromDB().then((conversations)=> {
++        let conversationsArray = {};
++        for (let i=0;i<conversations.length;i++) {
++          let conversation = conversations.item(i);
++          if (typeof conversationsArray[conversation.groupId] == 'undefined') {
++            const conversationEntity = getConversationEntity(conversation)
++            
++            conversationEntity.id = conversation.groupId;
++            conversationEntity.events = [];
++            conversationEntity.participants = [];
++            conversationEntity.time = new Date(conversation.createdAt * 1000);
++            conversationEntity.createdAt = conversation.createdAt;
++            conversationsArray[conversation.groupId] = conversationEntity;
++          }
++          const messageEntity = getMessageEntity(conversation);
++          messageEntity.id = conversation.eventId;
++          //messageEntity.type = "MESSAGE";
++          conversationsArray[conversation.groupId].lastEvent = messageEntity;
++          const userEntity = getUserEntity(conversation);
++          userEntity.avatar = userEntity.avatarUrl;
++          userEntity.id = conversation.userId;
++          messageEntity.owner = userEntity;
++          messageEntity.type = "MESSAGE";
++          messageEntity.time = new Date(conversation.eventCreatedAt * 1000);
++          if (messageEntity.time > conversationsArray[conversation.groupId].time) {
++            conversationsArray[conversation.groupId].time = messageEntity.time;
++          }
++          const userIdx = conversationsArray[conversation.groupId].participants.findIndex(c => c.userId == userEntity.id);
++          if (userIdx == -1) {
++            const avatar = usersList[userEntity.id]?.avatar;
++            if (avatar) {
++              userEntity.avatar = avatar;
++            }
++            conversationsArray[conversation.groupId].participants.push(userEntity);
++          }
++          const messageIdx = conversationsArray[conversation.groupId].events.findIndex(e => e.id == messageEntity.event_id);
++          if (messageIdx == -1) {
++            conversationsArray[conversation.groupId].events.push(messageEntity);
++          }
++         
++        }
++        const conversationsArrayR = Object.values(conversationsArray).sort((a,b)=> {
++          return a.time > b.time
++        });
++        ctx.setConversations(conversationsArrayR);
++        init = true;
++      });
      });
-+    // get latest conversations from the DB:
-+    ctx.getConversationsFromDB().then((conversations)=> {
-+      for (let i=0;i<conversations.length;i++) {
-+        let conversation = conversations.item(i);
-+       /* ctx.addConversation({
-+          ...conversation, 
-+          id: conversation.group_id,
-+          time: new Date(conversation.created_at * 1000),
-+        });*/
++    const getEntity = (list, params) => {
++      const entity = {};
++      const keys = Object.keys(list);
++      for (i in keys) {
++        if (params.indexOf(keys[i]) !== -1) {
++          entity[keys[i]] = list[keys[i]];
++        }
 +      }
-+    });
++      return entity;
++    }
++    const getConversationEntity = (list) => {
++      return getEntity(list, ['created_by','is_archive','group_id','is_delete','is_read','is_mute','created_at','is_pin','name'])
++    }
++    const getUserEntity = (list) => {
++      return getEntity(list, ['userId','phone_number','seen_at','username','avatarUrl'])
++    }
++    const getMessageEntity = (list) => {
++      return getEntity(list, ['event_id','is_read','is_starred','created_at','text','is_delivered','retry_at', 'type'])
++    }
++    // get latest conversations from the DB:
++    
 +
    
      async function handleEventCreated ({ event }) {
        if (event && event.id) {
          const [decryptedEvent] = await decryptEvents(event.conversationId, [event], socket.chat_private_key, ctx);
 -        ctx.addEvent(decryptedEvent);
+-        if (!event.owner || event.owner.id !== ctx.getUserId()) {
 +        
-         if (!event.owner || event.owner.id !== ctx.getUserId()) {
++        if (!event.owner || event.owner.id != ctx.getUserId()) {
 +          ctx.addEvent(decryptedEvent);
            ctx.incrementUnreadCounts(
              { conversationId: event.conversationId, count: 1 }
            );
-+          ctx.saveMessageToDB(event.conversationId, event.text, event.owner ? event.owner.id : 0);
++          ctx.saveMessageToDB(event.conversationId, event.text, event.owner ? event.owner.id : 0, event.type, event.id, event.time);
 +        } else {
          }
-+        await ctx.saveUserToDB(event.owner.id, event.owner.avatar, event.owner.username, "");
++        await ctx.saveUserToDB(event.owner.id, event.owner.avatar, event.owner.username, event.owner.phone_number, event.owner.lastOnline);
 +      }
 +    }
 +    async function handleEventRead ({ conversationId, eventId, userId }) {
@@ -227,13 +299,13 @@ index c0d4abb..9a6dbf4 100644
      async function handleConversationCreated({ conversation }) {
        const newConversation = await decryptConversations([conversation], socket.chat_private_key, ctx);
        if (!newConversation[0].hidden) ctx.addConversation(newConversation[0]);
-+      ctx.saveConversationToDB(conversation, conversation.name);
++      ctx.saveConversationToDB(conversation);
      }
 +    socket.on("events:read_event", handleEventRead);
      socket.on("events:event_created", handleEventCreated);
      socket.on("conversations:created", handleConversationCreated);
      const cleanAuthenticationHooks = ctx.setUpAuthenticationHooks(authenticationCallback);
-@@ -141,29 +189,20 @@ export default function ChatContainer({ options }) {
+@@ -141,29 +262,26 @@ export default function ChatContainer({ options }) {
  
      return () => timer && clearTimeout(timer);
    }, [authError]);
@@ -254,6 +326,12 @@ index c0d4abb..9a6dbf4 100644
 +          Disconnected
 +        </Text></Pressable> : null }
 +      </>
++    );
++  }
++  if (!init || !user.id) {
++    return (
++      <>
++      </>
      );
    }
  
@@ -272,24 +350,38 @@ index c0d4abb..9a6dbf4 100644
  
  ChatContainer.propTypes = {
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
-index 8e9472a..73e18e5 100644
+index 8e9472a..96b6987 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
-@@ -27,12 +27,11 @@ export function createAuthActions(state, dispatch) {
+@@ -27,16 +27,17 @@ export function createAuthActions(state, dispatch) {
      if (authenticationTimeout) {
        clearTimeout(authenticationTimeout);
      }
 -    // authenticate.
-     socket.emit("users:authenticate", options, function handleAuthSuccess(res) {
-       if (res && res.success) {
-         setAuthInfo(options, res.user);
-         setAuthenticationError("");
+-    socket.emit("users:authenticate", options, function handleAuthSuccess(res) {
+-      if (res && res.success) {
+-        setAuthInfo(options, res.user);
+-        setAuthenticationError("");
 -        callback(res);
-+        if (typeof callback == 'function') callback(res);
-       } else {
-         setAuthenticationError("Authentication failed!");
-       }
-@@ -58,10 +57,18 @@ export function createAuthActions(state, dispatch) {
+-      } else {
+-        setAuthenticationError("Authentication failed!");
+-      }
+-    });
++    if (typeof options.token !== 'undefined') {
++      socket.emit("users:authenticate", options, function handleAuthSuccess(res) {
++        if (res && res.success) {
++          setAuthInfo(options, res.user);
++          setAuthenticationError("");
++          if (typeof callback == 'function') callback(res);
++        } else {
++          setAuthenticationError("Authentication failed!");
++        }
++      });
++    }
+   }
+ 
+   function setAuthInfo(options, user) {
+@@ -58,10 +59,18 @@ export function createAuthActions(state, dispatch) {
      };
    }
  
@@ -301,7 +393,7 @@ index 8e9472a..73e18e5 100644
 +      }
        setAuthenticationError("Lost connection to the server.");
        console.warn("Socket disconnected:", error);
-+      if (error == 'ping timeout') {
++      if (error == 'ping timeout' || error == 'transport close') {
 +        authenticationTimeout = setTimeout(function () {
 +          authenticate(state.options, callback);
 +        }, 100);
@@ -309,7 +401,7 @@ index 8e9472a..73e18e5 100644
      };
    }
  
-@@ -104,7 +111,7 @@ export function createAuthActions(state, dispatch) {
+@@ -104,7 +113,7 @@ export function createAuthActions(state, dispatch) {
        const handleRequireAuthentication = createRequireAuthenticationHandler(callback);
        const handleSocketDisconnected = createSocketDisconnectedHandler();
        socket.on('connect', () => {
@@ -403,7 +495,7 @@ index 787b10d..15ddd17 100644
        dispatch({ type: "update_events", payload: { conversationId, events }});
      },
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
-index c41797c..85e23c8 100644
+index c41797c..48dcd46 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 @@ -1,3 +1,5 @@
@@ -446,7 +538,7 @@ index c41797c..85e23c8 100644
    }
    return { ...state, conversations: newConversations };
  };
-@@ -74,6 +94,24 @@ const unsetTyping = (state, conversationId, userId) => {
+@@ -74,17 +94,73 @@ const unsetTyping = (state, conversationId, userId) => {
  
  export function conversationReducer(state, action) {
    switch(action.type) {
@@ -454,9 +546,12 @@ index c41797c..85e23c8 100644
 +    // delete conversation by id.
 +    const user = action.payload.user;
 +    const users = [...state.users];
-+    const userIdx = state.users.findIndex(u => u.userId === user.userId);
++    const userIdx = state.users.findIndex(u => u.id === user.id);
 +    if (userIdx != -1) {
-+      users[userIdx] = user;
++      users[userIdx] = {
++        ...user,
++        avatar: users[userIdx].avatar
++      };
 +    } else {
 +      users.push(user);
 +    }
@@ -464,62 +559,63 @@ index c41797c..85e23c8 100644
 +  }
 +  case "delete_call": {
 +    const callId = action.payload.call.id;
-+    const calls = state.calls.filter(call => call.id !== callId);
++    const calls = state.calls.filter(call => call.id != callId);
 +    return { ...state, calls };
 +  }
 +
    case "delete_conversation": {
      // delete conversation by id.
      const conversationId = action.payload.conversationId;
-@@ -82,22 +120,63 @@ export function conversationReducer(state, action) {
+-    const conversations = state.conversations.filter(conversation => conversation.id !== conversationId);
++    const conversations = state.conversations.filter(conversation => conversation.id != conversationId);
+     return { ...state, conversations };
    }
  
    case "mute_conversation": {
 -    // delete conversation by id.
 +    // mute conversation by id.
 +    const conversationId = action.payload.conversationId;
-+    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
++    const conversations = state.conversations.map(conversation => conversation.id != conversationId ? conversation : {...conversation, muted: !conversation.muted});
 +    return { ...state, conversations };
 +  }
 +
 +  case "archive_conversation": {
 +    // archive conversation by id.
 +    const conversationId = action.payload.conversationId;
-+    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, archived: !conversation.archived});
++    const conversations = state.conversations.map(conversation => conversation.id != conversationId ? conversation : {...conversation, archived: !conversation.archived});
 +    return { ...state, conversations };
 +  }
 +
 +  case "pin_conversation": {
 +    // pin conversation by id.
 +    const conversationId = action.payload.conversationId;
-+    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, pinned: !conversation.pinned});
++    const conversations = state.conversations.map(conversation => conversation.id != conversationId ? conversation : {...conversation, pinned: !conversation.pinned});
 +    return { ...state, conversations };
 +  }
 +
 +  case "unread_conversation": {
 +    // unread conversation by id.
 +    const conversationId = action.payload.conversationId;
-+    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, unread: !conversation.unread});
++    const conversations = state.conversations.map(conversation => conversation.id != conversationId ? conversation : {...conversation, unread: !conversation.unread});
 +    return { ...state, conversations };
 +  }
 +
 +  case "mute_conversation": {
 +    // mute conversation by id.
-     const conversationId = action.payload.conversationId;
-     const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
-     return { ...state, conversations };
-   }
- 
-+  case "typing_conversation": {
-+    // set typing flag conversation by id.
 +    const conversationId = action.payload.conversationId;
-+    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, typing: !conversation.typing});
++    const conversations = state.conversations.map(conversation => conversation.id != conversationId ? conversation : {...conversation, muted: !conversation.muted});
 +    return { ...state, conversations };
 +  }
 +
-   case "update_conversations":
-     return { ...state, conversations: action.payload.conversations };
++  case "typing_conversation": {
++    // set typing flag conversation by id.
+     const conversationId = action.payload.conversationId;
+-    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
++    const conversations = state.conversations.map(conversation => conversation.id != conversationId ? conversation : {...conversation, typing: !conversation.typing});
+     return { ...state, conversations };
+   }
  
+@@ -94,10 +170,16 @@ export function conversationReducer(state, action) {
    case "add_conversations": {
      return addConversations(state, action.payload.conversations);
    }
@@ -536,7 +632,7 @@ index c41797c..85e23c8 100644
  
    case "update_unread_counts": {
      return updateUnreadCounts(state, action.payload.stats);
-@@ -120,11 +199,14 @@ export function conversationReducer(state, action) {
+@@ -120,11 +202,14 @@ export function conversationReducer(state, action) {
  
  export function createConversationActions(state, dispatch) {
    const socket = getSocket();
@@ -553,7 +649,7 @@ index c41797c..85e23c8 100644
        }
      });
    }
-@@ -132,11 +214,60 @@ export function createConversationActions(state, dispatch) {
+@@ -132,11 +217,95 @@ export function createConversationActions(state, dispatch) {
      dispatch({ type: "mute_conversation", payload: { conversationId }});
    }
  
@@ -579,11 +675,46 @@ index c41797c..85e23c8 100644
 +      const conversationIdx = state.conversations.findIndex(c => c.id == conversationId);
 +      return ctx.getChatname(state.conversations[conversationIdx]);
 +    },
++    getChatLastOnline(conversation) {
++      const user = state.user;
++      if (!conversation) return "";
++      if (typeof conversation.participants !== "undefined" && (conversation.avatar == "" || !conversation.avatar)) {
++        const notOwner = conversation.participants.filter(f=>f.id != user.id)
++        if (!notOwner[0]) {
++          return this.getCurrentUser().lastOnline;
++        }
++        
++        const notOwnerIdx = state.users.findIndex(u=>u.id == notOwner[0].id);
++        if (notOwnerIdx !== -1) {
++          return state.users[notOwnerIdx].lastOnline;
++        }
++        return notOwner[0] ? notOwner[0].lastOnline : false;
++      } return false;
++    },
++    getCurrentUser() {
++      const user = state.users[state.users.findIndex(u=>u.id == state.user.id)];
++      return user;
++    },
++    getChatAvatar(conversation) {
++      const user = state.user;
++      if (!conversation) return "";
++      if (typeof conversation.participants !== "undefined" && (conversation.avatar == "" || !conversation.avatar)) {
++        const notOwner = conversation.participants.filter(f=>f.id != user.id)
++        if (!notOwner[0]) {
++          return this.getCurrentUser().avatar;
++        }
++        const notOwnerIdx = state.users.findIndex(u=>u.id == notOwner[0].id);
++        if (notOwnerIdx !== -1) {
++          return state.users[notOwnerIdx].avatar;
++        } 
++        return notOwner[0] ? notOwner[0].avatar : "";
++      } return conversation.avatar;
++    },
 +    getChatname(conversation) {
 +      const user = state.user;
 +      if (!conversation) return "";
 +      if (typeof conversation.participants !== "undefined" && (conversation.name == "" || !conversation.name)) {
-+        const notOwner = conversation.participants.filter(f=>f.id !== user.id)
++        const notOwner = conversation.participants.filter(f=>f.id != user.id)
 +        const name = notOwner[0] ? this.getContactName(notOwner[0].username) : "Me";
 +        return name;
 +      } return conversation.name;
@@ -591,12 +722,12 @@ index c41797c..85e23c8 100644
 +    getContactName(phone_number) {
 +      const ctx = this;
 +      const contactIdx = ctx.contacts.findIndex(c => c.labels.indexOf(phone_number) !== -1);
-+      return contactIdx !== -1 ? ctx.contacts[contactIdx].value : (state.user.username !== phone_number && phone_number != 'Me' ? phone_number : "Me");
++      return contactIdx !== -1 ? ctx.contacts[contactIdx].humanValue : (state.user.username !== phone_number && phone_number != 'Me' ? phone_number : "Me");
 +    },
 +    getUsernameByUserId(userId) {
 +      const users = state.users;
 +      const userIdx = state.users.findIndex(u => u.userId == userId);
-+      return userIdx !== -1 ? this.getContactName(users[userIdx].username) : `Wevive user`; 
++      return userIdx !== -1 ? this.getContactName(users[userIdx].username) : `Me`; 
 +    },
 +    getUsers() {
 +      return state.users || [];
@@ -614,7 +745,7 @@ index c41797c..85e23c8 100644
          if (a.lastEvent && b.lastEvent) {
            return a.lastEvent.time < b.lastEvent.time;
          } else if (a.lastEvent) {
-@@ -152,6 +283,9 @@ export function createConversationActions(state, dispatch) {
+@@ -152,6 +321,9 @@ export function createConversationActions(state, dispatch) {
          dispatch({ type: "add_conversations", payload: { conversations }});
        }
      },
@@ -624,7 +755,7 @@ index c41797c..85e23c8 100644
      addConversation(conversation) {
        dispatch({ type: "add_conversation", payload: { conversation }});
      },
-@@ -167,5 +301,8 @@ export function createConversationActions(state, dispatch) {
+@@ -167,5 +339,8 @@ export function createConversationActions(state, dispatch) {
      unsetTyping({ conversationId, userId }) {
        dispatch({ type: "unset_typing", payload: { conversationId, userId }});
      },
@@ -634,7 +765,7 @@ index c41797c..85e23c8 100644
    };
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
-index f9bc1dc..ce7a152 100644
+index f9bc1dc..9841fb1 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/index.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/index.js
 @@ -6,7 +6,8 @@ import combineReducers from "./combineReducers";
@@ -647,7 +778,7 @@ index f9bc1dc..ce7a152 100644
  
  export const ChatContext = React.createContext({...ChatInitialState});
  
-@@ -17,8 +18,452 @@ const reducer = combineReducers(
+@@ -17,8 +18,459 @@ const reducer = combineReducers(
    settingsReducer
  );
  
@@ -761,12 +892,13 @@ index f9bc1dc..ce7a152 100644
 +      })
 +    });
 +  },[]);
-+  const updateMessageEvent = React.useCallback((messageId, eventId) => {
++  const updateMessageEvent = React.useCallback((messageId, event) => {
++    //console.error('updateMessageEvent',messageId,eventId)
 +    return new Promise((resolve, reject) => {
 +      return getDB().then((db)=> {
 +        db.executeSql(
-+          "UPDATE messages SET `event_id`=? WHERE id = ?",
-+          [eventId, messageId]
++          "UPDATE messages SET `event_id`=?,`is_delivered`=? WHERE id = ?",
++          [event.id, Math.floor(new Date(event.time) / 1000), messageId]
 +        ).then(([results])=> {
 +          resolve(results);
 +        });
@@ -870,7 +1002,7 @@ index f9bc1dc..ce7a152 100644
 +    return new Promise((resolve, reject) => {
 +      return getDB().then((db)=> {
 +        db.executeSql(
-+          "SELECT * FROM users ORDER BY created_at DESC"
++          "SELECT users.userId as id, users.created_at, users.avatarFileId, users.avatarUrl, users.username, users.phone_number, users.seen_at as lastOnline,files.path FROM users LEFT JOIN files ON users.avatarFileId = files.id ORDER BY users.created_at DESC"
 +        ).then(([results])=> {
 +          resolve(results.rows.length > 0 ? results.rows : false);
 +        });
@@ -881,7 +1013,11 @@ index f9bc1dc..ce7a152 100644
 +    return new Promise((resolve, reject) => {
 +      return getDB().then((db)=> {
 +        db.executeSql(
-+          "SELECT * FROM conversations ORDER BY created_at DESC"
++          `SELECT conversations.*, users.*, messages.*, conversations.created_at as createdAt, conversations.group_id as groupId, messages.created_at as eventCreatedAt, messages.author_id as eventUserId, messages.event_id as eventId, messages.id as localId   FROM conversations
++          LEFT JOIN participants ON conversations.group_id = participants.group_id
++          LEFT JOIN users ON participants.user_id = users.userId
++          LEFT JOIN messages ON conversations.group_id = messages.group_id
++          ORDER BY messages.created_at ASC`
 +        ).then(([results])=> {
 +          
 +          resolve(results.rows.length > 0 ? results.rows : false);
@@ -1028,7 +1164,7 @@ index f9bc1dc..ce7a152 100644
 +      });
 +    })
 +  },[]);
-+  const saveUserToDB = React.useCallback((userId, avatarUrl, username, phone_number) => {
++  const saveUserToDB = React.useCallback((userId, avatarUrl, username, phone_number, seen_at) => {
 +    return new Promise((resolve, reject) => {
 +      getDB().then(async (db)=> {
 +        const existingUser = await db.executeSql(
@@ -1039,24 +1175,26 @@ index f9bc1dc..ce7a152 100644
 +          const avatarFileId = avatarUrl !== null ? await saveFile(avatarUrl,'avatar',userId) : existingUser[0].rows.item(0).avatarFileId;
 +          const avatar = avatarUrl !== null ? avatarUrl : existingUser[0].rows.item(0).avatarUrl;
 +          const update = await db.executeSql(
-+            "UPDATE users SET username=?, avatarUrl=?, avatarFileId=?, phone_number=? WHERE userId=?",
-+            [ username, avatarUrl, avatarFileId, phone_number, userId]
++            "UPDATE users SET username=?, avatarUrl=?, avatarFileId=?, phone_number=?, seen_at=? WHERE userId=?",
++            [ username, avatarUrl, avatarFileId, phone_number, new Date(seen_at) / 1000, userId]
 +          );
 +        } else {
 +          const avatarFileId = avatarUrl !== null ? await saveFile(avatarUrl,'avatar',userId) : 0;
 +          return await db.executeSql(
-+            "INSERT OR IGNORE INTO users (`userId`,`username`,`avatarUrl`, `avatarFileId`, `phone_number`, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-+            [userId, username, avatarUrl, avatarFileId, phone_number, Math.floor(Date.now() / 1000)]
++            "INSERT OR IGNORE INTO users (`userId`,`username`,`avatarUrl`, `avatarFileId`, `phone_number`, `seen_at`,created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
++            [userId, username, avatarUrl, avatarFileId, phone_number, new Date(seen_at) / 1000, Math.floor(Date.now() / 1000)]
 +          );
 +        }
 +      })
 +    });
 +  },[]);
-+  const saveMessageToDB = React.useCallback((conversation, contents, author, event_id) => {
++  const saveMessageToDB = React.useCallback((conversationId, contents, author, type, event_id, time = 0, delivered_at=true) => {
++    //const conversationIdx = state.conversations.findIndex((c) => c.id === conversationId);
++    //const conversation = conversations[conversationIdx];
 +    return getDB().then((db)=> {
 +      return db.executeSql(
-+        "INSERT OR IGNORE INTO messages(`group_id`,`text`,`author_id`, `event_id`, created_at) VALUES (?, ?, ?, ?, ?)",
-+        [conversation.id, contents, author, event_id, Math.floor(Date.now() / 1000)]
++        "INSERT OR IGNORE INTO messages(`group_id`,`text`,`author_id`, `event_id`, `type`, created_at, is_delivered) VALUES (?, ?, ?, ?, ?, ?, ?)",
++        [conversationId, contents, author, event_id, type, time > 0 ? Math.floor(new Date(time) / 1000) : Math.floor(Date.now() / 1000), delivered_at ? Math.floor(Date.now() / 1000) : 0]
 +      ).then(([results])=> {
 +        return results.insertId;
 +      });
@@ -1066,7 +1204,7 @@ index f9bc1dc..ce7a152 100644
 +    getDB().then((db)=> {
 +      db.executeSql(
 +        "INSERT OR IGNORE INTO conversations(`group_id`,`group_key`,`name`,`created_by`,`created_at`) VALUES (?, ?, ?, ?, ?)",
-+        [conversation.id, "", conversation.name, conversation.participants[conversation.participants.length-1].id, Math.floor(Date.now() / 1000)]
++        [conversation.id, "", conversation.name, conversation.createdBy, new Date(conversation.time) / 1000 ]
 +      ).then(([results])=> {
 +        conversation.participants.map(p =>  
 +          db.executeSql(
@@ -1101,7 +1239,7 @@ index f9bc1dc..ce7a152 100644
    const context = React.useMemo(
      () => {
        return ({
-@@ -26,11 +471,33 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
+@@ -26,11 +478,33 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
          ...createAuthActions(state, dispatch),
          ...createChatActions(state, dispatch),
          ...createConversationActions(state, dispatch),
@@ -1139,7 +1277,7 @@ index f9bc1dc..ce7a152 100644
        });
      },
      [state]
-@@ -47,5 +514,5 @@ ChatContextProvider.propTypes = {
+@@ -47,5 +521,5 @@ ChatContextProvider.propTypes = {
    options: PropTypes.object.isRequired,
    children: PropTypes.element.isRequired,
    socketIoUrl: PropTypes.string.isRequired,
@@ -1199,19 +1337,27 @@ index 0000000..609e264
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 5388ef0..f68395d 100644
+index 5388ef0..2d4d892 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-@@ -10,7 +10,7 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
+@@ -10,7 +10,8 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
  import {launchCamera, launchImageLibrary} from "react-native-image-picker";
  
  import WebView from "react-native-webview";
 -import Recording from "react-native-recording";
++import uuid from 'uuid';
 +//import Recording from "react-native-recording";
  
  const sendButton = require("../images/sendbtn.png");
  const styles = StyleSheet.create({
-@@ -135,9 +135,8 @@ export default function ChatForm({ conversation }) {
+@@ -132,37 +133,61 @@ export default function ChatForm({ conversation }) {
+   const [tries, setTries] = React.useState(0);
+   const settings = ctx.getSettings();
+   const Icon = ctx.icon;
++  const user = ctx.getUser();
++  const users = ctx.getUsers();
++  const userIdx = users.findIndex(u => u.userId == user.id);
++  const currentUser = users[userIdx];
    const onChangeText = React.useCallback((text) => {
      setMessage(text);
      const socket = getSocket();
@@ -1222,11 +1368,17 @@ index 5388ef0..f68395d 100644
          if (!success && error) {
            Alert.alert("Error", error);
          }
-@@ -145,24 +144,42 @@ export default function ChatForm({ conversation }) {
+       });
      }
    },[message]);
- 
+-
 -  const sendMessage = React.useCallback((contents) => {
++  const uuidv4 = () => {
++    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
++      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
++      return v.toString(16);
++    });
++  }
 +  const sendMessage = React.useCallback(async (contents) => {
      const socket = getSocket();
 -    socket.emit("events:new_message", { conversationId: conversation.id, message: contents }, ({ success, error }) => {
@@ -1240,18 +1392,16 @@ index 5388ef0..f68395d 100644
 -            sendMessage(contents);
 -          }, 1000 * (1+tries * 2));
 +    setMessage("");
-+    const localMsg = await ctx.saveMessageToDB(conversation, contents, socket.chat_user_id, 0);
++    const localMsg = await ctx.saveMessageToDB(conversation.id, contents, user.id, "MESSAGE", uuidv4(), 0, false);
 +    const newMessage = {
 +      id: String(localMsg),
 +      conversationId: conversation.id,
 +      type: "MESSAGE",
 +      nonce: localMsg,
-+      owner: {
-+        id: socket.chat_user_id,
-+        username: "Me",
-+      },
++      owner: user,
 +      time: +Date.now(), 
 +      text: contents,
++      is_delivered: false,
 +    };
 +    ctx.addEvent(newMessage);
 +    setTimeout(()=>{
@@ -1279,7 +1429,7 @@ index 5388ef0..f68395d 100644
      if (message) {
        ctx.getDB().then((db)=> {
          db.executeSql(
-@@ -177,7 +194,11 @@ export default function ChatForm({ conversation }) {
+@@ -177,7 +202,11 @@ export default function ChatForm({ conversation }) {
            } else {
              sendMessage(message);
            }
@@ -1291,7 +1441,7 @@ index 5388ef0..f68395d 100644
        });
        
        Keyboard.dismiss();
-@@ -193,7 +214,7 @@ export default function ChatForm({ conversation }) {
+@@ -193,7 +222,7 @@ export default function ChatForm({ conversation }) {
  
      });
    };
@@ -1300,7 +1450,7 @@ index 5388ef0..f68395d 100644
  
    const [audioWebview, setWebView] = React.useState(false);
    const [audioLoaded, setAudioLoaded] = React.useState(false);
-@@ -203,12 +224,12 @@ export default function ChatForm({ conversation }) {
+@@ -203,12 +232,12 @@ export default function ChatForm({ conversation }) {
    const recordAudio = () => {
      if (audioRecording) {
        setAudioRecording(false);
@@ -1315,7 +1465,7 @@ index 5388ef0..f68395d 100644
        bufferSize: 81920,
        sampleRate: 44100,
        bitsPerChannel: 8,
-@@ -227,15 +248,28 @@ export default function ChatForm({ conversation }) {
+@@ -227,15 +256,28 @@ export default function ChatForm({ conversation }) {
      });
  
      Recording.start();
@@ -1346,7 +1496,7 @@ index 5388ef0..f68395d 100644
          value={message}
          style={styles.txt}
          onSubmitEditing={submit}
-@@ -243,19 +277,11 @@ export default function ChatForm({ conversation }) {
+@@ -243,19 +285,11 @@ export default function ChatForm({ conversation }) {
          placeholderTextColor={"rgb(125,125,125)"}
          blurOnSubmit={true}
          onChangeText={onChangeText} />
@@ -1369,7 +1519,7 @@ index 5388ef0..f68395d 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index bbdff8a..98a0443 100644
+index bbdff8a..ab5283e 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,5 +1,5 @@
@@ -1538,7 +1688,7 @@ index bbdff8a..98a0443 100644
 +  const Menu = ({event, Icon, setSelectedEvent, viewRef, tapEvent}) => {
 +    const username = ctx.getUserId();
 +    const author = event?.owner?.id;
-+    const isOwn = author === username;
++    const isOwn = author == username;
 +    return (
 +      <View style={{...(isOwn ? styles.ownMenuBox : styles.menuBox), top: tapEvent.nativeEvent.pageY - 170}}>
 +        <MenuButton style={styles.menuButton} event={event} text={"Star"} Icon={Icon} iconName={"star-icon"} size={15} setSelectedEvent={setSelectedEvent} />
@@ -1553,9 +1703,13 @@ index bbdff8a..98a0443 100644
    React.useEffect(() => {
      const socket = getSocket();
  
-@@ -58,15 +201,16 @@ export default function ChatScreen({ navigation, route }) {
+@@ -57,22 +200,27 @@ export default function ChatScreen({ navigation, route }) {
+         const decryptedEvents = await decryptEvents(conversation.id, events, socket.chat_private_key, ctx);
          const parsedEvents = await parseEvents(decryptedEvents);
          ctx.setEvents({ conversationId: conversation.id, events: parsedEvents });
++        parsedEvents.map(e => {
++          ctx.saveMessageToDB(conversation.id, e.text, socket.chat_user_id, e.type, e.id, e.time)
++        })
        });
 -      socket.emit("events:mark_read", { conversationId: conversation.id, public: !!settings.disable_read_events }, function ({ success }) {
 -        if (success) {
@@ -1578,8 +1732,20 @@ index bbdff8a..98a0443 100644
  
      function handleUnread({ event }) {
        if (event && event.id && event.conversationId === conversation.id) {
-@@ -103,13 +247,26 @@ export default function ChatScreen({ navigation, route }) {
+         socket.emit("events:mark_read", { conversationId: conversation.id, eventId: event.id, public: !!settings.disable_read_events }, function ({ success }) {
+           if (success) {
+             ctx.incrementUnreadCounts({ conversationId: conversation.id, count: -1 });
++            updateCount();
+           }
+         });
+       }
+@@ -101,15 +249,35 @@ export default function ChatScreen({ navigation, route }) {
+       const decryptedEvents = await decryptEvents(conversation.id, update.events, socket.chat_private_key, ctx);
+       const parsedEvents = await parseEvents(decryptedEvents);
        ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents)});
++      parsedEvents.map(e => {
++        ctx.saveMessageToDB(conversation.id, e.text, socket.chat_user_id, e.type, e.id, e.time)
++      })
      });
    }
 +  const Icon = ctx.icon;
@@ -1604,11 +1770,15 @@ index bbdff8a..98a0443 100644
 -          left={<PillButton text="Back" onPress={() => navigation.goBack()} />}
 -          title={conversation.name || "Chat"} />
 +          right={buttons}
-+          title={ctx.getChatname(conversation)} />
++          conversation={conversation}
++          title={ctx.getChatname(conversation)}
++          avatar={ctx.getChatAvatar(conversation)}
++          lastOnline={ctx.getChatLastOnline(conversation)}
++        />
          <View style={styles.inner}>
            <View style={styles.list}>
              <ImageBackground source={chatWallpaper} style={styles.wallpaper}>
-@@ -117,7 +274,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -117,7 +285,7 @@ export default function ChatScreen({ navigation, route }) {
                  if (events.length >= 20) {
                    fetchMoreMessages();
                  }
@@ -1617,7 +1787,7 @@ index bbdff8a..98a0443 100644
                <TypingIndicator conversation={conversation} />
                <View style={styles.form}>
                  <ChatForm conversation={conversation} />
-@@ -125,7 +282,8 @@ export default function ChatScreen({ navigation, route }) {
+@@ -125,7 +293,8 @@ export default function ChatScreen({ navigation, route }) {
              </ImageBackground>
            </View>
          </View>
@@ -1628,7 +1798,7 @@ index bbdff8a..98a0443 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-index 50d322e..0c38d64 100644
+index 50d322e..b1349a0 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 @@ -6,10 +6,9 @@ import { ChatContext } from "../ChatContext";
@@ -1856,7 +2026,7 @@ index 50d322e..0c38d64 100644
    const options = {
      enableVibrateFallback: true,
      ignoreAndroidSystemSettings: false
-@@ -257,52 +161,71 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
+@@ -257,52 +161,78 @@ function Message({ event, text, time, author, isOwn, encrypted, menu, setShowMen
      setLikes(likes - 1);
      ReactNativeHapticFeedback.trigger("impactMedium", options);
    }
@@ -1870,9 +2040,12 @@ index 50d322e..0c38d64 100644
 +
 +  const users =  ctx.getUsers();
 +  const getAvatar = React.useCallback((id) => {
-+    const userId = users.findIndex(u => id == u.userId);
-+    const userAvatar = users[userId].avatarUrl;
-+    return userAvatar;
++    const userId = users.findIndex(u => id == u.id);
++    if (userId !== -1) { 
++      const userAvatar = users[userId].avatar;
++      return userAvatar;
++    } 
++    return null;
 +  },[]);
 +  const authorUrl = getAvatar(author);
    return (
@@ -1909,8 +2082,8 @@ index 50d322e..0c38d64 100644
 +      }}>
 +        <>
 +          <View style={styles.authorBox}>
-+            <Image source={{url: authorUrl}} style={styles.avatar} />
-+            <Text style={styles.author}>{ctx.getContactName(ctx.getUsernameByUserId(author))}</Text>
++            <Image source={{uri: authorUrl}} style={styles.avatar} />
++            <Text style={styles.author}>{!isOwn ? ctx.getContactName(ctx.getUsernameByUserId(author)) : "Me"}</Text>
 +          </View>
 +          <View style={styles.textBox}>
 +            
@@ -1919,12 +2092,16 @@ index 50d322e..0c38d64 100644
 +          {encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
 +          <View style={styles.timeBox}>
 +            <Text style={styles.time}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
-+            <Text style={styles.readIndicator}>
-+              <Icon name="ticks" color={!event.nonce || event.id != event.nonce ? (!event.readBy || !event.readBy.length || event.readBy.length > 1 ? "rgb(228,140,58)" : "rgb(90,213,90)") : "rgb(100,100,100)"} size={8} />
-+            </Text>
-+            <Text style={styles.deliveryIndicator}>
-+              <Icon name="ticks" color={!event.nonce || event.id != event.nonce ? (!event.readBy || !event.readBy.length || event.readBy.length > 1 ? "rgb(228,140,58)" : "rgb(90,213,90)") : "rgb(100,100,100)"} size={8}/>
-+            </Text>
++            {isOwn && (
++              <>
++                <Text style={styles.readIndicator}>
++                  <Icon name="ticks" color={event?.readBy?.length > 1 ? "rgb(228,140,58)" : "rgb(100,100,100)"} size={8} />
++                </Text>
++                <Text style={styles.deliveryIndicator}>
++                  <Icon name="ticks" color={event?.is_delivered ? "rgb(228,140,58)" : "rgb(100,100,100)"} size={8}/>
++                </Text>
++              </>
++            )}
 +          </View>
 +          {likesButton}
 +        </>
@@ -1949,8 +2126,9 @@ index 50d322e..0c38d64 100644
 +  const username = ctx.getUserId();
    const isMessage = event?.type === "MESSAGE";
 -  const author = event?.owner?.username;
+-  const isOwn = author === username;
 +  const author = event?.owner?.id;
-   const isOwn = author === username;
++  const isOwn = !author || author == username;
    if (isMessage) {
      if (event?.hidden) return null;
 -    return (<Message Icon={ctx.icon} menu={menu} setShowMenu={setShowMenu} event={event} text={event?.text} isOwn={isOwn} author={author} time={event?.time} encrypted={event?.encrypted} />);
@@ -2073,6 +2251,66 @@ index d7b227a..2fbc6d2 100644
  MessageList.propTypes = {
    events: PropTypes.arrayOf(EventPropType),
    onEndReached: PropTypes.func
+diff --git a/node_modules/react-native-chat-plugin/Components/Header.js b/node_modules/react-native-chat-plugin/Components/Header.js
+index 239ae48..8936790 100644
+--- a/node_modules/react-native-chat-plugin/Components/Header.js
++++ b/node_modules/react-native-chat-plugin/Components/Header.js
+@@ -1,30 +1,51 @@
+ import React from "react";
+-import { Text, View, StyleSheet } from "react-native";
++import { Text, View, StyleSheet, Image } from "react-native";
+ import PropTypes from "prop-types";
+ import Colors from "../constants/Colors";
++import moment from "moment";
+ 
+ const styles = StyleSheet.create({
+   topContainer: {
+     flexDirection: "row",
+     justifyContent: "space-between",
+     alignItems: "center",
++    backgroundColor: "rgb(240,240,240)",
+   },
+   title: {
+     fontWeight: "bold",
+     color: Colors.FOREGROUND,
+-    flex: 1,
+     textAlign: "center",
+   },
+   emptyView: {
+     width: 60,
++  },
++  avatar: {
++    width: 30,
++    height: 30,
++    borderRadius: 30,
++  },
++  lastOnline: {
++    fontSize: 10,
++  },
++  chatName: {
++    justifyContent: "center",
+   }
+ });
+ 
+-export default function Header({ left, right, title }) {
++export default function Header({ left, right, title, avatar, lastOnline }) {
++  //console.error(lastOnline);
++  if (lastOnline) {
++    moment.locale('en')
++    var lastOnlineHumanized = moment(lastOnline).fromNow();
++  }
+   return (
+     <View style={styles.topContainer}>
+       {left ? left : <View style={styles.emptyView} />}
+-      {title ? <Text style={styles.title} numberOfLines={1} ellipsizeMode={"tail"}>{title}</Text> : null}
++      {!!avatar && <Image source={{url:avatar}} style={styles.avatar} />}
++      <View style={styles.chatName}>
++        {title ? <Text style={styles.title} numberOfLines={1} ellipsizeMode={"tail"}>{title}</Text> : null}
++        {lastOnline ? <Text style={styles.lastOnline} numberOfLines={1} ellipsizeMode={"tail"}>Online: {lastOnlineHumanized}</Text> : null}
++      </View>
+       {right ? right : <View style={styles.emptyView} />}
+     </View>
+   );
 diff --git a/node_modules/react-native-chat-plugin/Components/PillButton.js b/node_modules/react-native-chat-plugin/Components/PillButton.js
 index 42efb16..f2714f7 100644
 --- a/node_modules/react-native-chat-plugin/Components/PillButton.js
@@ -2128,7 +2366,7 @@ index 64f1ea6..3658991 100644
            style={styles.searchText}
            blurOnSubmit={true}
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
-index a3184cd..b524565 100644
+index a3184cd..0f5c35e 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
 @@ -7,6 +7,7 @@ import Fonts from "../constants/Fonts";
@@ -2139,7 +2377,25 @@ index a3184cd..b524565 100644
  const styles = StyleSheet.create(
    {
      container: {
-@@ -58,12 +59,18 @@ const styles = StyleSheet.create(
+@@ -29,6 +30,17 @@ const styles = StyleSheet.create(
+       right: 10,
+       top: 2,
+     },
++    isOwn: {
++      fontSize: 10,
++      position: "absolute",
++      fontFamily: Fonts.Light,
++      right: 10,
++      bottom: 8,
++      flexDirection: "row",
++    },
++    isOwnTicks: {
++      fontSize: 7,
++    },
+     preview: {
+       fontSize: 14,
+       marginTop: 7,
+@@ -58,19 +70,35 @@ const styles = StyleSheet.create(
        color: Colors.TEXT,
      },
      encryptedIcon: {
@@ -2164,17 +2420,38 @@ index a3184cd..b524565 100644
      }
    }
  );
-@@ -84,20 +91,29 @@ export default function ContactComponent({ conversation, onPress }) {
+-function getPreviewDate(conversation) {
++
++function getPreviewDate(conversation, user, Icon) {
+   let event = conversation.lastEvent;
+   const time = (typeof event?.time === "string") ? event.time : conversation.time;
+-  return <Text style={styles.date}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>;
++  const isOwn = event && event.owner.id == user.id;
++  return <>
++    {isOwn &&
++    <View style={styles.isOwn}>
++      <Icon style={styles.isOwnTicks} name='ticks' color={event.is_delivered ? "rgb(228,140,58)" : "rgb(100,100,100)"} />
++      <Icon style={styles.isOwnTicks} name='ticks' color={event?.readBy?.length > 1 ? "rgb(228,140,58)" : "rgb(100,100,100)"} />
++    </View>
++    }
++    <Text style={styles.date}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
++  </>;
+ }
+ function getPreview(conversation) {
+   let event = conversation.lastEvent;
+@@ -84,23 +112,33 @@ export default function ContactComponent({ conversation, onPress }) {
    const unreadCount = conversation.unreadCount ? parseInt(conversation.unreadCount) : 0;
    const ctx = useContext(ChatContext);
    const user = ctx.getUser();
 +  const users = ctx.getUsers();
    let participants = conversation.participants;
    if (user && Array.isArray(participants) && participants.length > 1) {
-     participants = participants.filter(p => p.id !== user.id);
+-    participants = participants.filter(p => p.id !== user.id);
++    participants = participants.filter(p => p.id != user.id);
    }
 -
 +  const Icon = ctx.icon;
++  //console.error(conversation.participants);
 +  const chatName = ctx.getChatname(conversation);
    return (
      <TouchableHighlight
@@ -2197,9 +2474,13 @@ index a3184cd..b524565 100644
 +          </View>
            <Text style={styles.preview}>{ getPreview(conversation) }</Text>
          </View>
-         {getPreviewDate(conversation)}
+-        {getPreviewDate(conversation)}
++        {getPreviewDate(conversation, user, Icon)}
+         { unreadCount? (
+           <View style={styles.unreadCount}>
+             <Text style={styles.unreadCountText}>{unreadCount}</Text>
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
-index fa4d21e..b1e5d22 100644
+index fa4d21e..28ba755 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 @@ -16,6 +16,7 @@ const closeIcon = require("../images/close.png");
@@ -2359,7 +2640,7 @@ index fa4d21e..b1e5d22 100644
    function searchAsyncForMessages(ctx, query) {
      searchForMessages(ctx, query).then((resultsFromDB) => {
        if (JSON.stringify(resultsFromDB) != JSON.stringify(results)) {
-@@ -177,37 +188,111 @@ export default function ConversationList({ navigation }) {
+@@ -177,37 +188,110 @@ export default function ConversationList({ navigation }) {
        return convMatches;
      }
    }, [query, conversations, results]);
@@ -2447,7 +2728,7 @@ index fa4d21e..b1e5d22 100644
 +  
    return (
      <View style={styles.container}>
-       <Header />
+-      <Header />
        <TextInput placeholder={"Search"} onChangeText={query => setQuery(query)} />
        <ImageBackground source={chatWallpaper} style={styles.chatBackground}>
 -        <View style={styles.buttonsContainer}>
@@ -2487,10 +2768,10 @@ index fa4d21e..b1e5d22 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 731a30e..7cbfc76 100644
+index 731a30e..a423197 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-@@ -6,6 +6,15 @@ import { ChatContext } from "../ChatContext";
+@@ -6,9 +6,19 @@ import { ChatContext } from "../ChatContext";
  import { NavigationPropType } from "../PropTypes";
  import LinearGradient from "react-native-linear-gradient";
  import { TouchableHighlight } from "react-native-gesture-handler";
@@ -2506,7 +2787,11 @@ index 731a30e..7cbfc76 100644
  const styles = StyleSheet.create({
    container: {
      flex: 1,
-@@ -100,9 +109,18 @@ const styles = StyleSheet.create({
++    backgroundColor: "rgb(240,240,240)",
+   },
+   buttonsContainer: {
+     flexDirection: "row",
+@@ -100,9 +110,18 @@ const styles = StyleSheet.create({
      width: 20,
      height: 20,
      borderRadius: 20,
@@ -2526,7 +2811,7 @@ index 731a30e..7cbfc76 100644
    headerStyle: {
      backgroundColor: "rgb(125,125,125)",
      padding: 20,
-@@ -111,65 +129,153 @@ const styles = StyleSheet.create({
+@@ -111,65 +130,153 @@ const styles = StyleSheet.create({
    },
    headerButtonStyle: {
      color: "white",
@@ -2648,7 +2933,7 @@ index 731a30e..7cbfc76 100644
 +    return (
 +      <TouchableOpacity onPress={()=>!alreadyExists && toggleSelected(item, marked)}>
 +        <LinearGradient style={styles.listItemContainer} colors={['#fff','#f3f3f3']}>
-+          <Text style={styles.listItemLabel}>{item.value}</Text>
++          <Text style={styles.listItemLabel}>{item.humanValue}</Text>
 +          {alreadyExists && <Text style={styles.alreadyExists}>Wevive user</Text>}
 +          {!alreadyExists && numberOfFriends > 0 && <Text style={styles.numberOfFriends}>{trans('chats.friend_of_',{count:numberOfFriends})}</Text>}
 +          {!alreadyExists && <View style={selectedContacts.indexOf(item.label) >= 0 ? styles.markedContactToggle : styles.contactToggle}>
@@ -2741,7 +3026,7 @@ index c76b0d1..a5e3b06 100644
 +  author: PropType.string,
 +});
 diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
-index b708a42..db0080f 100644
+index b708a42..2ce8696 100644
 --- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 @@ -1,5 +1,5 @@
@@ -2760,7 +3045,7 @@ index b708a42..db0080f 100644
  import {
    SearchReducer,
    SearchInitialState,
-@@ -18,6 +18,14 @@ import {
+@@ -18,28 +18,119 @@ import {
    dispatchAppendContactsAction,
    dispatchEndReachedAction
  } from "./SearchReducers";
@@ -2775,7 +3060,10 @@ index b708a42..db0080f 100644
  
  const styles = StyleSheet.create({
    container: {
-@@ -27,19 +35,101 @@ const styles = StyleSheet.create({
+     flex: 1,
++    backgroundColor: "rgb(240,240,240)",
+   },
+   loadingContainer: {
      flex: 1,
      justifyContent: "center",
    },
@@ -2881,7 +3169,7 @@ index b708a42..db0080f 100644
    const update = (success, contacts, dispatcher) => {
      if (!success || (contacts && contacts.length === 0)) {
        dispatcher(dispatch, contacts);
-@@ -49,13 +139,25 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -49,13 +140,25 @@ export default function SearchContactsScreen({ navigation }) {
      }
    };
  
@@ -2909,7 +3197,7 @@ index b708a42..db0080f 100644
          if (followings) {
            followings = followings.filter((follower) => {
              return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -69,11 +171,11 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -69,11 +172,11 @@ export default function SearchContactsScreen({ navigation }) {
    const getMoreUsers = () => {
      if (state.page > 0) {
        if (!query) {
@@ -2923,7 +3211,7 @@ index b708a42..db0080f 100644
            if (followings) {
              followings = followings.filter((follower) => {
                return follower.username.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-@@ -88,32 +190,59 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -88,32 +191,59 @@ export default function SearchContactsScreen({ navigation }) {
    React.useEffect(() => {
      const timer = setTimeout(() => {
        getUsers();
@@ -2998,7 +3286,7 @@ index b708a42..db0080f 100644
    if (loading) {
      return (
        <View style={styles.loadingContainer}>
-@@ -121,20 +250,32 @@ export default function SearchContactsScreen({ navigation }) {
+@@ -121,20 +251,32 @@ export default function SearchContactsScreen({ navigation }) {
        </View>
      );
    }
@@ -3073,10 +3361,10 @@ index b245cc3..aab586e 100644
        {
          contact.selected
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index 0d59b81..4cf65fa 100644
+index 0d59b81..40586e3 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
-@@ -7,29 +7,45 @@ export { addUnreadCountListener, updateCount } from "./utils/unread-counter";
+@@ -7,29 +7,58 @@ export { addUnreadCountListener, updateCount } from "./utils/unread-counter";
  import { NativeModules } from 'react-native';
  import { SQLCipherClient } from "./utils/SQLCipherClient";
  import { initSocket } from "./utils/SocketIOClient";
@@ -3085,6 +3373,19 @@ index 0d59b81..4cf65fa 100644
  export const { ChatPlugin } = NativeModules;
  import Contacts from 'react-native-contacts';
  
++const getContactName = (c, reverse) => {
++  let n = "";
++  let columns = ['givenName','familyName'];
++  if (reverse) columns.reverse();
++  if (c[columns[0]]) {
++    n += c[columns[0]];
++  }
++  if (c[columns[1]]) {
++    if (n != "") n += " ";
++    n += c[columns[1]];
++  }
++  return n;
++}
  
 -export default function ChatModule({ socketIoUrl, options, icon }) {
 +export default function ChatModule({ socketIoUrl, options, icon, children }) {
@@ -3116,13 +3417,13 @@ index 0d59b81..4cf65fa 100644
 +      )
 +      .then((err)=> {
 +        Contacts.getAllWithoutPhotos().then(fetchedContacts => {
-+          setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, labels:r.phoneNumbers.map(p=>p.number), label: r.phoneNumbers[0].number})));
++          setContacts(fetchedContacts.filter((r)=>(r.givenName?.length || r.familyName?.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({humanValue:getContactName(r), value:getContactName(r, true), labels:r.phoneNumbers.map(p=>p.number), label: r.phoneNumbers[0].number})));
 +        });
 +      }
 +      );
 +    } else {
 +      Contacts.getAllWithoutPhotos().then(fetchedContacts => {
-+        setContacts(fetchedContacts.filter((r)=>(r.givenName && r.givenName.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({value:r.givenName, labels:r.phoneNumbers.map(p=>p.number), label: r.phoneNumbers[0].number})));
++        setContacts(fetchedContacts.filter((r)=>(r.givenName?.length || r.familyName?.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({humanValue:getContactName(r), value:getContactName(r, true), labels:r.phoneNumbers.map(p=>p.number), label: r.phoneNumbers[0].number})));
 +      });
 +    }
 +  },[]);
@@ -3150,7 +3451,7 @@ index 7caec69..068c73b 100644
        socket.emit("conversations:create", { participants: [participant] }, ({ success, conversation }) => {
          if (success) {
 diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
-index 8cb4565..d736292 100644
+index 8cb4565..8e262eb 100644
 --- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 +++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 @@ -4,7 +4,7 @@ SQLite.DEBUG(false);
@@ -3158,7 +3459,7 @@ index 8cb4565..d736292 100644
  
  let db = null;
 -let db_version = 20;
-+let db_version = 49;
++let db_version = 60;
  export function getEncryptionKeys(context) {
    return new Promise((resolve, reject) => {
      context.getDB().then((db) => {
@@ -3204,7 +3505,7 @@ index 8cb4565..d736292 100644
      db.executeSql(
        `CREATE TABLE chats (
            id INTEGER PRIMARY KEY,
-@@ -77,22 +104,58 @@ function initDB(token) {
+@@ -77,12 +104,42 @@ function initDB(token) {
      db.executeSql(
        `CREATE TABLE conversations (
            id INTEGER PRIMARY KEY,
@@ -3249,21 +3550,18 @@ index 8cb4565..d736292 100644
          );`,
      ),
      db.executeSql(
-       `CREATE TABLE messages (
-           id INTEGER PRIMARY KEY,
--          event_id TEXT UNIQUE,
-+          event_id TEXT,
+@@ -92,7 +149,13 @@ function initDB(token) {
            group_id TEXT NOT NULL,
            author_id TEXT NOT NULL,
            text TEXT NOT NULL,
 -          created_at TEXT NOT NULL
++          type TEXT,
 +          created_at TEXT NOT NULL,
 +          is_starred INTEGER,
 +          is_delivered INTEGER,
 +          is_read INTEGER,
 +          tries INTEGER,
-+          retry_at INTEGER,
-+          UNIQUE(event_id, created_at)
++          retry_at INTEGER
          );`,
      ),
      db.executeSql(
