@@ -25,7 +25,7 @@ export default function PhoneUsernameSettings(props) {
   const {authData, avatarUrl, updateMe} = useContext(UserContext);
   const chatCtx = useContext(ChatContext);
   const users = chatCtx.getUsers();
-  const userIdx = users.findIndex(u => u.userId == authData.id);
+  const userIdx = users.findIndex(u => u.id == authData.id);
   let avatarUrlToUse = avatarUrl || authData.avatar;
   if (userIdx !== -1) {
     avatarUrlToUse = users[userIdx].avatar;
@@ -111,7 +111,6 @@ export default function PhoneUsernameSettings(props) {
             style={styles.profileImage}
           />
         </TouchableOpacity>
-
         <TouchableOpacity
           onPress={image.default ? pickImage : saveImage}
           style={styles.avatarContainer}>

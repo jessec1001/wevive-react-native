@@ -9,8 +9,8 @@ export default class SocialStatusSettings extends Component {
       <>
         <MenuDivider />
         <MenuItem type={"selection"}>Active</MenuItem>
-        <MenuItem type={"selection"} selected>At home</MenuItem>
-        <MenuItem type={"selection"}>Do not disturb</MenuItem>
+        <MenuItem type={"selection"} selected>At Work</MenuItem>
+        <MenuItem type={"selection"}>Do Not Disturb</MenuItem>
         <MenuItem type={"selection"}>None</MenuItem>
       </>
     );
