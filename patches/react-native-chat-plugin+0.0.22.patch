@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index c0d4abb..178051c 100644
+index c0d4abb..0b6b25f 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
-@@ -2,116 +2,237 @@ import React from "react";
+@@ -2,124 +2,330 @@ import React from "react";
  import PropTypes from "prop-types";
  import { View, Text, StyleSheet, Alert } from "react-native";
  
@@ -23,7 +23,9 @@ index c0d4abb..178051c 100644
 +import Pressable from "react-native/Libraries/Components/Pressable/Pressable";
 +import { responsiveFontSize, responsiveHeight, responsiveWidth } from "react-native-responsive-dimensions";
 +import { UserContext } from "../../src/context/UserContext";
-+let init = false;
++import NetInfo from '@react-native-community/netinfo';
++import Sound from "react-native-sound";
++import { addUnreadCount, updateCount } from "react-native-chat-plugin/utils/unread-counter";
  const styles = StyleSheet.create({
    errorView: {
 -    flex: 1,
@@ -54,10 +56,12 @@ index c0d4abb..178051c 100644
  
 -export default function ChatContainer({ options }) {
 +
-+export default function ChatContainer({ options, children }) {
++export default function ChatContainer({ options, contacts, children }) {
    const ctx = React.useContext(ChatContext);
    const socket = getSocket();
++  const [init, setInit] = React.useState(false);
    const [retry, setRetry] = React.useState(false);
++  const [connected, setConnected] = React.useState(true);
    const [showRetryButton, setShowRetryButton] = React.useState(false);
 -  React.useEffect(()=>{
 -    ctx.setAuthenticationError("Connecting..");
@@ -73,6 +77,7 @@ index c0d4abb..178051c 100644
 +  const user = ctx.getUser();
 +  const users = ctx.getUsers();
 +  const authenticationCallback = (res) => {
++    if (!res || !res.user) return;
 +    setTimeout(() => {
 +      socket.chat_user_id = res.user.id;
 +      /*resendEncryptionKeys(ctx, socket, res.user.id).then(() => {
@@ -140,24 +145,57 @@ index c0d4abb..178051c 100644
 +      }
 +      */
 +      emitEvents();
-+    },100);
++    }, 50);
 +  };
 +  React.useEffect(() => {
++    resendFailed(user.id)
++  }, [user.id])
++  React.useEffect(() => {
++    ctx.addPhoneContacts(contacts);
++  }, [contacts])
++  React.useEffect(() => {
++    if (!connected || !options) return;
 +    ctx.setAuthInfo(options, userContext.authData);
      getEncryptionKeys(ctx).then(({ private_key, public_key, salt }) => {
        socket.chat_public_key = public_key;
        socket.chat_private_key = private_key;
        socket.chat_token = options.token;
-       ctx.authenticate({...options,public_key, salt}, authenticationCallback);
-+      //console.error(userContext.authData);
+-      ctx.authenticate({...options,public_key, salt}, authenticationCallback);
++      if (options.token != "") {
++        ctx.authenticate({...options,public_key, salt}, authenticationCallback);
++      }
++    });
++  },[connected, options]);
++const resendFailed = (userId) => {
++  if (!userId) return;
++  ctx.getFailedMessagesFromDB(userId).then((events)=> {
++    for (let i=0;i<events.length;i++) {
++      let e = events.item(i);
++      socket.emit("events:new_message", { conversationId: e.group_id, message: e.text, nonce: e.id }, ({ success, error, event, nonce }) => {
++        if (!success && error) {
++  
++        } else if (event) {
++          ctx.updateEvent(e.group_id, e.id, {...event, is_delivered:true})
++          ctx.updateMessageEvent(e.id, event)
++        }
++      });
++    }
 +  });
-+},[]);
++}
++const updateLastOnline = () => {
++  const ids = users.map(u => u.id);
++  if (ids.length) {
++    socket.emit("users:get_last_online", {ids}, async (res) => {
++      ctx.setLastOnline(res.lastOnline)
++    });
++  }
++}
 +const userContext = React.useContext(UserContext);
 +const emitEvents = (recreateKeys = false) => {
 +  // get latest conversations from the server:
 +  ctx.getLatestEventFromDB().then((event)=> {
 +    const options = event ? {since: 0} : {since: 0};
-+    //return "OFFLINE";
++    updateCount();
 +    socket.emit("conversations:fetch", options, async (res) => {
 +      if (res && res.success && Array.isArray(res.conversations)) {
 +        const conversations = await decryptConversations(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys);
@@ -183,24 +221,29 @@ index c0d4abb..178051c 100644
 +      ctx.updateUnreadCounts({ stats });
 +    }
 +  });
++  updateLastOnline();
++  resendFailed(user.id);
 +};
-+  React.useEffect(()=>{
-+    //ctx.setAuthenticationError("Connecting..");
-+  }, []);
 +  React.useEffect(() => {
-+    if (init) return;
++    //if (init) return;
 +    //init = true;
 +    //return;
 +    // get latest users from the DB:
 +    ctx.getUsersFromDB().then((users)=> {
++      if (init) return;
 +      const usersList = {};
 +      for (let i=0;i<users.length;i++) {
 +        let user = users.item(i);
++        user.userId = user.id;
 +        user.avatar = user.path;
++        user.phone_number = user.username;
 +        delete user.path;
 +        user.lastOnline = user.lastOnline * 1000;
 +        ctx.addUser(user);
 +        usersList[user.id] = user;
++      }
++      if (!userContext.authData.username) {
++        userContext.setAuthData(usersList[userContext.authData.id]);
 +      }
 +      
 +      ctx.getConversationsFromDB().then((conversations)=> {
@@ -224,7 +267,7 @@ index c0d4abb..178051c 100644
 +          const userEntity = getUserEntity(conversation);
 +          userEntity.avatar = userEntity.avatarUrl;
 +          userEntity.id = conversation.userId;
-+          messageEntity.owner = userEntity;
++          messageEntity.owner = usersList[conversation.eventUserId];
 +          messageEntity.type = "MESSAGE";
 +          messageEntity.time = new Date(conversation.eventCreatedAt * 1000);
 +          if (messageEntity.time > conversationsArray[conversation.groupId].time) {
@@ -248,7 +291,9 @@ index c0d4abb..178051c 100644
 +          return a.time > b.time
 +        });
 +        ctx.setConversations(conversationsArrayR);
-+        init = true;
++        setInit(true);
++        updateLastOnline();
++        resendFailed(user.id);
 +      });
      });
 +    const getEntity = (list, params) => {
@@ -272,28 +317,53 @@ index c0d4abb..178051c 100644
 +    }
 +    // get latest conversations from the DB:
 +    
-+
++    const playSound = () => {
++      var whoosh = new Sound('chord.wav', Sound.MAIN_BUNDLE, (error) => {
++        if (error) {
++          console.log('failed to load the sound', error);
++          return;
++        }
++        // loaded successfully
++        //console.log('duration in seconds: ' + whoosh.getDuration() + 'number of channels: ' + whoosh.getNumberOfChannels());
++      
++        // Play the sound with an onEnd callback
++        whoosh.play((success) => {
++          if (success) {
++            console.log('successfully finished playing');
++          } else {
++            console.log('playback failed due to audio decoding errors');
++          }
++        });
++      });
++      
++      // Reduce the volume by half
++      //whoosh.setVolume(0.5);
++      whoosh.release();
++    }
    
      async function handleEventCreated ({ event }) {
        if (event && event.id) {
          const [decryptedEvent] = await decryptEvents(event.conversationId, [event], socket.chat_private_key, ctx);
 -        ctx.addEvent(decryptedEvent);
 -        if (!event.owner || event.owner.id !== ctx.getUserId()) {
-+        
 +        if (!event.owner || event.owner.id != ctx.getUserId()) {
++          playSound();
++          addUnreadCount(1);
 +          ctx.addEvent(decryptedEvent);
            ctx.incrementUnreadCounts(
              { conversationId: event.conversationId, count: 1 }
            );
 +          ctx.saveMessageToDB(event.conversationId, event.text, event.owner ? event.owner.id : 0, event.type, event.id, event.time);
 +        } else {
-         }
++        }
 +        await ctx.saveUserToDB(event.owner.id, event.owner.avatar, event.owner.username, event.owner.phone_number, event.owner.lastOnline);
 +      }
 +    }
 +    async function handleEventRead ({ conversationId, eventId, userId }) {
 +      if (conversationId && eventId && userId) {
-+        ctx.updateEventReads(conversationId, eventId, userId);
++        if (user.id != userId) {
++          ctx.updateEventReads(conversationId, eventId, userId);
+         }
        }
      }
      async function handleConversationCreated({ conversation }) {
@@ -301,11 +371,36 @@ index c0d4abb..178051c 100644
        if (!newConversation[0].hidden) ctx.addConversation(newConversation[0]);
 +      ctx.saveConversationToDB(conversation);
      }
++    const handleTyping = ({userId, conversationId}) => {
++      if (conversationId && userId) {
++        ctx.setTyping({ conversationId, userId });
++        setTimeout(() => {
++          ctx.unsetTyping({ conversationId, userId });
++        }, 3000);
++      }
++    };
++    socket.on("events:typing", handleTyping);
 +    socket.on("events:read_event", handleEventRead);
      socket.on("events:event_created", handleEventCreated);
      socket.on("conversations:created", handleConversationCreated);
      const cleanAuthenticationHooks = ctx.setUpAuthenticationHooks(authenticationCallback);
-@@ -141,29 +262,26 @@ export default function ChatContainer({ options }) {
+-
++    const netinfo_unsubscribe = NetInfo.addEventListener((state) => {
++      if (state.isConnected) {
++        setConnected(true);
++      } else {
++        setConnected(false);
++      }
++    });
+     return () => {
+       socket.off("events:event_created", handleEventCreated);
+       socket.off("conversations:created", handleConversationCreated);
+       cleanAuthenticationHooks();
++      netinfo_unsubscribe();
+     };
+   }, [options, retry]);
+ 
+@@ -141,29 +347,26 @@ export default function ChatContainer({ options }) {
  
      return () => timer && clearTimeout(timer);
    }, [authError]);
@@ -350,10 +445,10 @@ index c0d4abb..178051c 100644
  
  ChatContainer.propTypes = {
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
-index 8e9472a..96b6987 100644
+index 8e9472a..e356216 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/AuthReducer.js
-@@ -27,16 +27,17 @@ export function createAuthActions(state, dispatch) {
+@@ -27,16 +27,18 @@ export function createAuthActions(state, dispatch) {
      if (authenticationTimeout) {
        clearTimeout(authenticationTimeout);
      }
@@ -367,6 +462,7 @@ index 8e9472a..96b6987 100644
 -        setAuthenticationError("Authentication failed!");
 -      }
 -    });
++
 +    if (typeof options.token !== 'undefined') {
 +      socket.emit("users:authenticate", options, function handleAuthSuccess(res) {
 +        if (res && res.success) {
@@ -381,7 +477,7 @@ index 8e9472a..96b6987 100644
    }
  
    function setAuthInfo(options, user) {
-@@ -58,10 +59,18 @@ export function createAuthActions(state, dispatch) {
+@@ -58,16 +60,24 @@ export function createAuthActions(state, dispatch) {
      };
    }
  
@@ -393,7 +489,7 @@ index 8e9472a..96b6987 100644
 +      }
        setAuthenticationError("Lost connection to the server.");
        console.warn("Socket disconnected:", error);
-+      if (error == 'ping timeout' || error == 'transport close') {
++      if (error == 'ping timeout' || error == 'transport close' || error == 'transport error') {
 +        authenticationTimeout = setTimeout(function () {
 +          authenticate(state.options, callback);
 +        }, 100);
@@ -401,7 +497,14 @@ index 8e9472a..96b6987 100644
      };
    }
  
-@@ -104,7 +113,7 @@ export function createAuthActions(state, dispatch) {
+   function createRequireAuthenticationHandler(callback) {
+     return function handleRequireAuthentication(response) {
+-      authenticate(state.token, () => {
++      authenticate(state.options, () => {
+         callback && callback();
+ 
+         if (response.event) {
+@@ -104,7 +114,7 @@ export function createAuthActions(state, dispatch) {
        const handleRequireAuthentication = createRequireAuthenticationHandler(callback);
        const handleSocketDisconnected = createSocketDisconnectedHandler();
        socket.on('connect', () => {
@@ -411,24 +514,26 @@ index 8e9472a..96b6987 100644
        // handle connection error.
        socket.on("error", handleSocketError);
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
-index 787b10d..15ddd17 100644
+index 787b10d..2290984 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ChatReducer.js
-@@ -1,10 +1,13 @@
+@@ -1,10 +1,14 @@
  
  export const ChatInitialState = {
    conversations: [],
+-  authenticationError: "",
 +  calls: [],
-   authenticationError: "",
++  authenticationError: "Connecting..",
    loading: false,
    options: {},
    user: {},
 +  users: [],
 +  contacts: [],
++  phoneContacts: [],
  };
  
  export function ChatReducer(state, action) {
-@@ -20,6 +23,39 @@ export function ChatReducer(state, action) {
+@@ -20,6 +24,50 @@ export function ChatReducer(state, action) {
      return { ...state, conversations };
    }
  
@@ -453,22 +558,33 @@ index 787b10d..15ddd17 100644
 +    if (conversationIdx == -1) return state;
 +    const conversations = [...state.conversations];
 +    if (typeof conversations[conversationIdx] == 'object' &&  typeof conversations[conversationIdx].events == 'undefined') return state;
-+    const eventsIdx =  conversations[conversationIdx].events.findIndex((c) => c.id == eventId);
-+    if (eventsIdx == -1) return state;
-+    const event = conversations[conversationIdx].events[eventsIdx];
-+    const readBy = typeof event.readBy == 'undefined' ? [] : event.readBy;
-+    readBy.push(userId);
-+    conversations[conversationIdx].events[eventsIdx] = {
-+      ...event,
-+      readBy: readBy
-+    };
++    if (eventId) {
++      const eventsIdx =  conversations[conversationIdx].events.findIndex((c) => c.id == eventId);
++      if (eventsIdx == -1) return state;
++      const event = conversations[conversationIdx].events[eventsIdx];
++      const readBy = typeof event.readBy == 'undefined' ? [] : event.readBy;
++      readBy.push(userId);
++      conversations[conversationIdx].events[eventsIdx] = {
++        ...event,
++        readBy: readBy
++      };
++    } else {
++      conversations[conversationIdx].events.forEach((event, eventsIdx) => {
++        const readBy = typeof event.readBy == 'undefined' ? [] : event.readBy;
++        readBy.push(userId);
++        conversations[conversationIdx].events[eventsIdx] = {
++          ...event,
++          readBy: readBy
++        };
++      });
++    }
 +    return { ...state, conversations };
 +  }
 +
    case "new_event": {
      const event = action.payload.event;
      const conversationId = event.conversationId || event.conversation.id;
-@@ -30,7 +66,11 @@ export function ChatReducer(state, action) {
+@@ -30,7 +78,11 @@ export function ChatReducer(state, action) {
      const conversationIdx = state.conversations.findIndex((c) => c.id === conversationId);
      const conversations = [...state.conversations];
      if (conversations[conversationIdx]) {
@@ -481,7 +597,7 @@ index 787b10d..15ddd17 100644
        if (Array.isArray(conversations[conversationIdx].events)) {
          conversations[conversationIdx].events.push(event);
        }
-@@ -54,6 +94,12 @@ export function createChatActions(state, dispatch) {
+@@ -54,6 +106,12 @@ export function createChatActions(state, dispatch) {
      addEvent(event) {
        dispatch({ type: "new_event", payload: { event } });
      },
@@ -495,7 +611,7 @@ index 787b10d..15ddd17 100644
        dispatch({ type: "update_events", payload: { conversationId, events }});
      },
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
-index c41797c..48dcd46 100644
+index c41797c..7d54c00 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 @@ -1,3 +1,5 @@
@@ -504,10 +620,46 @@ index c41797c..48dcd46 100644
  import { getSocket } from "../utils/SocketIOClient";
  
  const addConversations = (state, conversations) => {
-@@ -16,6 +18,24 @@ const addConversations = (state, conversations) => {
+@@ -7,15 +9,59 @@ const addConversations = (state, conversations) => {
+     if (conversationIdx === -1) {
+       newConversations.unshift(conversation);
+     } else {
++      if (newConversations[conversationIdx].participants) {
++        currentParticipants = conversation.participants;
++        delete conversation.participants;
++      }
++      if (newConversations[conversationIdx].lastEvent && conversation.lastEvent) {
++        if (+ new Date(conversation.lastEvent.time) <  + new Date(newConversations[conversationIdx].lastEvent.time)) {
++          delete conversation.lastEvent;
++        }
++      }
+       newConversations[conversationIdx] = {
+         ...newConversations[conversationIdx],
+-        ...conversation
++        ...conversation,
++        currentParticipants
+       };
+     }
+   }
    return { ...state, conversations: newConversations };
  };
  
++const addPhoneContacts = (state, contacts) => {
++  const newContacts = [...state.phoneContacts];
++  if (!contacts.length) return state;
++  for (const contact of contacts) {
++    const contactIdx = newContacts.findIndex((c) => c.label == contact.label && c.value == contact.value);
++    if (contactIdx === -1) {
++      newContacts.unshift(contact);
++    } else {
++      newContacts[contactIdx] = {
++        ...newContacts[contactIdx],
++        ...contact
++      };
++    }
++  }
++  return { ...state, phoneContacts: newContacts };
++}
 +const addCalls = (state, calls) => {
 +  const newCalls = [...state.calls];
 +  for (const call of calls) {
@@ -529,16 +681,43 @@ index c41797c..48dcd46 100644
  const updateUnreadCounts = (state, stats) => {
    const newConversations = [...state.conversations];
    for (const stat of stats) {
-@@ -51,7 +71,7 @@ const setTyping = (state, conversationId, userId) => {
+@@ -42,7 +88,7 @@ const incrementUnreadCount = (state, conversationId, count) => {
+ 
+ const setTyping = (state, conversationId, userId) => {
+   const newConversations = [...state.conversations];
+-  const conversationIdx = newConversations.findIndex((c) => c.id === conversationId);
++  const conversationIdx = newConversations.findIndex((c) => c.id == conversationId);
+   if (conversationIdx === -1) {
+     return state;
+   }
+@@ -50,22 +96,22 @@ const setTyping = (state, conversationId, userId) => {
+   if (newConversations[conversationIdx].typing == null) {
      newConversations[conversationIdx].typing = {};
    }
-   if (!(userId in newConversations[conversationIdx].typing)) {
+-  if (!(userId in newConversations[conversationIdx].typing)) {
 -    newConversations[conversationIdx].typing = {userId, timestamp};
++  if (!(userId in Object.keys(newConversations[conversationIdx].typing))) {
 +    newConversations[conversationIdx].typing[userId] = {userId, timestamp};
    }
    return { ...state, conversations: newConversations };
  };
-@@ -74,17 +94,73 @@ const unsetTyping = (state, conversationId, userId) => {
+ 
+ const unsetTyping = (state, conversationId, userId) => {
+   const newConversations = [...state.conversations];
+-  const conversationIdx = newConversations.findIndex((c) => c.id === conversationId);
++  const conversationIdx = newConversations.findIndex((c) => c.id == conversationId);
+   if (conversationIdx === -1) {
+     return state;
+   }
+   if (newConversations[conversationIdx].typing == null) {
+     newConversations[conversationIdx].typing = {};
+   }
+-  if ((userId in newConversations[conversationIdx].typing)) {
++  if ((userId in Object.keys(newConversations[conversationIdx].typing))) {
+     delete newConversations[conversationIdx].typing[userId];
+   }
+   return { ...state, conversations: newConversations };
+@@ -74,17 +120,87 @@ const unsetTyping = (state, conversationId, userId) => {
  
  export function conversationReducer(state, action) {
    switch(action.type) {
@@ -546,7 +725,7 @@ index c41797c..48dcd46 100644
 +    // delete conversation by id.
 +    const user = action.payload.user;
 +    const users = [...state.users];
-+    const userIdx = state.users.findIndex(u => u.id === user.id);
++    const userIdx = state.users.findIndex(u => u.id == user.id);
 +    if (userIdx != -1) {
 +      users[userIdx] = {
 +        ...user,
@@ -555,6 +734,20 @@ index c41797c..48dcd46 100644
 +    } else {
 +      users.push(user);
 +    }
++    return { ...state, users };
++  }
++  case "set_last_online": {
++    const usersLastOnline = action.payload.users;
++    const users = [...state.users];
++    usersLastOnline.forEach((ul)=> {
++      const userIdx = state.users.findIndex(u => u.id == ul.id);
++      if (userIdx != -1) {
++        users[userIdx] = {
++          ...users[userIdx],
++          lastOnline: ul.lastOnline
++        };
++      }
++    })
 +    return { ...state, users };
 +  }
 +  case "delete_call": {
@@ -588,7 +781,8 @@ index c41797c..48dcd46 100644
 +
 +  case "pin_conversation": {
 +    // pin conversation by id.
-+    const conversationId = action.payload.conversationId;
+     const conversationId = action.payload.conversationId;
+-    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
 +    const conversations = state.conversations.map(conversation => conversation.id != conversationId ? conversation : {...conversation, pinned: !conversation.pinned});
 +    return { ...state, conversations };
 +  }
@@ -609,18 +803,21 @@ index c41797c..48dcd46 100644
 +
 +  case "typing_conversation": {
 +    // set typing flag conversation by id.
-     const conversationId = action.payload.conversationId;
--    const conversations = state.conversations.map(conversation => conversation.id !== conversationId ? conversation : {...conversation, muted: !conversation.muted});
++    const conversationId = action.payload.conversationId;
 +    const conversations = state.conversations.map(conversation => conversation.id != conversationId ? conversation : {...conversation, typing: !conversation.typing});
      return { ...state, conversations };
    }
  
-@@ -94,10 +170,16 @@ export function conversationReducer(state, action) {
+@@ -94,10 +210,20 @@ export function conversationReducer(state, action) {
    case "add_conversations": {
      return addConversations(state, action.payload.conversations);
    }
 +  case "add_calls": {
 +    return addCalls(state, action.payload.calls);
++  }
++
++  case "add_phone_contacts": {
++    return addPhoneContacts(state, action.payload.contacts);
 +  }
  
    case "add_conversation": {
@@ -632,7 +829,7 @@ index c41797c..48dcd46 100644
  
    case "update_unread_counts": {
      return updateUnreadCounts(state, action.payload.stats);
-@@ -120,11 +202,14 @@ export function conversationReducer(state, action) {
+@@ -120,11 +246,14 @@ export function conversationReducer(state, action) {
  
  export function createConversationActions(state, dispatch) {
    const socket = getSocket();
@@ -649,7 +846,7 @@ index c41797c..48dcd46 100644
        }
      });
    }
-@@ -132,11 +217,95 @@ export function createConversationActions(state, dispatch) {
+@@ -132,11 +261,96 @@ export function createConversationActions(state, dispatch) {
      dispatch({ type: "mute_conversation", payload: { conversationId }});
    }
  
@@ -720,11 +917,11 @@ index c41797c..48dcd46 100644
 +      } return conversation.name;
 +    },
 +    getContactName(phone_number) {
-+      const ctx = this;
-+      const contactIdx = ctx.contacts.findIndex(c => c.labels.indexOf(phone_number) !== -1);
-+      return contactIdx !== -1 ? ctx.contacts[contactIdx].humanValue : (state.user.username !== phone_number && phone_number != 'Me' ? phone_number : "Me");
++      const contactIdx = state.phoneContacts.findIndex(c => c.labels.indexOf(phone_number) !== -1);
++      return contactIdx !== -1 ? state.phoneContacts[contactIdx].humanValue : (state.user.username !== phone_number && phone_number != 'Me' ? phone_number : "Me");
 +    },
 +    getUsernameByUserId(userId) {
++
 +      const users = state.users;
 +      const userIdx = state.users.findIndex(u => u.userId == userId);
 +      return userIdx !== -1 ? this.getContactName(users[userIdx].username) : `Me`; 
@@ -740,12 +937,22 @@ index c41797c..48dcd46 100644
 +      }) : [];
 +    },
      getConversations() {
-       state.conversations.sort((a,b)=>{
+-      state.conversations.sort((a,b)=>{
++      
++      sortedConversations = state.conversations.sort((a,b)=>{
 +        if (a.pinned && !b.pinned) return false;
          if (a.lastEvent && b.lastEvent) {
            return a.lastEvent.time < b.lastEvent.time;
          } else if (a.lastEvent) {
-@@ -152,6 +321,9 @@ export function createConversationActions(state, dispatch) {
+@@ -145,13 +359,16 @@ export function createConversationActions(state, dispatch) {
+           return true;
+         }
+       });
+-      return state.conversations || [];
++      return sortedConversations || [];
+     },
+     setConversations(conversations) {
+       if (Array.isArray(conversations)) {
          dispatch({ type: "add_conversations", payload: { conversations }});
        }
      },
@@ -755,17 +962,26 @@ index c41797c..48dcd46 100644
      addConversation(conversation) {
        dispatch({ type: "add_conversation", payload: { conversation }});
      },
-@@ -167,5 +339,8 @@ export function createConversationActions(state, dispatch) {
+@@ -167,5 +384,17 @@ export function createConversationActions(state, dispatch) {
      unsetTyping({ conversationId, userId }) {
        dispatch({ type: "unset_typing", payload: { conversationId, userId }});
      },
 +    addCalls(calls) {
 +      dispatch({ type: "add_calls", payload: { calls }});
 +    },
++    addPhoneContacts(contacts) {
++      dispatch({ type: "add_phone_contacts", payload: { contacts }});
++    },
++    setLastOnline(users) {
++      dispatch({ type: "set_last_online", payload: { users }});
++    },
++    getPhoneContacts() {
++      return state.phoneContacts
++    },
    };
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
-index f9bc1dc..9841fb1 100644
+index f9bc1dc..7752e79 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/index.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/index.js
 @@ -6,7 +6,8 @@ import combineReducers from "./combineReducers";
@@ -778,7 +994,7 @@ index f9bc1dc..9841fb1 100644
  
  export const ChatContext = React.createContext({...ChatInitialState});
  
-@@ -17,8 +18,459 @@ const reducer = combineReducers(
+@@ -17,8 +18,472 @@ const reducer = combineReducers(
    settingsReducer
  );
  
@@ -893,7 +1109,6 @@ index f9bc1dc..9841fb1 100644
 +    });
 +  },[]);
 +  const updateMessageEvent = React.useCallback((messageId, event) => {
-+    //console.error('updateMessageEvent',messageId,eventId)
 +    return new Promise((resolve, reject) => {
 +      return getDB().then((db)=> {
 +        db.executeSql(
@@ -1020,6 +1235,20 @@ index f9bc1dc..9841fb1 100644
 +          ORDER BY messages.created_at ASC`
 +        ).then(([results])=> {
 +          
++          resolve(results.rows.length > 0 ? results.rows : false);
++        });
++      })
++    });
++  },[]);
++  const getFailedMessagesFromDB = React.useCallback((userId) => {
++    return new Promise((resolve, reject) => {
++      return getDB().then((db)=> {
++        db.executeSql(
++          `SELECT * FROM messages WHERE 
++          author_id = ? AND (is_delivered = '0' OR is_delivered = '' OR is_delivered IS NULL)
++          ORDER BY messages.created_at ASC`,
++          String(userId)
++        ).then(([results])=> {
 +          resolve(results.rows.length > 0 ? results.rows : false);
 +        });
 +      })
@@ -1206,7 +1435,7 @@ index f9bc1dc..9841fb1 100644
 +        "INSERT OR IGNORE INTO conversations(`group_id`,`group_key`,`name`,`created_by`,`created_at`) VALUES (?, ?, ?, ?, ?)",
 +        [conversation.id, "", conversation.name, conversation.createdBy, new Date(conversation.time) / 1000 ]
 +      ).then(([results])=> {
-+        conversation.participants.map(p =>  
++        if (conversation.participants) conversation.participants.map(p =>  
 +          db.executeSql(
 +            "INSERT OR IGNORE INTO participants(`group_id`,`user_id`, `created_at`) VALUES (?, ?, ?)",
 +            [conversation.id, p.id, Math.floor(Date.now() / 1000)]
@@ -1239,7 +1468,7 @@ index f9bc1dc..9841fb1 100644
    const context = React.useMemo(
      () => {
        return ({
-@@ -26,11 +478,33 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
+@@ -26,11 +491,34 @@ export function ChatContextProvider({options,children,socketIoUrl, db, icon, con
          ...createAuthActions(state, dispatch),
          ...createChatActions(state, dispatch),
          ...createConversationActions(state, dispatch),
@@ -1255,6 +1484,7 @@ index f9bc1dc..9841fb1 100644
 +        getLatestEventFromDB,
 +        getConversationsFromDB,
 +        getMessagesFromDB,
++        getFailedMessagesFromDB,
 +        markConversation,
 +        removeConversationFromDB,
 +        updateMessageEvent,
@@ -1277,7 +1507,7 @@ index f9bc1dc..9841fb1 100644
        });
      },
      [state]
-@@ -47,5 +521,5 @@ ChatContextProvider.propTypes = {
+@@ -47,5 +535,5 @@ ChatContextProvider.propTypes = {
    options: PropTypes.object.isRequired,
    children: PropTypes.element.isRequired,
    socketIoUrl: PropTypes.string.isRequired,
@@ -1337,7 +1567,7 @@ index 0000000..609e264
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 5388ef0..2d4d892 100644
+index 5388ef0..02aa811 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -10,7 +10,8 @@ import {encryptChatMessage} from "../utils/ChatEncryption";
@@ -1350,7 +1580,15 @@ index 5388ef0..2d4d892 100644
  
  const sendButton = require("../images/sendbtn.png");
  const styles = StyleSheet.create({
-@@ -132,37 +133,61 @@ export default function ChatForm({ conversation }) {
+@@ -123,6 +124,7 @@ const styles = StyleSheet.create({
+   }
+ });
+ const maxRetries = 3;
++let i = 0;
+ const messageIcon = require("../images/message_icon.png");
+ const micIcon = require("../images/mic_icon.png");
+ const imageIcon = require("../images/image_icon.png");
+@@ -132,37 +134,62 @@ export default function ChatForm({ conversation }) {
    const [tries, setTries] = React.useState(0);
    const settings = ctx.getSettings();
    const Icon = ctx.icon;
@@ -1416,20 +1654,21 @@ index 5388ef0..2d4d892 100644
 +            }, 1000 * (1+tries * 2));
 +          }
 +        } else if (event) {
-+          ctx.updateEvent(conversation.id, localMsg, event)
++          //console.warn('mark as read?', localMsg);
++          ctx.updateEvent(conversation.id, localMsg, {...event, is_delivered:true})
 +          ctx.updateMessageEvent(localMsg, event)
          }
 -      }
 -    });
 +      });
-+    },1000)
++    },100)
    },[]);
    const submit = React.useCallback(() => {
 -    setMessage("");
      if (message) {
        ctx.getDB().then((db)=> {
          db.executeSql(
-@@ -177,7 +202,11 @@ export default function ChatForm({ conversation }) {
+@@ -177,7 +204,11 @@ export default function ChatForm({ conversation }) {
            } else {
              sendMessage(message);
            }
@@ -1441,7 +1680,7 @@ index 5388ef0..2d4d892 100644
        });
        
        Keyboard.dismiss();
-@@ -193,7 +222,7 @@ export default function ChatForm({ conversation }) {
+@@ -193,7 +224,7 @@ export default function ChatForm({ conversation }) {
  
      });
    };
@@ -1450,7 +1689,7 @@ index 5388ef0..2d4d892 100644
  
    const [audioWebview, setWebView] = React.useState(false);
    const [audioLoaded, setAudioLoaded] = React.useState(false);
-@@ -203,12 +232,12 @@ export default function ChatForm({ conversation }) {
+@@ -203,12 +234,12 @@ export default function ChatForm({ conversation }) {
    const recordAudio = () => {
      if (audioRecording) {
        setAudioRecording(false);
@@ -1465,7 +1704,7 @@ index 5388ef0..2d4d892 100644
        bufferSize: 81920,
        sampleRate: 44100,
        bitsPerChannel: 8,
-@@ -227,15 +256,28 @@ export default function ChatForm({ conversation }) {
+@@ -227,15 +258,28 @@ export default function ChatForm({ conversation }) {
      });
  
      Recording.start();
@@ -1496,7 +1735,7 @@ index 5388ef0..2d4d892 100644
          value={message}
          style={styles.txt}
          onSubmitEditing={submit}
-@@ -243,19 +285,11 @@ export default function ChatForm({ conversation }) {
+@@ -243,19 +287,11 @@ export default function ChatForm({ conversation }) {
          placeholderTextColor={"rgb(125,125,125)"}
          blurOnSubmit={true}
          onChangeText={onChangeText} />
@@ -1519,7 +1758,7 @@ index 5388ef0..2d4d892 100644
    );
  }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index bbdff8a..ab5283e 100644
+index bbdff8a..33fdb2a 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,5 +1,5 @@
@@ -1703,12 +1942,12 @@ index bbdff8a..ab5283e 100644
    React.useEffect(() => {
      const socket = getSocket();
  
-@@ -57,22 +200,27 @@ export default function ChatScreen({ navigation, route }) {
+@@ -57,40 +200,34 @@ export default function ChatScreen({ navigation, route }) {
          const decryptedEvents = await decryptEvents(conversation.id, events, socket.chat_private_key, ctx);
          const parsedEvents = await parseEvents(decryptedEvents);
          ctx.setEvents({ conversationId: conversation.id, events: parsedEvents });
 +        parsedEvents.map(e => {
-+          ctx.saveMessageToDB(conversation.id, e.text, socket.chat_user_id, e.type, e.id, e.time)
++          ctx.saveMessageToDB(conversation.id, e.text, e.owner.id, e.type, e.id, e.time)
 +        })
        });
 -      socket.emit("events:mark_read", { conversationId: conversation.id, public: !!settings.disable_read_events }, function ({ success }) {
@@ -1739,12 +1978,32 @@ index bbdff8a..ab5283e 100644
            }
          });
        }
-@@ -101,15 +249,35 @@ export default function ChatScreen({ navigation, route }) {
+     }    
+-    const handleTyping = ({event}) => {
+-      if (event && event.id && event.conversationId === conversation.id) {
+-        ctx.setTyping({ conversationId: event.conversationId, userId: event.userId });
+-        setTimeout(() => {
+-          ctx.unsetTyping({ conversationId: event.conversationId, userId: event.userId });
+-        }, 3000);
+-      }
+-    };
+-
+-    socket.on("events:typing", handleTyping);
+     socket.on("events:event_created", handleUnread);
+     return () => {
+       socket.off("events:event_created", handleUnread);
+-      socket.off("events:typing", handleTyping);
+     };
+   }, []);
+   function fetchMoreMessages() {
+@@ -100,16 +237,36 @@ export default function ChatScreen({ navigation, route }) {
+       if (!update.events.length) setLastPage(true);
        const decryptedEvents = await decryptEvents(conversation.id, update.events, socket.chat_private_key, ctx);
        const parsedEvents = await parseEvents(decryptedEvents);
-       ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents)});
+-      ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents)});
++      ctx.setEvents({ conversationId: conversation.id, events: events.concat(parsedEvents).reverse()});
 +      parsedEvents.map(e => {
-+        ctx.saveMessageToDB(conversation.id, e.text, socket.chat_user_id, e.type, e.id, e.time)
++        ctx.saveMessageToDB(conversation.id, e.text, e.owner.id, e.type, e.id, e.time)
 +      })
      });
    }
@@ -1778,7 +2037,7 @@ index bbdff8a..ab5283e 100644
          <View style={styles.inner}>
            <View style={styles.list}>
              <ImageBackground source={chatWallpaper} style={styles.wallpaper}>
-@@ -117,7 +285,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -117,7 +274,7 @@ export default function ChatScreen({ navigation, route }) {
                  if (events.length >= 20) {
                    fetchMoreMessages();
                  }
@@ -1787,7 +2046,7 @@ index bbdff8a..ab5283e 100644
                <TypingIndicator conversation={conversation} />
                <View style={styles.form}>
                  <ChatForm conversation={conversation} />
-@@ -125,7 +293,8 @@ export default function ChatScreen({ navigation, route }) {
+@@ -125,7 +282,8 @@ export default function ChatScreen({ navigation, route }) {
              </ImageBackground>
            </View>
          </View>
@@ -2251,11 +2510,37 @@ index d7b227a..2fbc6d2 100644
  MessageList.propTypes = {
    events: PropTypes.arrayOf(EventPropType),
    onEndReached: PropTypes.func
+diff --git a/node_modules/react-native-chat-plugin/ChatScreen/TypingIndicator.js b/node_modules/react-native-chat-plugin/ChatScreen/TypingIndicator.js
+index c3253a0..ce5d19f 100644
+--- a/node_modules/react-native-chat-plugin/ChatScreen/TypingIndicator.js
++++ b/node_modules/react-native-chat-plugin/ChatScreen/TypingIndicator.js
+@@ -6,11 +6,19 @@ import { ConversationPropType } from "../PropTypes";
+ const styles = StyleSheet.create({
+   typing: {
+     fontSize: 10,
++    textAlign: "center",
++  },
++  shortTyping: {
++    fontSize: 10,
+   }
+ });
+ 
+-export default function TypingIndicator (conversation) {
+-  return (conversation.typing && <Text style={styles.typing}>Typing: {Object.keys(conversation.typing).length}</Text>) || null;
++export default function TypingIndicator ({conversation, short}) {
++  if (!short) {
++    return (conversation.typing && <Text style={styles.typing}>...</Text>) || null;
++  } else {
++    return (conversation.typing && <Text style={styles.shortTyping}>...</Text>) || null;
++  }
+ }
+ TypingIndicator.propTypes = {
+   conversation: ConversationPropType,
 diff --git a/node_modules/react-native-chat-plugin/Components/Header.js b/node_modules/react-native-chat-plugin/Components/Header.js
-index 239ae48..8936790 100644
+index 239ae48..07ea517 100644
 --- a/node_modules/react-native-chat-plugin/Components/Header.js
 +++ b/node_modules/react-native-chat-plugin/Components/Header.js
-@@ -1,30 +1,51 @@
+@@ -1,30 +1,50 @@
  import React from "react";
 -import { Text, View, StyleSheet } from "react-native";
 +import { Text, View, StyleSheet, Image } from "react-native";
@@ -2294,7 +2579,6 @@ index 239ae48..8936790 100644
  
 -export default function Header({ left, right, title }) {
 +export default function Header({ left, right, title, avatar, lastOnline }) {
-+  //console.error(lastOnline);
 +  if (lastOnline) {
 +    moment.locale('en')
 +    var lastOnlineHumanized = moment(lastOnline).fromNow();
@@ -2366,18 +2650,19 @@ index 64f1ea6..3658991 100644
            style={styles.searchText}
            blurOnSubmit={true}
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
-index a3184cd..0f5c35e 100644
+index a3184cd..671c1eb 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
-@@ -7,6 +7,7 @@ import Fonts from "../constants/Fonts";
+@@ -7,6 +7,8 @@ import Fonts from "../constants/Fonts";
  import { ConversationPropType } from "../PropTypes";
  import { ChatContext } from "../ChatContext";
  import LinearGradient from "react-native-linear-gradient";
 +import { responsiveFontSize } from "react-native-responsive-dimensions";
++import TypingIndicator from "react-native-chat-plugin/ChatScreen/TypingIndicator";
  const styles = StyleSheet.create(
    {
      container: {
-@@ -29,6 +30,17 @@ const styles = StyleSheet.create(
+@@ -29,6 +31,17 @@ const styles = StyleSheet.create(
        right: 10,
        top: 2,
      },
@@ -2395,7 +2680,7 @@ index a3184cd..0f5c35e 100644
      preview: {
        fontSize: 14,
        marginTop: 7,
-@@ -58,19 +70,35 @@ const styles = StyleSheet.create(
+@@ -58,19 +71,38 @@ const styles = StyleSheet.create(
        color: Colors.TEXT,
      },
      encryptedIcon: {
@@ -2424,14 +2709,17 @@ index a3184cd..0f5c35e 100644
 +
 +function getPreviewDate(conversation, user, Icon) {
    let event = conversation.lastEvent;
++  if (typeof event.is_delivered == 'undefined') {
++    event.is_delivered = true;
++  }
    const time = (typeof event?.time === "string") ? event.time : conversation.time;
 -  return <Text style={styles.date}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>;
 +  const isOwn = event && event.owner.id == user.id;
 +  return <>
 +    {isOwn &&
 +    <View style={styles.isOwn}>
-+      <Icon style={styles.isOwnTicks} name='ticks' color={event.is_delivered ? "rgb(228,140,58)" : "rgb(100,100,100)"} />
 +      <Icon style={styles.isOwnTicks} name='ticks' color={event?.readBy?.length > 1 ? "rgb(228,140,58)" : "rgb(100,100,100)"} />
++      <Icon style={styles.isOwnTicks} name='ticks' color={event.is_delivered ? "rgb(228,140,58)" : "rgb(100,100,100)"} />
 +    </View>
 +    }
 +    <Text style={styles.date}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
@@ -2439,7 +2727,7 @@ index a3184cd..0f5c35e 100644
  }
  function getPreview(conversation) {
    let event = conversation.lastEvent;
-@@ -84,23 +112,33 @@ export default function ContactComponent({ conversation, onPress }) {
+@@ -84,23 +116,35 @@ export default function ContactComponent({ conversation, onPress }) {
    const unreadCount = conversation.unreadCount ? parseInt(conversation.unreadCount) : 0;
    const ctx = useContext(ChatContext);
    const user = ctx.getUser();
@@ -2451,7 +2739,6 @@ index a3184cd..0f5c35e 100644
    }
 -
 +  const Icon = ctx.icon;
-+  //console.error(conversation.participants);
 +  const chatName = ctx.getChatname(conversation);
    return (
      <TouchableHighlight
@@ -2460,11 +2747,11 @@ index a3184cd..0f5c35e 100644
        <LinearGradient style={styles.container} colors={['#ffffff', '#f3f3f3']}>
 -        <ProfilePreview text={conversation.name} contacts={participants} />
 -        {conversation.encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
-+        <Text></Text>
 +        <ProfilePreview text={chatName} contacts={participants} />
 +        
          <View>
 -          <Text style={styles.name}>{conversation.name}</Text>
+-          <Text style={styles.preview}>{ getPreview(conversation) }</Text>
 +          <View style={styles.conversationName}>
 +            <Text style={styles.name}>{chatName}</Text>
 +            {conversation.encrypted ? <Image source={lockIcon} style={styles.conversationIcon} /> : null }
@@ -2472,7 +2759,11 @@ index a3184cd..0f5c35e 100644
 +            {conversation.pinned && <Icon name="office-push-pin" style={styles.conversationIcon} />}
 +            {conversation.archived && <Icon name="archive" style={styles.conversationIcon} />}
 +          </View>
-           <Text style={styles.preview}>{ getPreview(conversation) }</Text>
++          {conversation.typing ? 
++            <TypingIndicator conversation={conversation} short />
++          :
++            <Text style={styles.preview}>{ getPreview(conversation) }</Text>
++          }
          </View>
 -        {getPreviewDate(conversation)}
 +        {getPreviewDate(conversation, user, Icon)}
@@ -2480,7 +2771,7 @@ index a3184cd..0f5c35e 100644
            <View style={styles.unreadCount}>
              <Text style={styles.unreadCountText}>{unreadCount}</Text>
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
-index fa4d21e..28ba755 100644
+index fa4d21e..21054ac 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 @@ -16,6 +16,7 @@ const closeIcon = require("../images/close.png");
@@ -2744,9 +3035,10 @@ index fa4d21e..28ba755 100644
 +          renderHiddenItem={renderHiddenItem}
            disableLeftSwipe={false}
 -          disableRightSwipe={true}
-+          disableRightSwipe={false}
-           recalculateHiddenLayout={false}
+-          recalculateHiddenLayout={false}
 -          rightOpenValue={-120}
++          disableRightSwipe={false}
++          recalculateHiddenLayout={true}
 +          rightOpenValue={-180}
 +          stopLeftSwipe={120}
 +          stopRightSwipe={-180}
@@ -2768,7 +3060,7 @@ index fa4d21e..28ba755 100644
  };
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 731a30e..a423197 100644
+index 731a30e..32bb682 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 @@ -6,9 +6,19 @@ import { ChatContext } from "../ChatContext";
@@ -2811,7 +3103,7 @@ index 731a30e..a423197 100644
    headerStyle: {
      backgroundColor: "rgb(125,125,125)",
      padding: 20,
-@@ -111,65 +130,153 @@ const styles = StyleSheet.create({
+@@ -111,65 +130,152 @@ const styles = StyleSheet.create({
    },
    headerButtonStyle: {
      color: "white",
@@ -2881,17 +3173,17 @@ index 731a30e..a423197 100644
  
 -export default function ConversationList({ navigation }) {
 +export default function PhoneContactsScreen({ navigation }) {
++  
    const ctx = React.useContext(ChatContext);
+-  const contacts = ctx.contacts;
 +  const clientctx = React.useContext(ClientContext);
 +  const Icon = ctx.icon;
 +  const [selectedContacts, setSelectedContacts] = React.useState([]);
 +  const [existingUsers, setExistingUsers] = React.useState({existing:[],contacts:[],friendCounts: []});
-   const contacts = ctx.contacts;
-+  
++  const contacts = ctx.getPhoneContacts();
 +  const getNumbers = () => {
 +    const numbers = [];
-+    
-+    ctx.contacts.forEach(c => {
++    contacts.forEach(c => {
 +      if (!c.labels) {
 +        numbers.push(clearPhoneNumber(clientctx.geo.geo.country_code, c.label))
 +      } else {
@@ -3026,7 +3318,7 @@ index c76b0d1..a5e3b06 100644
 +  author: PropType.string,
 +});
 diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
-index b708a42..2ce8696 100644
+index b708a42..4889a67 100644
 --- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen.js
 @@ -1,5 +1,5 @@
@@ -3174,7 +3466,7 @@ index b708a42..2ce8696 100644
    };
  
 +  const clientctx = React.useContext(ClientContext);
-+  const contacts = ctx.contacts;
++  const contacts = ctx.getPhoneContacts();
 +  const [friends, setFriends] = React.useState([]);
 +  React.useEffect(() =>{
 +    const ffriends = {};
@@ -3361,10 +3653,10 @@ index b245cc3..aab586e 100644
        {
          contact.selected
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index 0d59b81..40586e3 100644
+index 0d59b81..2ce4feb 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
-@@ -7,29 +7,58 @@ export { addUnreadCountListener, updateCount } from "./utils/unread-counter";
+@@ -7,29 +7,61 @@ export { addUnreadCountListener, updateCount } from "./utils/unread-counter";
  import { NativeModules } from 'react-native';
  import { SQLCipherClient } from "./utils/SQLCipherClient";
  import { initSocket } from "./utils/SocketIOClient";
@@ -3401,6 +3693,8 @@ index 0d59b81..40586e3 100644
 +    const db = await SQLCipherClient(options);
 +    return db.database;
 +  };
++  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
++  //updateCount();
    React.useEffect(() => {
 -    Contacts.getAll().then(fetchedContacts => {
 -      setContacts(fetchedContacts.map((r)=>({value:r.givenName, label: r.givenName})));
@@ -3424,6 +3718,7 @@ index 0d59b81..40586e3 100644
 +    } else {
 +      Contacts.getAllWithoutPhotos().then(fetchedContacts => {
 +        setContacts(fetchedContacts.filter((r)=>(r.givenName?.length || r.familyName?.length)).filter((r)=>(r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)).map((r)=>({humanValue:getContactName(r), value:getContactName(r, true), labels:r.phoneNumbers.map(p=>p.number), label: r.phoneNumbers[0].number})));
++        
 +      });
 +    }
 +  },[]);
@@ -3431,8 +3726,8 @@ index 0d59b81..40586e3 100644
    return (
 -    <ChatContextProvider options={options} socketIoUrl={socketIoUrl} db={db} icon={icon} contacts={contacts}>
 -      <ChatContainer options={options} />
-+    <ChatContextProvider options={options} socketIoUrl={socketIoUrl} getDB={getDB} icon={icon} contacts={contacts}>
-+      <ChatContainer options={options}>
++    <ChatContextProvider options={options} socketIoUrl={socketIoUrl} getDB={getDB} icon={icon}>
++      <ChatContainer options={options} contacts={contacts}>
 +        {children}
 +      </ChatContainer>
      </ChatContextProvider>
@@ -3451,7 +3746,7 @@ index 7caec69..068c73b 100644
        socket.emit("conversations:create", { participants: [participant] }, ({ success, conversation }) => {
          if (success) {
 diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
-index 8cb4565..8e262eb 100644
+index 8cb4565..96b8132 100644
 --- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 +++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
 @@ -4,7 +4,7 @@ SQLite.DEBUG(false);
@@ -3459,7 +3754,7 @@ index 8cb4565..8e262eb 100644
  
  let db = null;
 -let db_version = 20;
-+let db_version = 60;
++let db_version = 74;
  export function getEncryptionKeys(context) {
    return new Promise((resolve, reject) => {
      context.getDB().then((db) => {
@@ -3626,3 +3921,37 @@ index 67f1028..0438d14 100644
    socket = IO(socketIoUrl, {
      path: "/io",
      jsonp: false,
+diff --git a/node_modules/react-native-chat-plugin/utils/unread-counter.js b/node_modules/react-native-chat-plugin/utils/unread-counter.js
+index 88c1ac2..839d09f 100644
+--- a/node_modules/react-native-chat-plugin/utils/unread-counter.js
++++ b/node_modules/react-native-chat-plugin/utils/unread-counter.js
+@@ -21,6 +21,7 @@ function initCounter(options) {
+       const id = user ? user.id : "";
+ 
+       socket.on("events:event_created", ({ event }) => {
++        console.error('on events');
+         if (!event.owner || event.owner.id != id) {
+           addUnreadCount(1);
+         }
+@@ -30,12 +31,8 @@ function initCounter(options) {
+ }
+ 
+ export function addUnreadCountListener(cb, url = null, options = null) {
+-  if (!initialized) {
+-    initSocket(url);
+-    initCounter(options);
+-    initialized = true;
+-  }
+   listeners.push(cb);
++  //updateCount();
+ }
+ 
+ export function updateCount() {
+@@ -47,7 +44,6 @@ export function updateCount() {
+         return acc;
+       }, 0);
+     }
+-
+     notify(totalCount);
+   });
+ }

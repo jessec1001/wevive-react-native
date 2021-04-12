@@ -29,8 +29,9 @@ export default function CallHistory({navigation, route}) {
   }, []);
   const swiper = React.useRef();
   const onPress = (conversation) => {
-    navigation.navigate('ChatScreen', {
-      conversation: {id: conversation.group_id},
+    navigation.navigate('VideoCalls', {
+      callId: conversation.group_id,
+      video: false,
     });
   };
   const renderHiddenItem = ({item}) => {

@@ -193,11 +193,6 @@ export default function Header(props) {
   const nextOrProfile = getNextOrProfile(props, name, params, avatarUrl);
   return (
     <SafeAreaView edges={['top']}>
-      <StatusBar
-        backgroundColor="white"
-        translucent={true}
-        barStyle="dark-content"
-      />
       <View style={styles.header}>
         <View style={styles.left}>
           {!props.hiddenBack ? (

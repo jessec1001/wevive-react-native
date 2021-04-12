@@ -37,6 +37,7 @@ import APIService from './service/APIService';
 import ChatModule from 'react-native-chat-plugin';
 
 import Icon from './components/Icon';
+import {ChatContext} from 'react-native-chat-plugin/ChatContext';
 const chat_url = 'https://chat.wevive.com/';
 //const chat_url = 'http://192.168.0.180:3001/';
 const contentFooter = null;
@@ -77,13 +78,14 @@ export default class Main extends Component {
   }
 
   state = {
-    userToken: null,
+    userToken: '',
     drawerType: 'profile',
     isDonationModalVisible: false,
     sidebarLinks: defaultSidebarLinks,
     styles: StyleSheet.create({
       contentBg: {
         width: responsiveWidth(100),
+        backgroundColor: 'rgb(255,255,255)',
         flex: 1,
       },
       contentBgImage: {
@@ -121,42 +123,46 @@ export default class Main extends Component {
     }
     this.props.navigation.navigate(route, routeParams);
   };
-
   render() {
     return (
-      this.state.userToken && (
+      this.state.userToken.length > 0 && (
         <ChatModule
           options={{token: this.state.userToken}}
           socketIoUrl={chat_url}
           icon={Icon}>
+          <StatusBar translucent barStyle="dark-content" />
           <ImageBackground
             resizeMode="cover"
             imageStyle={this.state.styles.contentBgImage}
             style={this.state.styles.contentBg}>
             <AppThemeContext.Consumer>
               {({themeSettings, goBack, insets}) => (
-                <>
-                  {!themeSettings.hiddenHeader ? (
-                    <Header
-                      themeSettings={themeSettings}
-                      navigation={this.props.navigation}
-                      hiddenBack={themeSettings.hiddenBack}
-                      goBack={goBack}
-                      navigate={this.navigate}
-                      route={this.props.route}
-                    />
-                  ) : null}
-                  <AppNavigator />
-                  {!themeSettings.hiddenFooter ? (
+                <ChatContext.Consumer>
+                  {({contacts}) => (
                     <>
-                      <FooterTabs
-                        navigate={this.navigate}
-                        navigation={this.props.navigation}
-                        route={this.props.route}
-                      />
+                      {!themeSettings.hiddenHeader ? (
+                        <Header
+                          themeSettings={themeSettings}
+                          navigation={this.props.navigation}
+                          hiddenBack={themeSettings.hiddenBack}
+                          goBack={goBack}
+                          navigate={this.navigate}
+                          route={this.props.route}
+                        />
+                      ) : null}
+                      <AppNavigator contacts={contacts} />
+                      {!themeSettings.hiddenFooter ? (
+                        <>
+                          <FooterTabs
+                            navigate={this.navigate}
+                            navigation={this.props.navigation}
+                            route={this.props.route}
+                          />
+                        </>
+                      ) : null}
                     </>
-                  ) : null}
-                </>
+                  )}
+                </ChatContext.Consumer>
               )}
             </AppThemeContext.Consumer>
           </ImageBackground>

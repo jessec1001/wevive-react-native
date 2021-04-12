@@ -1,5 +1,6 @@
 import React, {createRef} from 'react';
 import {Text, StyleSheet, View, Pressable} from 'react-native';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import Icon from './components/Icon';
 import {
   responsiveHeight,
@@ -12,7 +13,7 @@ import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import {ActionSheetCustom as ActionSheet} from '@alessiocancian/react-native-actionsheet';
 
 import {colors} from './../app.json';
-import { addUnreadCountListener } from 'react-native-chat-plugin';
+import {addUnreadCountListener} from 'react-native-chat-plugin';
 const actionSheetRef = createRef();
 const showActionSheet = () => {
   actionSheetRef.current.show();
@@ -21,9 +22,13 @@ const showActionSheet = () => {
 export default function FooterTabs(props) {
   const [unread, setUnread] = React.useState(0);
   // useRoute doesn't work here
-  addUnreadCountListener((value) => {
-    setUnread(value);
-  });
+  React.useEffect(() => {
+    PushNotificationIOS.setApplicationIconBadgeNumber(0);
+    addUnreadCountListener((value) => {
+      PushNotificationIOS.setApplicationIconBadgeNumber(value);
+      setUnread(value);
+    });
+  }, []);
   const params = props.route.state?.routes[props.route.state.index].params;
   const ActionSheetElement = (props) => {
     return (
@@ -195,7 +200,11 @@ export default function FooterTabs(props) {
               }>
               Chats
             </Text>
-            {unread > 0 && <View style={styles.unreadBox}><Text style={styles.unreadText}>{unread}</Text></View>}
+            {unread > 0 && (
+              <View style={styles.unreadBox}>
+                <Text style={styles.unreadText}>{unread}</Text>
+              </View>
+            )}
           </Pressable>
         </View>
         {groupsButton}
@@ -208,16 +217,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   unreadText: {
-    color: "white",
+    color: 'white',
     fontSize: 9,
-    fontWeight: "400",
-    alignSelf: "center",
-    textAlign: "center",
+    fontWeight: '400',
+    alignSelf: 'center',
+    textAlign: 'center',
   },
   unreadBox: {
-    backgroundColor: "rgb(200,30,30)",
-    justifyContent: "center",
-    position: "absolute",
+    backgroundColor: 'rgb(200,30,30)',
+    justifyContent: 'center',
+    position: 'absolute',
     borderRadius: 30,
     width: 14,
     height: 14,

@@ -125,7 +125,7 @@ export default class VerificationScreen extends Component {
                       <Button onPress={handleSubmit} title="NEXT" />
                     </View>
                   )}
-                  {!!errors.pin && (
+                  {(!!errors.pin || !values.pin) && (
                     <View style={styles.buttonContainerStyle}>
                       <Button
                         onPress={this.props.navigation.goBack}

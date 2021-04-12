@@ -250,6 +250,7 @@ export default class SignIn extends Component {
                               placeholder="Phone"
                               style={styles.inputStyle}
                               name="phone"
+                              keyboardType="numeric"
                               placeholderTextColor={styles.inputStyle.color}
                               autoCapitalize="none"
                               testID="phone"
