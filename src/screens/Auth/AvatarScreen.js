@@ -76,7 +76,7 @@ export default class AvatarScreen extends Component {
           }}
           onSubmit={(values, actions) => {
             global.appIsLoading();
-            APIService('users/me', {
+            APIService('users/me/', {
               name: values.name,
             }).then(() => {
               APIService('user-photo/update_photo/', {

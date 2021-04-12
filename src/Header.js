@@ -185,6 +185,9 @@ export default function Header(props) {
   const styleSuffix = getStyleSuffix(name);
   const style = name ? styles[`headerTitle${styleSuffix}`] : styles.headerTitle;
   const logo = getLogo(name);
+  if (!ctx.authData) {
+    return null;
+  }
   const userIdx = users.findIndex(u => u.id == ctx.authData.id);
   let avatarUrl = ctx.avatarUrl || ctx.authData.avatar;
   if (userIdx !== -1) {

@@ -1,7 +1,7 @@
 {
   "name": "WeviveRN",
   "displayName": "WeviveRN",
-  "domainReversed": "com.weviveapp.wevive",
+  "domainReversed": "com.wevive.weviveapp",
   "deepLinkURL": "https://app.wevive.com/",
   "api_url": "https://app.wevive.com/api/",
   "api_hmac_secret": "api_hmac_secret",

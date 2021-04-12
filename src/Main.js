@@ -64,7 +64,7 @@ export default class Main extends Component {
   }
   componentDidMount() {
     if (Platform.OS === 'android') {
-      changeNavigationBarColor('#082136', false, true);
+      changeNavigationBarColor('#ffffff', true, false);
     }
     PushNotificationsService.register(
       this.onRegister,
