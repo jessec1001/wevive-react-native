@@ -47,14 +47,24 @@ export default class Main extends Component {
     super(props);
     global.mainNavigation = this.props.navigation;
   }
-  onRegister(token) {
+  onRegister(token, apns_token) {
+    const name = getUniqueId();
     APIService('push-notifications/fcm/', {
       registration_id: token,
-      name: getUniqueId(),
+      name,
       application_id: domainReversed,
       //'device_id':getUniqueId().replace(/[-_]/g,''),
       cloud_message_type: 'FCM',
     });
+    if (apns_token && apns_token.length > 0) {
+      APIService('push-notifications/apns/', {
+        registration_id: token,
+        name,
+        application_id: domainReversed,
+        //'device_id':getUniqueId().replace(/[-_]/g,''),
+        cloud_message_type: 'APNS',
+      });
+    }
   }
   onNotification(notification) {
     //Alert.alert(notification.title,notification.body);

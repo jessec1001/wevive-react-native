@@ -44,9 +44,10 @@ class FCM_Service {
   getToken = (onRegister) => {
     messaging()
       .getToken()
-      .then((fcmToken) => {
+      .then(async (fcmToken) => {
+        let apnsToken = await messaging().getAPNSToken();
         if (fcmToken) {
-          onRegister(fcmToken);
+          onRegister(fcmToken, apnsToken);
         } else {
           console.log('[FCMService] User does not have a device token');
         }
@@ -119,9 +120,10 @@ class FCM_Service {
       }
     });
     // Triggered when have new token
-    messaging().onTokenRefresh((fcmToken) => {
+    messaging().onTokenRefresh(async (fcmToken) => {
       console.log('[FCMService] New token refresh: ', fcmToken);
-      onRegister(fcmToken);
+      let apnsToken = await messaging().getAPNSToken();
+      onRegister(fcmToken, apnsToken);
     });
   };
   unRegister = () => {
