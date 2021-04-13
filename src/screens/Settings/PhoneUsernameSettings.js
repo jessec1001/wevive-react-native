@@ -142,7 +142,7 @@ export default function PhoneUsernameSettings(props) {
       <MenuDivider text="About" />
       <MenuItem
         type={'info'}
-        info={'At Work'}
+        info={authData.status || 'None'}
         onPress={() => {
           props.navigation.navigate('SocialStatusSettings');
         }}>

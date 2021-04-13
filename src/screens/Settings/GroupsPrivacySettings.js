@@ -1,17 +1,38 @@
-import React, {Component} from 'react';
-import {Share, ScrollView, Text} from 'react-native';
+import React from 'react';
+import {ChatContext} from 'react-native-chat-plugin/ChatContext';
 
 import {MenuItem, MenuDivider} from '../../components/Menu';
 
-export default class GroupsPrivacySettings extends Component {
-  render() {
-    return (
-      <>
-        <MenuDivider />
-        <MenuItem type={"selection"} selected>Everyone</MenuItem>
-        <MenuItem type={"selection"}>My contacts</MenuItem>
-        <MenuItem type={"selection"}>None</MenuItem>
-      </>
-    );
-  }
+export default function GroupsPrivacySettings({navigation}) {
+  const ctx = React.useContext(ChatContext);
+  const selected = ctx.getSetting('GroupsPrivacy');
+  const setSetting = (value) => {
+    return () => {
+      ctx.setSetting('GroupsPrivacy', value);
+      navigation.navigate('PrivacySettings');
+    };
+  };
+  return (
+    <>
+      <MenuDivider />
+      <MenuItem
+        type={'selection'}
+        selected={selected == 'Everyone'}
+        onPress={setSetting('Everyone')}>
+        Everyone
+      </MenuItem>
+      <MenuItem
+        type={'selection'}
+        selected={selected == 'My contacts'}
+        onPress={setSetting('My contacts')}>
+        My contacts
+      </MenuItem>
+      <MenuItem
+        type={'selection'}
+        selected={selected == 'None'}
+        onPress={setSetting('None')}>
+        None
+      </MenuItem>
+    </>
+  );
 }

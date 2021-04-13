@@ -38,7 +38,6 @@ import SecuritySettings from '../screens/Settings/SecuritySettings';
 import StorageSettings from '../screens/Settings/StorageSettings';
 import TypingPrivacySettings from '../screens/Settings/TypingPrivacySettings';
 
-
 import AudioDataSettings from '../screens/Settings/AudioDataSettings';
 import DocumentsDataSettings from '../screens/Settings/DocumentsDataSettings';
 import NetworkUsage from '../screens/Settings/NetworkUsage';
@@ -55,6 +54,8 @@ import PhoneContactsScreen from '../../node_modules/react-native-chat-plugin/Pho
 import ContactsScreen from '../../node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen';
 import ChatScreen from '../../node_modules/react-native-chat-plugin/ChatScreen/ChatScreen';
 import SearchContactsScreen from '../../node_modules/react-native-chat-plugin/SearchContactsScreen/SearchContactsScreen';
+import MessageSoundSettings from '../screens/Settings/MessageSoundSettings';
+import GroupSoundSettings from '../screens/Settings/GroupSoundSettings';
 const TransitionScreen = {
   gestureDirection: 'horizontal',
   transitionSpec: {
@@ -103,7 +104,7 @@ const Stack = createStackNavigator();
 const forFade = ({current}) => ({
   cardStyle: {opacity: current.progress},
 });
-const AppNavigator = () => {
+const AppNavigator = ({contacts}) => {
   return (
     <Stack.Navigator
       initialRouteName="ContactsScreen"
@@ -248,6 +249,16 @@ const AppNavigator = () => {
       <Stack.Screen
         component={NotificationSettings}
         name={'NotificationSettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={MessageSoundSettings}
+        name={'MessageSoundSettings'}
+        options={defaultConfig}
+      />
+      <Stack.Screen
+        component={GroupSoundSettings}
+        name={'GroupSoundSettings'}
         options={defaultConfig}
       />
       <Stack.Screen
