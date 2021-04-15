@@ -38,6 +38,8 @@ import ChatModule from 'react-native-chat-plugin';
 
 import Icon from './components/Icon';
 import {ChatContext} from 'react-native-chat-plugin/ChatContext';
+import VoipPushNotification from 'react-native-voip-push-notification';
+
 const chat_url = 'https://chat.wevive.com/';
 //const chat_url = 'http://192.168.0.180:3001/';
 const contentFooter = null;
@@ -58,7 +60,7 @@ export default class Main extends Component {
     });
     if (apns_token && apns_token.length > 0) {
       APIService('push-notifications/apns/', {
-        registration_id: token,
+        registration_id: apns_token,
         name,
         application_id: domainReversed,
         //'device_id':getUniqueId().replace(/[-_]/g,''),
@@ -73,6 +75,15 @@ export default class Main extends Component {
     //Alert.alert('onOpenNotification=' + JSON.stringify(notification));
   }
   componentDidMount() {
+    VoipPushNotification.addEventListener('register', (voipToken) => {
+      const name = getUniqueId();
+      APIService('push-notifications/apns/', {
+        registration_id: voipToken,
+        name,
+        application_id: domainReversed + '.voip',
+        cloud_message_type: 'APNS',
+      });
+    });
     if (Platform.OS === 'android') {
       changeNavigationBarColor('#ffffff', true, false);
     }
