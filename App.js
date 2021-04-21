@@ -8,6 +8,7 @@ import {
   Platform,
   Dimensions,
   StyleSheet,
+  Text,
 } from 'react-native';
 
 UIManager.setLayoutAnimationEnabledExperimental &&
@@ -18,7 +19,7 @@ import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 import Orientation from 'react-native-orientation-locker';
 
-import {responsiveWidth} from 'react-native-responsive-dimensions';
+import {responsiveFontSize, responsiveWidth} from 'react-native-responsive-dimensions';
 
 import * as RNLocalize from 'react-native-localize';
 //import Geolocation from '@react-native-community/geolocation';
@@ -68,11 +69,14 @@ class AppContainer extends Component {
     }
 
     Dimensions.removeEventListener('change', this.dimensionListener);
-    global.appIsLoading = () => {
-      this.setState({isLoading: true});
+    global.appIsLoading = (loadingMessage) => {
+      this.setState({
+        isLoading: true,
+        loadingMessage: loadingMessage ? loadingMessage : '',
+      });
     };
     global.appIsNotLoading = () => {
-      this.setState({isLoading: false});
+      this.setState({isLoading: false, loadingMessage: ''});
     };
     //Geolocation.setRNConfiguration( { authorizationLevel: 'whenInUse' } );
     RNLocalize.addEventListener('change', this.handleLocalizationChange);
@@ -95,6 +99,7 @@ class AppContainer extends Component {
 
   state = {
     isLoading: false,
+    loadingMessage: '',
     client: null,
     geo: null,
   };
@@ -106,7 +111,7 @@ class AppContainer extends Component {
           <ClientContext.Provider
             value={{client: this.state.client, geo: this.state.geo}}>
             <BioID>
-              <RootStack />
+              <RootStack initialProps={this.props.initialProps} />
             </BioID>
           </ClientContext.Provider>
         </SafeAreaProvider>
@@ -115,6 +120,11 @@ class AppContainer extends Component {
             <View style={styles.loadingBackground} />
             <View style={styles.loadingIndicator}>
               <ActivityIndicator color={'white'} size={'large'} />
+              {true > 0 && (
+                <Text style={styles.loadingMessage}>
+                  {this.state.loadingMessage}
+                </Text>
+              )}
             </View>
           </>
         ) : null}
@@ -139,6 +149,17 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     width: responsiveWidth(100),
+  },
+  loadingMessage: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+    width: responsiveWidth(100),
+    bottom: "43%",
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: responsiveFontSize(2),
+    textAlign: "center",
   },
 });
 //let codePushOptions = {checkFrequency: CodePush.CheckFrequency.ON_APP_RESUME};
