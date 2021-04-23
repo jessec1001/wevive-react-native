@@ -109,3 +109,16 @@ index 389e406..20d175c 100644
          {selectedContacts.length > 0 && <TouchableOpacity onPress={goNext}>
            <Text style={styles.headerButtonStyle}>Next</Text>
          </TouchableOpacity>}
+diff --git a/node_modules/react-native-chat-plugin/PropTypes.js b/node_modules/react-native-chat-plugin/PropTypes.js
+index a5e3b06..2c5f0aa 100644
+--- a/node_modules/react-native-chat-plugin/PropTypes.js
++++ b/node_modules/react-native-chat-plugin/PropTypes.js
+@@ -6,7 +6,7 @@ export const NavigationPropType = PropType.shape({
+ });
+ 
+ export const UserPropType = PropType.shape({
+-  id: PropType.string,
++  id: PropType.any,
+   username: PropType.string.isRequired,
+   color: PropType.string,
+   avatar: PropType.string,
