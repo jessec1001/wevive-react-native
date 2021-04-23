@@ -17,7 +17,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {colors} from '../../app.json';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-const logo = require('../images/PNG/wetalk_logo.png');
+const logo = require('../images/PNG/logo-line.png');
 const background = require('../images/PNG/wevive_bg.png');
 
 export default class AppBootstrap extends Component {
@@ -59,7 +59,7 @@ export default class AppBootstrap extends Component {
         opacity: 0.4,
       },
       logo: {
-        width: 417/93 * responsiveWidth(15),
+        width: 417/83 * responsiveWidth(15),
         height: responsiveWidth(15),
         top: -80,
       },
@@ -92,11 +92,10 @@ export default class AppBootstrap extends Component {
     }
     setTimeout(function () {
       $this._bootstrapAsync($this);
-    }, 1500);
+    }, 300);
   }
 
   _bootstrapAsync = async ($this) => {
-    //AsyncStorage.removeItem('userToken');
     const userToken = await AsyncStorage.getItem('userToken');
     $this.setState({isReady: true});
     $this.props.navigation.navigate(userToken ? 'App' : 'Auth');

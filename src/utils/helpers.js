@@ -45,7 +45,7 @@ export function parse_str(querystring) {
     return params;
 };
 
-import { useNavigation, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
+//import { useNavigation, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { formatDistanceToNow, format, parse, parseISO } from 'date-fns';
 
 

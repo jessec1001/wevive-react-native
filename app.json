@@ -1,9 +1,9 @@
 {
   "name": "WeviveRN",
   "displayName": "WeviveRN",
-  "domainReversed": "com.praxisfintech.lotteryapp",
-  "deepLinkURL": "https://app.wevive.co.uk/",
-  "api_url": "https://app.wevive.co.uk/api/",
+  "domainReversed": "com.wevive.weviveapp",
+  "deepLinkURL": "https://app.wevive.com/",
+  "api_url": "https://app.wevive.com/api/",
   "api_hmac_secret": "api_hmac_secret",
   "debug": false,
   "client_name": "Vivid Unity",
@@ -13,9 +13,10 @@
     "secondary": "rgb(227,140,57)",
     "textSecondary": "rgb(255,255,255)",
     "textMain": "rgb(255,255,255)",
-    "footer": "rgb(241,241,241)",
-    "footerText": "rgb(0,0,0)",
-    "footerIcons": "rgb(0,0,0)",
+    "footer": "rgb(255,255,255)",
+    "footerText": "rgb(20,20,20)",
+    "footerIcons": "rgb(111,111,111)",
+    "activeFooterIcon": "rgb(227,140,57)",
     "header": "rgba(0,0,0,0)",
     "headerText": "rgb(0,0,0)",
     "background": "rgb(0,56,104)",
@@ -27,7 +28,7 @@
     "headlineBackground": "rgba(0,0,0,0.5)",
     "alert": "rgb(235, 83, 229)",
     "alert2": "rgb(246,164,0)",
-    "alert3": "rgb(8, 220, 63)",
+    "alert3": "rgb(8, 220, 63)"
   },
   "oauth": {
     "facebook": {

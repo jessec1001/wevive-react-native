@@ -49,18 +49,14 @@ export default class PINScreen extends Component {
           }}
           onSubmit={(values, actions) => {
             global.appIsLoading();
-            APIService('users/sign_in/', {
-              email: values.email,
-              password: values.password,
-              remember_me: 1,
-              is_staff: false,
+            APIService('users/set_pin/', {
+              pin: values.pin,
             }).then((result) => {
               global.appIsNotLoading();
-              this.navigateSuccess();
               if (result) {
                 this.navigateSuccess();
               } else {
-                actions.setFieldError('password', 'Wrong password.');
+                actions.setFieldError('pin', 'Failed to save PIN.');
               }
             });
           }}
@@ -99,6 +95,11 @@ export default class PINScreen extends Component {
               {values.pin.length > 0 && !errors.pin && (
                 <View style={styles.buttonContainerStyle}>
                   <Button onPress={handleSubmit} title="NEXT" />
+                </View>
+              )}
+              {!!errors.pin && (
+                <View style={styles.buttonContainerStyle}>
+                  <Button onPress={this.props.navigation.goBack} title="BACK" />
                 </View>
               )}
             </>

@@ -1,5 +1,14 @@
+import RNHeicConverter from 'react-native-heic-converter';
+
 import React, {Fragment, Component, useContext} from 'react';
-import {Text, TextInput, View, TouchableOpacity, Image} from 'react-native';
+import {
+  Text,
+  TextInput,
+  View,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from 'react-native';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import Button from '../../components/Button';
@@ -14,14 +23,17 @@ import Icon from '../../components/Icon';
 import {
   responsiveHeight,
   responsiveWidth,
-  responsiveFontSize
+  responsiveFontSize,
 } from 'react-native-responsive-dimensions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const defaultAvatar = require('../../images/PNG/wewelogo.png');
 export default class AvatarScreen extends Component {
   state = {
     email: null,
     bioAccessToken: null,
     avatarImage: null,
+    filename: null,
+    mime: null,
   };
   pickImage = () => {
     ImagePicker.openPicker({
@@ -31,8 +43,16 @@ export default class AvatarScreen extends Component {
       cropperCircleOverlay: true,
       avoidEmptySpaceAroundImage: true,
     }).then((image) => {
-      this.setState({avatarImage: image.path});
-      console.log(image.path);
+      let imageFilename =
+        Platform.OS == 'android'
+          ? image.path.replace(/^.*\//, '')
+          : image.filename.toLowerCase();
+      imageFilename = imageFilename.replace(/\.heic$/, '.jpg');
+      this.setState({
+        avatarImage: image.path,
+        avatarFile: imageFilename,
+        avatarMime: image.mime,
+      });
     });
   };
   navigateSuccess = () => {
@@ -56,19 +76,24 @@ export default class AvatarScreen extends Component {
           }}
           onSubmit={(values, actions) => {
             global.appIsLoading();
-            APIService('users/sign_in/', {
-              email: values.email,
-              password: values.password,
-              remember_me: 1,
-              is_staff: false,
-            }).then((result) => {
-              global.appIsNotLoading();
-              this.navigateSuccess();
-              if (result) {
-                this.navigateSuccess();
-              } else {
-                actions.setFieldError('password', 'Wrong password.');
-              }
+            APIService('users/me/', {
+              name: values.name,
+            }).then(() => {
+              APIService('user-photo/update_photo/', {
+                photo: this.state.avatarImage,
+                filename: this.state.avatarFile,
+                mime: this.state.avatarMime,
+                name: values.name,
+              }).then((result) => {
+                global.appIsNotLoading();
+                if (result) {
+                  AsyncStorage.setItem('avatarUrl', result);
+                  AsyncStorage.setItem('userName', values.name);
+                  this.navigateSuccess();
+                } else {
+                  actions.setFieldError('name', 'Failed to upload.');
+                }
+              });
             });
           }}
           validationSchema={yup.object().shape({
@@ -107,7 +132,7 @@ export default class AvatarScreen extends Component {
                       source={defaultAvatar}
                       name="plus-icon"
                       size={responsiveHeight(8)}
-                      color={"white"}
+                      color={'white'}
                       style={styles.defaultAvatarImageIcon}
                     />
                   </View>

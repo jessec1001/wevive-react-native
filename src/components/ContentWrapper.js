@@ -83,13 +83,9 @@ export default function ContentWrapper(props) {
       {props.title && (
         <View style={styles.titleView}>
           <Text style={styles.titleText}>{props.title}</Text>
-          <Text style={styles.balanceText}>£{authData?.balance}</Text>
         </View>
       )}
       <ScrollComponent>
-        <Image style={styles.logo} source={logo} />
-        <Image style={styles.logo2} source={logo2} />
-        <Image style={styles.logo3} source={logo3} />
         {props.details}
         <View
           style={{

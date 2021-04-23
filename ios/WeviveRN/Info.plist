@@ -44,7 +44,7 @@
 	<key>NSContactsUsageDescription</key>
 	<string>Allow syncing your phone contacts.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Record audio messages.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
@@ -54,6 +54,8 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>wevive.ttf</string>
+		<string>SFProDisplay-Regular.ttf</string>
+		<string>SFProDisplay-Semibold.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

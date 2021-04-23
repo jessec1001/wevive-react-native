@@ -1,28 +1,29 @@
 import React from 'react';
-import {
-  createStackNavigator,
-} from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import Main from '../Main';
 const Stack = createStackNavigator();
 const defaultConfig = {
   headerShown: false,
   cardStyleInterpolator: forFade,
 };
+import {
+  UserContext as AppUserContext,
+  AppThemeContext,
+} from '../context/UserContext';
 
-const forFade = ({ current }) => ({
-  cardStyle: { opacity: current.progress },
+
+const forFade = ({current}) => ({
+  cardStyle: {opacity: current.progress},
 });
 
-const AppStack = () => (
-  <Stack.Navigator
-    initialRouteName="Main"
-    screenOptions={{ gestureEnabled: false }}>
-    <Stack.Screen
-      name="Main"
-      component={Main}
-      options={defaultConfig}
-    />
-  </Stack.Navigator>
-);
+const AppStack = () => {
+  return (
+    <Stack.Navigator
+      initialRouteName="Main"
+      screenOptions={{gestureEnabled: false}}>
+      <Stack.Screen name="Main" component={Main} options={defaultConfig} />
+    </Stack.Navigator>
+  );
+};
 
 export default AppStack;

@@ -10,13 +10,13 @@ import {
   Platform,
   ImageBackground,
   Alert,
+  PermissionsAndroid,
+  NativeModules,
 } from 'react-native';
 
 import {AppThemeContext} from './context/UserContext';
-import Drawer from 'react-native-drawer';
 import Header from './Header';
 import FooterTabs from './FooterTabs';
-import Sidebar from './components/Sidebar/Sidebar';
 import defaultSidebarLinks from './components/Sidebar/SidebarLinks';
 
 import AppNavigator from './navigation/AppNavigator';
@@ -32,11 +32,21 @@ import {
 } from 'react-native-responsive-dimensions';
 import {getUniqueId} from 'react-native-device-info';
 
-import {PushNotificationsService} from './service/PushNotificationsService';
+//import {PushNotificationsService} from './service/PushNotificationsService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from './service/APIService';
+import ChatModule from 'react-native-chat-plugin';
 
+import Icon from './components/Icon';
+import {ChatContext} from 'react-native-chat-plugin/ChatContext';
+//import VoipPushNotification from 'react-native-voip-push-notification';
+//import RNCallKeep from 'react-native-callkeep';
+//import CallKit from '../react/features/mobile/call-integration/CallKit';
+//import CallKit from '../react/features/mobile/call-integration/CallKit';
+
+const chat_url = 'https://chat.wevive.com/';
+//const chat_url = 'http://192.168.0.180:3001/';
 const contentFooter = null;
 
 export default class Main extends Component {
@@ -44,14 +54,24 @@ export default class Main extends Component {
     super(props);
     global.mainNavigation = this.props.navigation;
   }
-  onRegister(token) {
+  onRegister(token, apns_token) {
+    const name = getUniqueId();
     APIService('push-notifications/fcm/', {
       registration_id: token,
-      name: getUniqueId(),
+      name,
       application_id: domainReversed,
       //'device_id':getUniqueId().replace(/[-_]/g,''),
       cloud_message_type: 'FCM',
     });
+    if (apns_token && apns_token.length > 0) {
+      APIService('push-notifications/apns/', {
+        registration_id: apns_token,
+        name,
+        application_id: domainReversed,
+        //'device_id':getUniqueId().replace(/[-_]/g,''),
+        cloud_message_type: 'APNS',
+      });
+    }
   }
   onNotification(notification) {
     //Alert.alert(notification.title,notification.body);
@@ -60,51 +80,46 @@ export default class Main extends Component {
     //Alert.alert('onOpenNotification=' + JSON.stringify(notification));
   }
   componentDidMount() {
-    if (Platform.OS === 'android') {
-      changeNavigationBarColor('#082136', false, true);
-    }
-    PushNotificationsService.register(
-      this.onRegister,
-      this.onNotification,
-      this.onOpenNotification,
-    );
-    /*
-    const title = 'Test Event';
-    const eventConfig = {
-      title,
-      // and other options
-    };
-    AddCalendarEvent.presentEventCreatingDialog(eventConfig)
-      .then((eventInfo) => {
-        // handle success - receives an object with `calendarItemIdentifier` and `eventIdentifier` keys, both of type string.
-        // These are two different identifiers on iOS.
-        // On Android, where they are both equal and represent the event id, also strings.
-        // when { action: 'CANCELED' } is returned, the dialog was dismissed
-        console.error(JSON.stringify(eventInfo));
-      })
-      .catch((error) => {
-        // handle error such as when user rejected permissions
-        console.error(error);
+    /*CallKit.addListener('RNCallKeepPerformAnswerCallAction', (aa) => {
+      //console.error('performAnswerCallAction', aa);
+    });*/
+    /*if (Platform.OS !== 'android') {
+      VoipPushNotification.addEventListener('register', (voipToken) => {
+        const name = getUniqueId();
+        PushNotificationsService.register(
+          this.onRegister,
+          this.onNotification,
+          this.onOpenNotification,
+        );
+        APIService('push-notifications/apns/', {
+          registration_id: voipToken,
+          name,
+          application_id: domainReversed + '.voip',
+          cloud_message_type: 'APNS',
+        });
       });
-    */
-
-    if (global.isInternetReachable) {
-      /*APIService('content/sidebar', {}, false, 60 * 4).then(result => {
-        if (result.sidebarLinks) {
-          this.setState({sidebarLinks: result.sidebarLinks});
-        }
-      });*/
+      VoipPushNotification.registerVoipToken();
     }
+    */
+    if (Platform.OS === 'android') {
+      changeNavigationBarColor('#ffffff', true, false);
+    }
+
+    AsyncStorage.getItem('userToken').then((userToken) => {
+      this.setState({userToken});
+    });
     global.toggleDonationModal = this.toggleDonationModal;
   }
 
   state = {
+    userToken: '',
     drawerType: 'profile',
     isDonationModalVisible: false,
     sidebarLinks: defaultSidebarLinks,
     styles: StyleSheet.create({
       contentBg: {
         width: responsiveWidth(100),
+        backgroundColor: 'rgb(255,255,255)',
         flex: 1,
       },
       contentBgImage: {
@@ -122,39 +137,13 @@ export default class Main extends Component {
       amount,
     });
   };
-  closeDrawer = () => {
-    this.drawer && this.drawer.close();
-  };
-  toggleDrawer = (drawerType = 'profile') => {
-    if (this.state.drawerType != drawerType) {
-      if (this.drawer._open) {
-        setTimeout(() => {
-          this.setState({drawerType});
-          this.toggleDrawer(drawerType);
-        }, 400);
-      } else {
-        this.setState({drawerType});
-      }
-    } else {
-      this.setState({drawerType});
-    }
-    this.drawer && this.drawer.toggle();
-  };
-  openDrawer = () => {
-    this.drawer && this.drawer.open();
-  };
   navigate = (route, routeParams) => {
-    this.closeDrawer();
-    if (route == 'ViroAR' || route == 'Panorama') {
+    if (route == 'VideoCalls') {
       var hiddenHeader = true;
       var hiddenFooter = true;
     } else {
       var hiddenHeader = false;
       var hiddenFooter = false;
-    }
-    if (route == 'Donate') {
-      this.toggleDonationModal();
-      return true;
     }
     if (this.state.hiddenHeader && !hiddenHeader) {
       this.setState({hiddenHeader: false});
@@ -168,84 +157,51 @@ export default class Main extends Component {
     }
     this.props.navigation.navigate(route, routeParams);
   };
-
   render() {
-    const {navigate} = this.props.navigation;
     return (
-      <ImageBackground
-        resizeMode="cover"
-        imageStyle={this.state.styles.contentBgImage}
-        style={this.state.styles.contentBg}>
-        <AppThemeContext.Consumer>
-          {({themeSettings, goBack, insets}) => (
-            <>
-              <Drawer
-                ref={(ref) => {
-                  this.drawer = ref;
-                }}
-                type={'overlay'}
-                content={
-                  <Sidebar
-                    sidebarLinks={this.state.sidebarLinks}
-                    closeDrawer={this.closeDrawer}
-                    navigation={this.props.navigation}
-                    route={this.props.route}
-                    drawerType={this.state.drawerType}
-                  />
-                }
-                onClose={() => this.closeDrawer()}
-                side="right"
-                styles={{
-                  drawer: {
-                    shadowColor: '#000000',
-                    marginTop: responsiveHeight(8.5) + insets.top,
-                    backgroundColor: 'rgba(0,0,0,0)',
-                  },
-                  mainOverlay: {
-                    backgroundColor: 'rgba(0,0,0,0)',
-                    opacity: 0,
-                    marginTop: responsiveHeight(8.5) + insets.top,
-                    position: 'absolute',
-                  },
-                }}
-                tweenDuration={300}
-                tweenHandler={(ratio) => ({
-                  mainOverlay: {opacity: ratio},
-                })}>
-                {!themeSettings.hiddenHeader ? (
-                  <Header
-                    themeSettings={themeSettings}
-                    navigation={this.props.navigation}
-                    toggleDrawer={this.toggleDrawer.bind(this)}
-                    hiddenBack={themeSettings.hiddenBack}
-                    goBack={goBack}
-                  />
-                ) : null}
-                <AppNavigator />
-              </Drawer>
-              {!themeSettings.hiddenFooter ? (
-                <>
-                  <FooterTabs
-                    toggleDrawer={this.toggleDrawer.bind(this)}
-                    navigation={this.props.navigation}
-                    route={this.props.route}
-                  />
-                  <Image
-                    source={contentFooter}
-                    style={{
-                      position: 'absolute',
-                      marginBottom: 0,
-                      bottom: responsiveHeight(9),
-                      height: 15,
-                      width: '100%',
-                    }}
-                  />
-                </>
-              ) : null}
-            </>
-          )}
-        </AppThemeContext.Consumer>
-      </ImageBackground>
+      this.state.userToken.length > 0 && (
+        <ChatModule
+          options={{token: this.state.userToken}}
+          socketIoUrl={chat_url}
+          icon={Icon}>
+          <StatusBar translucent barStyle="dark-content" />
+          <ImageBackground
+            resizeMode="cover"
+            imageStyle={this.state.styles.contentBgImage}
+            style={this.state.styles.contentBg}>
+            <AppThemeContext.Consumer>
+              {({themeSettings, goBack, insets}) => (
+                <ChatContext.Consumer>
+                  {({contacts}) => (
+                    <>
+                      {!themeSettings.hiddenHeader ? (
+                        <Header
+                          themeSettings={themeSettings}
+                          navigation={this.props.navigation}
+                          hiddenBack={themeSettings.hiddenBack}
+                          goBack={goBack}
+                          navigate={this.navigate}
+                          route={this.props.route}
+                        />
+                      ) : null}
+                      <AppNavigator contacts={contacts} />
+                      {!themeSettings.hiddenFooter ? (
+                        <>
+                          <FooterTabs
+                            navigate={this.navigate}
+                            navigation={this.props.navigation}
+                            route={this.props.route}
+                          />
+                        </>
+                      ) : null}
+                    </>
+                  )}
+                </ChatContext.Consumer>
+              )}
+            </AppThemeContext.Consumer>
+          </ImageBackground>
+        </ChatModule>
+      )
     );
   }
 }

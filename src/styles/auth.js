@@ -3,17 +3,46 @@ import {StyleSheet} from 'react-native';
 import {
   responsiveHeight,
   responsiveWidth,
-  responsiveFontSize
+  responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 
-import {colors} from "../../app.json";
+import {colors} from '../../app.json';
 
 const textColor = 'black';
 const backgroundColor = 'rgb(240,240,240)';
 
-const styles = keyboard => {
+const styles = (keyboard) => {
   return StyleSheet.create({
-    bigHeadlineText: {
+    alertName: {
+      textAlign: "left",
+      justifyContent: "flex-start",
+      alignSelf: "flex-start",
+      paddingHorizontal: responsiveWidth(0),
+      paddingVertical: responsiveWidth(3),
+      width: responsiveWidth(100),
+      color: "rgb(100,100,100)",
+      backgroundColor: "rgb(220,220,220)",
+    },
+    alertHeadline: {
+      textAlign: "left",
+      justifyContent: "flex-start",
+      alignSelf: "flex-start",
+      paddingHorizontal: responsiveWidth(10),
+      paddingBottom: responsiveWidth(3),
+      fontSize: responsiveFontSize(2.3),
+    },
+    alertText: {
+      textAlign: "left",
+      justifyContent: "flex-start",
+      alignSelf: "flex-start",
+      paddingHorizontal: responsiveWidth(10),
+    },
+    alertTriangle: {
+      color: "rgb(220,67,57)",
+      fontSize: responsiveFontSize(10),
+      marginVertical: responsiveWidth(4),
+    },
+    bigHeadlcineText: {
       fontSize: responsiveFontSize(3),
       //fontFamily: 'Adelle-Bold',
     },
@@ -26,18 +55,18 @@ const styles = keyboard => {
       //fontFamily: 'Adelle-Bold',
       fontSize: responsiveFontSize(1.8),
       lineHeight: responsiveFontSize(2.4),
-      textAlign: "center",
+      textAlign: 'center',
       paddingHorizontal: responsiveWidth(12),
       paddingVertical: responsiveWidth(3),
     },
     blackButton: {
-      backgroundColor: "black",
+      backgroundColor: 'black',
       paddingHorizontal: 50,
       borderRadius: 12,
       paddingVertical: 10,
     },
     blackButtonText: {
-      color: "white",
+      color: 'white',
       //fontFamily: 'Adelle-Bold',
       fontSize: responsiveFontSize(3),
     },
@@ -47,7 +76,7 @@ const styles = keyboard => {
       fontSize: responsiveFontSize(3),
       textAlign: 'center',
       color: textColor,
-      fontWeight: "800",
+      fontWeight: '800',
       marginTop: 20,
       marginBottom: 20,
       //fontFamily: 'Adelle-Bold',
@@ -62,6 +91,7 @@ const styles = keyboard => {
       marginTop: responsiveWidth(1),
       marginBottom: responsiveWidth(2.5),
       fontSize: responsiveFontSize(1.8),
+      paddingHorizontal: responsiveWidth(10),
       textAlign: 'center',
     },
     checkboxTextStyle: {
@@ -69,7 +99,10 @@ const styles = keyboard => {
       marginBottom: responsiveWidth(8.5),
       fontSize: responsiveFontSize(1.8),
       textAlign: 'center',
+      width: responsiveWidth(100),
+      height: responsiveWidth(5),
     },
+    checkbox16Style: {},
     dropdownIcon: {
       top: 5,
     },
@@ -78,7 +111,7 @@ const styles = keyboard => {
       marginBottom: responsiveWidth(2.5),
       fontSize: responsiveFontSize(3),
       textAlign: 'center',
-      fontWeight: "900",
+      fontWeight: '900',
     },
     mainLogoStyle: {
       width: responsiveWidth(50),
@@ -89,27 +122,26 @@ const styles = keyboard => {
       padding: responsiveWidth(1.5),
       marginBottom: responsiveWidth(1.5),
       width: responsiveWidth(100),
-      justifyContent: "center",
-      alignContent: "center",
-      alignItems: "center",
-      borderBottomColor: "rgb(227,140,57)",
+      justifyContent: 'center',
+      alignContent: 'center',
+      alignItems: 'center',
+      borderBottomColor: 'rgb(227,140,57)',
       borderBottomWidth: 2,
     },
     mainLogoImageStyle: {
-      resizeMode: "contain",
+      resizeMode: 'contain',
     },
     mainHeadlineStyle: {
       color: textColor,
       fontSize: responsiveFontSize(2.55),
-      fontWeight: "700",
-
+      fontWeight: '700',
     },
     codeHeadlineStyle: {
       color: textColor,
       fontSize: responsiveFontSize(2.55),
-      fontWeight: "700",
+      fontWeight: '700',
       marginBottom: responsiveWidth(10),
-      textAlign: "center",
+      textAlign: 'center',
     },
     errorStyle: {
       fontSize: responsiveFontSize(1.75),
@@ -119,10 +151,10 @@ const styles = keyboard => {
     },
     spinnerStyle: {
       color: 'black',
-      overlayColor: 'rgba(0, 0, 0, 0.00)'
+      overlayColor: 'rgba(0, 0, 0, 0.00)',
     },
     spinnerTextStyle: {
-      color: 'black'
+      color: 'black',
     },
     container: {
       justifyContent: 'center',
@@ -130,24 +162,24 @@ const styles = keyboard => {
       flexDirection: 'column',
       marginBottom: responsiveHeight(18),
       flex: 1,
-      position: "relative",
+      position: 'relative',
       zIndex: 10,
     },
     logo: {
-      width: 138*1.2,
-      height: 151*1.2,
-      position: "absolute",
+      width: 138 * 1.2,
+      height: 151 * 1.2,
+      position: 'absolute',
       bottom: 30,
       right: 0,
       opacity: 0.15,
     },
     logo2: {
-      width: 111*1.6,
-      height: 25*1.6,
-      position: "absolute",
+      width: 111 * 1.6,
+      height: 25 * 1.6,
+      position: 'absolute',
       bottom: 32,
       left: responsiveWidth(50),
-      marginLeft: -111*1.6/2,
+      marginLeft: (-111 * 1.6) / 2,
     },
     footerStyle: {
       marginTop: responsiveHeight(2),
@@ -180,6 +212,10 @@ const styles = keyboard => {
       //fontFamily: 'Adelle',
       color: 'black',
     },
+    inputStyleAndroid: {
+      marginLeft: responsiveWidth(10),
+      fontSize: responsiveHeight(2.5),
+    },
     inputContainerStyle: {
       marginBottom: responsiveHeight(2),
       backgroundColor: 'transparent',
@@ -188,13 +224,14 @@ const styles = keyboard => {
       borderColor: 'black',
       width: responsiveWidth(80),
       //alignItems: "center",
-      flexDirection: "column",
-      alignSelf: "center",
+      flexDirection: 'column',
+      alignSelf: 'center',
+    },
+    checkboxBoxStyle: {
+      flexDirection: 'row',
     },
     checkboxContainerStyle: {
-      top: responsiveWidth(2),
-      marginLeft: responsiveWidth(4),
-      marginTop: responsiveWidth(3)
+      left: -responsiveWidth(15),
     },
     buttonContainerStyle: {
       marginTop: responsiveHeight(0),
@@ -204,6 +241,23 @@ const styles = keyboard => {
       alignItems: 'center',
       position: 'relative',
       zIndex: 9,
+    },
+    toggleContainerStyle: {
+      backgroundColor: 'white',
+      width: responsiveWidth(80),
+      height: responsiveWidth(13),
+      alignSelf: 'center',
+      padding: responsiveWidth(2),
+      marginBottom: responsiveWidth(3),
+      justifyContent: 'center',
+      flexDirection: 'row',
+    },
+    toggleLabel: {
+      justifyContent: 'center',
+      alignSelf: 'center',
+      fontSize: responsiveFontSize(2),
+      top: 2,
+      marginRight: responsiveWidth(15),
     },
     footerText: {
       color: '#dbdbdb',
@@ -243,7 +297,7 @@ const styles = keyboard => {
     headerLogoContainer: {
       position: 'absolute',
       top: responsiveHeight(2.5),
-      height: responsiveHeight(8)
+      height: responsiveHeight(8),
     },
     headerLogoContainerFlex: {
       justifyContent: 'center',
@@ -260,7 +314,7 @@ const styles = keyboard => {
     },
     contentBg: {
       width: responsiveWidth(100),
-      flex:1,
+      flex: 1,
     },
     bgStyle: {
       opacity: 0.3,
@@ -292,106 +346,112 @@ const styles = keyboard => {
       borderColor: colors.main,
       borderWidth: 1,
       zIndex: 3,
-      justifyContent: "center",
+      justifyContent: 'center',
       marginHorizontal: responsiveWidth(1),
-      
-    }, 
+    },
     dotText: {
-      color:  "rgb(100,100,100)",
+      color: 'rgb(100,100,100)',
       fontSize: responsiveFontSize(1.7),
-      textAlign: "center",
+      textAlign: 'center',
     },
     activeDotText: {
-      color:  colors.main,
+      color: colors.main,
     },
     swiperContainer: {
-      justifyContent: "center",
-      height: "auto"
-    }, 
+      justifyContent: 'center',
+      height: 'auto',
+    },
     swiperWrapper: {
-      justifyContent: "center",
-      height: "auto",
+      justifyContent: 'center',
+      height: 'auto',
     },
     slide: {
-      justifyContent: "center",
+      justifyContent: 'center',
       marginTop: responsiveWidth(10),
       marginHorizontal: responsiveWidth(10),
-      height: "auto",
+      height: 'auto',
     },
     slideContainer: {
-      height: "auto",
+      height: 'auto',
     },
     paginationLine: {
-      borderColor: "rgb(200,200,200)",
+      borderColor: 'rgb(200,200,200)',
       borderBottomWidth: 1,
-      position: "absolute",
+      position: 'absolute',
       left: responsiveWidth(20),
       width: responsiveWidth(60),
-      marginLeft: -responsiveWidth(12.5),  
+      marginLeft: -responsiveWidth(12.5),
     },
     buttonWrapperStyle: {
       backgroundColor: 'transparent',
       flexDirection: 'row',
       top: -responsiveWidth(3.5),
-      position: "absolute",
+      position: 'absolute',
       width: responsiveWidth(75),
-      alignSelf: "center",
+      alignSelf: 'center',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginHorizontal: responsiveWidth(10),
     },
+    countryFlag2: {
+      width: responsiveWidth(14.5),
+      height: responsiveWidth(6),
+      position: 'absolute',
+      top: responsiveWidth(4.5),
+      left: responsiveWidth(12.5),
+    },
     countryFlag: {
       width: responsiveWidth(14.5),
       height: responsiveWidth(6),
-      position: "absolute",
-      top: responsiveWidth(5),
-      left: -responsiveWidth(2.5),
+      position: 'absolute',
+      top: responsiveWidth(4.5),
     },
     countryCode: {
-      alignSelf:"center",
+      alignSelf: 'center',
       fontSize: responsiveFontSize(1.5),
-      fontWeight: "200",
-      textAlign: "center",
+      fontWeight: '200',
+      textAlign: 'center',
     },
     countryCodeBox: {
       borderRightWidth: 1,
-      borderRightColor: "#999",
+      borderRightColor: '#999',
       top: responsiveWidth(4),
       width: responsiveWidth(12.5),
       height: responsiveWidth(7),
-      position: "absolute",
-      alignItems: "center",
-      justifyContent: "center",
+      position: 'absolute',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     avatarImage: {
       width: responsiveWidth(50),
       height: responsiveWidth(50),
       borderRadius: responsiveWidth(25),
-      justifyContent: "center",
-      alignSelf: "center",
+      justifyContent: 'center',
+      alignSelf: 'center',
       borderWidth: 3,
-      borderColor: "rgb(227,140,57)",
+      borderColor: 'rgb(227,140,57)',
     },
     defaultAvatarImage: {
       width: responsiveWidth(50),
       height: responsiveWidth(50),
       borderRadius: responsiveWidth(25),
       borderWidth: 1,
-      justifyContent: "center",
-      alignContent: "center",
-      alignSelf: "center",
-      textAlign: "center",
-      flexDirection: "row",
-      borderColor: "rgb(227,140,57)",
-      backgroundColor: "rgb(227,140,57)",
+      justifyContent: 'center',
+      alignContent: 'center',
+      alignSelf: 'center',
+      textAlign: 'center',
+      flexDirection: 'row',
+      borderColor: 'rgb(227,140,57)',
+      backgroundColor: 'rgb(227,140,57)',
     },
     defaultAvatarImageIcon: {
       top: responsiveWidth(17.5),
     },
     notificationDemo: {
-      width: responsiveWidth(100),
-      height: responsiveWidth(100),
-      marginBottom: responsiveWidth(3),
+      alignSelf: 'center',
+      width: responsiveWidth(80),
+      height: responsiveWidth(80),
+      marginVertical: responsiveWidth(4),
     },
     cellStyle: {
       borderBottomWidth: 2,
@@ -406,10 +466,14 @@ const styles = keyboard => {
     smileyIcon: {
       width: responsiveWidth(65),
       height: responsiveWidth(65),
-      alignSelf: "center",
+      alignSelf: 'center',
       marginVertical: responsiveWidth(12),
-
-    }
+    },
+    fingerStyle: {
+      width: 40,
+      height: 40,
+      tintColor: 'rgba(230,60,60,0.9)',
+    },
   });
 };
 export default styles;

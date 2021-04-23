@@ -23,7 +23,7 @@ import {ScrollContext} from '../context/ScrollContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AppThemeContext} from '../context/UserContext';
 
-const logo = require('../images/PNG/wetalk_logo.png');
+const logo = require('../images/PNG/logo-line.png');
 const background = require('../images/PNG/wevive_bg.png');
 const mainHeadline = 'Register';
 export default class AuthView extends Component {
@@ -108,17 +108,17 @@ export default class AuthView extends Component {
       <AppThemeContext.Consumer>
         {({themeSettings, goBack, insets}) => (
           <>
-            <StatusBar
+            {!this.props.noHeader && <StatusBar
               backgroundColor="rgba(0,56,104,0)"
               translucent={true}
               barStyle="dark-content"
-            />
+            />}
             <ImageBackground
               resizeMode="cover"
               imageStyle={this.state.styles.bgStyle}
               style={this.state.styles.contentBg}
               source={background}>
-              <View style={this.state.styles.mainLogoContainerStyle}>
+              {!this.props.noHeader && <View style={this.state.styles.mainLogoContainerStyle}>
                 <View style={{marginTop: insets.top}}>
                   <ClientLogo
                     style={this.state.styles.mainLogoStyle}
@@ -130,7 +130,7 @@ export default class AuthView extends Component {
                     {this.props.headline}
                   </Text>
                 )}
-              </View>
+              </View>}
               <KeyboardAwareScrollView
                 ref={(ref) => (this.state.scrollView = ref)}>
                 <ScrollContext.Provider value={{scroll: this.state.scrollView}}>

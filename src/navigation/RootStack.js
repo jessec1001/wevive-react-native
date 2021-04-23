@@ -68,7 +68,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import APIService from '../service/APIService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const RootStack = () => {
+const RootStack = ({initialProps}) => {
   let goBackFunction = () => {
     if (themeSettings.backFunction) {
       themeSettings.backFunction();
@@ -84,6 +84,14 @@ const RootStack = () => {
       }
     }
   };
+  React.useEffect(() => {
+    if (navigationRef.current && initialProps?.url?.room) {
+      navigationRef.current.navigate('VideoCalls', {
+        callId: initialProps.url.room,
+        video: true,
+      });
+    }
+  },[navigationRef, initialProps]);
   const [themeSettings, setThemeSettings] = useState({
     hiddenBack: true,
     hiddenHeader: false,
@@ -109,7 +117,7 @@ const RootStack = () => {
       }
     } else {
       const routeName = navState.name;
-      if (routeName == 'Panorama' || routeName == 'ViroAR') {
+      if (routeName == 'VideoCalls') {
         if (!themeSettings.hiddenHeader) {
           changedTheme.hiddenHeader = true;
           changedTheme.hiddenFooter = true;
@@ -120,7 +128,7 @@ const RootStack = () => {
           changedTheme.hiddenFooter = false;
         }
       }
-      if (routeName === 'Chat') {
+      if (routeName === 'ContactsScreen') {
         changedTheme.hiddenBack = true;
       } else {
         changedTheme.hiddenBack = false;
@@ -137,6 +145,7 @@ const RootStack = () => {
 
   const routeNameRef = React.useRef();
   const navigationRef = React.useRef();
+  global.navigation = navigationRef.current;
   const [authData, setAuthData] = useState(null);
   const updateMe = () => {
     APIService('users/me/', null, 5)
@@ -153,7 +162,23 @@ const RootStack = () => {
         });
       });
   };
-  const appUserContextValue = {authData, setAuthData, updateMe};
+  React.useEffect(() => {
+    updateMe();
+  }, []);
+  const [avatarUrl, setAvatarUrl] = React.useState(false);
+  AsyncStorage.getItem('avatarUrl').then((URL) => {
+    if (URL) {
+      setAvatarUrl(URL.slice(1, -1));
+    }
+  });
+  if (!authData) {
+    AsyncStorage.getItem('userId').then((userId) => {
+      if (userId) {
+        setAuthData({id: userId});
+      }
+    });
+  }
+  const appUserContextValue = {authData, setAuthData, updateMe, avatarUrl};
   const insets = useSafeAreaInsets();
   return (
     <AppUserContext.Provider value={appUserContextValue}>

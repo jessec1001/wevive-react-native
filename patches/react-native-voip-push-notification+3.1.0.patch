@@ -1,0 +1,15 @@
+diff --git a/node_modules/react-native-voip-push-notification/ios/RNVoipPushNotification/RNVoipPushNotificationManager.m b/node_modules/react-native-voip-push-notification/ios/RNVoipPushNotification/RNVoipPushNotificationManager.m
+index d84e59a..3f4b9b9 100644
+--- a/node_modules/react-native-voip-push-notification/ios/RNVoipPushNotification/RNVoipPushNotificationManager.m
++++ b/node_modules/react-native-voip-push-notification/ios/RNVoipPushNotification/RNVoipPushNotificationManager.m
+@@ -39,7 +39,9 @@ @implementation RNVoipPushNotificationManager
+ - (instancetype)init
+ {
+     if (self = [super init]) {
+-        _delayedEvents = [NSMutableArray array];
++        if (_delayedEvents == nil) {
++            _delayedEvents = [NSMutableArray array];
++        }
+     }
+     return self;
+ }

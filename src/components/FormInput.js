@@ -147,7 +147,7 @@ export default class extends Component {
                         placeholder={{label: this.props.label}}
                         style={{
                           inputIOS: styles.inputStyle,
-                          inputAndroid: styles.inputStyle,
+                          inputAndroid: styles.inputStyleAndroid,
                           iconContainer: {
                             top: responsiveWidth(4.2),
                             right: responsiveWidth(3.5),

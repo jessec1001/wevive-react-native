@@ -69,7 +69,7 @@ export default function Sidebar(props) {
         <TouchableOpacity
           style={styles.logout}
           onPress={() => {
-            //FIXME: logout
+            AsyncStorage.removeItem('sessionToken');
             AsyncStorage.removeItem('userToken');
             //AsyncStorage.removeItem('email');
             AsyncStorage.removeItem('password_sha512');
