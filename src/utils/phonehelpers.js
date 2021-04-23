@@ -1,7 +1,7 @@
 import phoneCodes from '../../phones.json';
 export const clearPhoneNumber = (country, number) => {
   if (number) {
-    let cleanNumber = number.replace(/[ \(\)-]+/g, '');
+    let cleanNumber = number.replace(/[^0-9+]+/g, '');
     if (cleanNumber.indexOf('+') !== 0) {
       cleanNumber =
         getCountryPhoneCode(country) + removeTrunkPrefix(country, cleanNumber);

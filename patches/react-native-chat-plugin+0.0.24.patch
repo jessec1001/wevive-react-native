@@ -1,0 +1,111 @@
+diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
+index a73d2b3..9c29aba 100644
+--- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
++++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
+@@ -145,7 +145,7 @@ const staticConversations = [
+     lastEvent: {
+       text: "Latest news",
+       owner: {
+-        id: 999
++        id: "-1"
+       },
+       time: Date()
+     },
+@@ -157,7 +157,7 @@ const staticConversations = [
+         contactName: "Wevive",
+         avatar: 'default',
+         owner: {
+-          id: 999,
++          id: "-1",
+           name: "AA",
+           username: "asd"
+         },
+@@ -170,7 +170,7 @@ const staticConversations = [
+         contactName: "Wevive",
+         avatar: 'default',
+         owner: {
+-          id: 999,
++          id: "-1",
+           name: "AA",
+           username: "asd"
+         },
+@@ -178,7 +178,7 @@ const staticConversations = [
+       }
+     ],
+     owner: {
+-      id: 999
++      id: "-1",
+     },
+     participants: [
+       {
+diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
+index 389e406..20d175c 100644
+--- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
++++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
+@@ -169,30 +169,32 @@ const onShare = async (numbers, navigation) => {
+ }
+ 
+ 
+-const renderSectionHeader = (section) => {
++const renderSectionHeader = React.memo((section) => {
+   //return null;
+   return (
+     <View style={styles.sectionHeaderContainer}>
+       <Text style={styles.sectionHeaderLabel}>{section.title}</Text>
+     </View>
+   );
+-};
+-
++});
+ 
+-const Contact = ({label, humanValue, clearLabel, alreadyExists, numberOfFriends, marked, toggleSelected}) => {
+-  return (
+-    <TouchableOpacity onPress={()=>!alreadyExists && toggleSelected(label, marked)}>
+-      <LinearGradient style={styles.listItemContainer} colors={['#fff','#f3f3f3']}>
+-        <Text style={styles.listItemLabel}>{humanValue}</Text>
+-        {alreadyExists && <Text style={styles.alreadyExists}>Wevive user</Text>}
+-        {!alreadyExists && numberOfFriends > 0 && <Text style={styles.numberOfFriends}>{trans('chats.friend_of_',{count:numberOfFriends})}</Text>}
+-        {!alreadyExists && <View style={!!marked ? styles.markedContactToggle : styles.contactToggle}>
+-          {!!marked && <Icon name="ticks" style={styles.markTick}/>}
+-        </View>}
+-      </LinearGradient>
+-    </TouchableOpacity>
+-  );
+-};
++class Contact extends React.PureComponent {
++  render() {
++    const {label, humanValue, clearLabel, alreadyExists, numberOfFriends, marked, toggleSelected} = this.props;
++    return (
++      <TouchableOpacity onPress={()=>!alreadyExists && toggleSelected(label, marked)}>
++        <LinearGradient style={styles.listItemContainer} colors={['#fff','#f3f3f3']}>
++          <Text style={styles.listItemLabel}>{humanValue}</Text>
++          {alreadyExists && <Text style={styles.alreadyExists}>Wevive user</Text>}
++          {!alreadyExists && numberOfFriends > 0 && <Text style={styles.numberOfFriends}>{trans('chats.friend_of_',{count:numberOfFriends})}</Text>}
++          {!alreadyExists && <View style={!!marked ? styles.markedContactToggle : styles.contactToggle}>
++            {!!marked && <Icon name="ticks" style={styles.markTick}/>}
++          </View>}
++        </LinearGradient>
++      </TouchableOpacity>
++    );
++  }
++}
+ 
+ export default function PhoneContactsScreen({ navigation }) {
+   
+@@ -213,7 +215,7 @@ export default function PhoneContactsScreen({ navigation }) {
+         })
+       }
+     });
+-    return numbers;
++    return [...new Set(numbers)];
+   };
+   React.useEffect(() => {
+     const friends = [];
+@@ -262,6 +264,7 @@ export default function PhoneContactsScreen({ navigation }) {
+         <TouchableOpacity onPress={goBack}>
+           <Text style={styles.headerButtonStyle}>Cancel</Text>
+         </TouchableOpacity>
++        <Text style={styles.headerButtonStyle}>{contacts.length} contacts</Text>
+         {selectedContacts.length > 0 && <TouchableOpacity onPress={goNext}>
+           <Text style={styles.headerButtonStyle}>Next</Text>
+         </TouchableOpacity>}
