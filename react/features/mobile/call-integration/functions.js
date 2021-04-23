@@ -12,7 +12,7 @@ import { toState } from '../../base/redux';
  */
 export function isCallIntegrationEnabled(stateful: Function | Object) {
     const state = toState(stateful);
-    const { disableCallIntegration } = state['features/base/flags'];
+    //const { disableCallIntegration } = state['features/base/flags'];
     //console.error(flag, disableCallIntegration);
     // The feature flag has precedence.
     return true;
@@ -21,7 +21,7 @@ export function isCallIntegrationEnabled(stateful: Function | Object) {
 export function getCallUUID(stateful: Function | Object) {
     const state = toState(stateful);
     const { callUUID } = state['features/base/flags'];
-    //console.error(flag, disableCallIntegration);
+    //console.error('getCallUUID', callUUID);
     // The feature flag has precedence.
     return callUUID;
 }

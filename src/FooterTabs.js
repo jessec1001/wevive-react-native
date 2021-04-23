@@ -1,6 +1,6 @@
 import React, {createRef} from 'react';
-import {Text, StyleSheet, View, Pressable} from 'react-native';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import {Text, StyleSheet, View, Pressable, Platform} from 'react-native';
+//import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import Icon from './components/Icon';
 import {
   responsiveHeight,
@@ -23,11 +23,13 @@ export default function FooterTabs(props) {
   const [unread, setUnread] = React.useState(0);
   // useRoute doesn't work here
   React.useEffect(() => {
-    PushNotificationIOS.setApplicationIconBadgeNumber(0);
-    addUnreadCountListener((value) => {
-      PushNotificationIOS.setApplicationIconBadgeNumber(value);
-      setUnread(value);
-    });
+    /*if (Platform.OS === 'ios') {
+      PushNotificationIOS.setApplicationIconBadgeNumber(0);
+      addUnreadCountListener((value) => {
+        PushNotificationIOS.setApplicationIconBadgeNumber(value);
+        setUnread(value);
+      });
+    }*/
   }, []);
   const params = props.route.state?.routes[props.route.state.index].params;
   const ActionSheetElement = (props) => {

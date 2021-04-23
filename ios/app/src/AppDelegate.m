@@ -30,9 +30,6 @@
 
 -             (BOOL)application:(UIApplication *)application
   didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
-
-    NSLog(@"Enabling Firebase");
     [FIRApp configure];
     [RNVoipPushNotificationManager voipRegistration];
     JitsiMeet *jitsiMeet = [JitsiMeet sharedInstance];
@@ -144,7 +141,7 @@
 
   // --- Retrieve information from your voip push payload
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
-  NSString *callerName = [NSString stringWithFormat:@"%@ (Connecting...)", payload.dictionaryPayload[@"callerName"]];
+  NSString *callerName = [NSString stringWithFormat:@"%@ ", payload.dictionaryPayload[@"callerName"]];
   NSString *handle = payload.dictionaryPayload[@"handle"];
 
   // --- this is optional, only required if you want to call `completion()` on the js side
@@ -167,6 +164,13 @@
   //  --- You should make sure to report to callkit BEFORE execute `completion()`
   // --- You don't need to call it if you stored `completion()` and will call it on the js side.
   completion();
+  /*[JitsiMeetView setPropsInViews: [JitsiMeetConferenceOptions fromBuilder:^(JitsiMeetConferenceOptionsBuilder *builder) {
+    [builder setFeatureFlag:@"resolution" withValue:@(720)];
+    builder.serverURL = [NSURL URLWithString:@"https://webrtc.wevive.com"];
+    builder.welcomePageEnabled = YES;
+    builder.room = uuid;
+  }]];*/
+  /**/
 }
 
 @end

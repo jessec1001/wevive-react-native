@@ -10,6 +10,8 @@ import {
   Platform,
   ImageBackground,
   Alert,
+  PermissionsAndroid,
+  NativeModules,
 } from 'react-native';
 
 import {AppThemeContext} from './context/UserContext';
@@ -30,7 +32,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {getUniqueId} from 'react-native-device-info';
 
-import {PushNotificationsService} from './service/PushNotificationsService';
+//import {PushNotificationsService} from './service/PushNotificationsService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from './service/APIService';
@@ -38,7 +40,10 @@ import ChatModule from 'react-native-chat-plugin';
 
 import Icon from './components/Icon';
 import {ChatContext} from 'react-native-chat-plugin/ChatContext';
-import VoipPushNotification from 'react-native-voip-push-notification';
+//import VoipPushNotification from 'react-native-voip-push-notification';
+//import RNCallKeep from 'react-native-callkeep';
+//import CallKit from '../react/features/mobile/call-integration/CallKit';
+//import CallKit from '../react/features/mobile/call-integration/CallKit';
 
 const chat_url = 'https://chat.wevive.com/';
 //const chat_url = 'http://192.168.0.180:3001/';
@@ -75,23 +80,31 @@ export default class Main extends Component {
     //Alert.alert('onOpenNotification=' + JSON.stringify(notification));
   }
   componentDidMount() {
-    VoipPushNotification.addEventListener('register', (voipToken) => {
-      const name = getUniqueId();
-      APIService('push-notifications/apns/', {
-        registration_id: voipToken,
-        name,
-        application_id: domainReversed + '.voip',
-        cloud_message_type: 'APNS',
+    /*CallKit.addListener('RNCallKeepPerformAnswerCallAction', (aa) => {
+      //console.error('performAnswerCallAction', aa);
+    });*/
+    /*if (Platform.OS !== 'android') {
+      VoipPushNotification.addEventListener('register', (voipToken) => {
+        const name = getUniqueId();
+        PushNotificationsService.register(
+          this.onRegister,
+          this.onNotification,
+          this.onOpenNotification,
+        );
+        APIService('push-notifications/apns/', {
+          registration_id: voipToken,
+          name,
+          application_id: domainReversed + '.voip',
+          cloud_message_type: 'APNS',
+        });
       });
-    });
+      VoipPushNotification.registerVoipToken();
+    }
+    */
     if (Platform.OS === 'android') {
       changeNavigationBarColor('#ffffff', true, false);
     }
-    PushNotificationsService.register(
-      this.onRegister,
-      this.onNotification,
-      this.onOpenNotification,
-    );
+
     AsyncStorage.getItem('userToken').then((userToken) => {
       this.setState({userToken});
     });

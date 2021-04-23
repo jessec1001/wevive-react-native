@@ -96,7 +96,6 @@ export default class AppBootstrap extends Component {
   }
 
   _bootstrapAsync = async ($this) => {
-    //AsyncStorage.removeItem('userToken');
     const userToken = await AsyncStorage.getItem('userToken');
     $this.setState({isReady: true});
     $this.props.navigation.navigate(userToken ? 'App' : 'Auth');

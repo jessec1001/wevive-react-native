@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+global.encryptionKeys = {"keygen_salt": "XP4joydRgMw1hf+eJXAcFQWmBlObh6iQ6RsNIfjSoZE=", "private_key": "Qxzxc3aVxDkoSDvhjHSgv3zYQeoVr2/rHOGmG2ttuJI=", "public_key": "h9HtEs59STqJQc+BDymfobPIHqYhTsDw9Sm2JyPF5F0="};
 //let codePushOptions = {checkFrequency: CodePush.CheckFrequency.ON_APP_RESUME};
 Orientation.lockToPortrait();
 export default AppContainer; //CodePush(codePushOptions)(AppContainer);

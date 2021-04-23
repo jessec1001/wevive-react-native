@@ -54,11 +54,7 @@ MiddlewareRegistry.register(store => next => action => {
  * @returns {void}
  */
 function _initializeCallIntegration({ getState }) {
-    const { disableCallIntegration } = getState()['features/base/settings'];
-
-    if (typeof disableCallIntegration === 'boolean') {
-        handleCallIntegrationChange(disableCallIntegration);
-    }
+    handleCallIntegrationChange(false);
 }
 
 /**
@@ -85,8 +81,8 @@ function _mapSettingsFieldToParticipant(settingsField) {
  * @private
  * @returns {void}
  */
-function _maybeHandleCallIntegrationChange({ settings: { disableCallIntegration } }) {
-    if (typeof disableCallIntegration === 'boolean') {
+function _maybeHandleCallIntegrationChange({ settings }) {
+    if (typeof settings?.disableCallIntegration === 'boolean') {
         handleCallIntegrationChange(disableCallIntegration);
     }
 }

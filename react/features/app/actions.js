@@ -48,7 +48,6 @@ declare var interfaceConfig: Object;
  * @returns {Function}
  */
 export function appNavigate(uri: ?string) {
-    console.log(uri);
     const disconnected = uri === 'disconnect';
     if (uri === 'disconnect') {
         uri = undefined;

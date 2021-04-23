@@ -68,7 +68,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import APIService from '../service/APIService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const RootStack = () => {
+const RootStack = ({initialProps}) => {
   let goBackFunction = () => {
     if (themeSettings.backFunction) {
       themeSettings.backFunction();
@@ -84,6 +84,14 @@ const RootStack = () => {
       }
     }
   };
+  React.useEffect(() => {
+    if (navigationRef.current && initialProps?.url?.room) {
+      navigationRef.current.navigate('VideoCalls', {
+        callId: initialProps.url.room,
+        video: true,
+      });
+    }
+  },[navigationRef, initialProps]);
   const [themeSettings, setThemeSettings] = useState({
     hiddenBack: true,
     hiddenHeader: false,

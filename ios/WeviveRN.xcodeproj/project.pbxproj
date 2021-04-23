@@ -41,6 +41,8 @@
 		B20C511B244F4225B5AD087B /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A8B81A3D30F646CB9B2CBBC1 /* Octicons.ttf */; };
 		91468B97813044058E69114B /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 082AB2FBEDEA4BC7AE06CAAE /* SimpleLineIcons.ttf */; };
 		650CCEBDF3CB4AD49D341A61 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 689480B768AF44DCBD97BAF7 /* Zocial.ttf */; };
+		E3FBC4E4995C4F40A41C1CA2 /* SFProDisplay-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B2F815848DBA44BA9A279C64 /* SFProDisplay-Regular.ttf */; };
+		41EDAB519DEF4938A2A6E2FA /* SFProDisplay-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 47E41847F7C44388AD218D9D /* SFProDisplay-Semibold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +110,8 @@
 		A8B81A3D30F646CB9B2CBBC1 /* Octicons.ttf */ = {isa = PBXFileReference; name = "Octicons.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		082AB2FBEDEA4BC7AE06CAAE /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; name = "SimpleLineIcons.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		689480B768AF44DCBD97BAF7 /* Zocial.ttf */ = {isa = PBXFileReference; name = "Zocial.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B2F815848DBA44BA9A279C64 /* SFProDisplay-Regular.ttf */ = {isa = PBXFileReference; name = "SFProDisplay-Regular.ttf"; path = "../src/fonts/SFProDisplay-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		47E41847F7C44388AD218D9D /* SFProDisplay-Semibold.ttf */ = {isa = PBXFileReference; name = "SFProDisplay-Semibold.ttf"; path = "../src/fonts/SFProDisplay-Semibold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -250,6 +254,8 @@
 				A8B81A3D30F646CB9B2CBBC1 /* Octicons.ttf */,
 				082AB2FBEDEA4BC7AE06CAAE /* SimpleLineIcons.ttf */,
 				689480B768AF44DCBD97BAF7 /* Zocial.ttf */,
+				B2F815848DBA44BA9A279C64 /* SFProDisplay-Regular.ttf */,
+				47E41847F7C44388AD218D9D /* SFProDisplay-Semibold.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -432,6 +438,8 @@
 				B20C511B244F4225B5AD087B /* Octicons.ttf in Resources */,
 				91468B97813044058E69114B /* SimpleLineIcons.ttf in Resources */,
 				650CCEBDF3CB4AD49D341A61 /* Zocial.ttf in Resources */,
+				E3FBC4E4995C4F40A41C1CA2 /* SFProDisplay-Regular.ttf in Resources */,
+				41EDAB519DEF4938A2A6E2FA /* SFProDisplay-Semibold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
