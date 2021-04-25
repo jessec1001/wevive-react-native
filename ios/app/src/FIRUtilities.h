@@ -16,7 +16,7 @@
 
 #import <Foundation/Foundation.h>
 
-@import Firebase;
+#import <Firebase.h>
 
 
 @interface FIRUtilities : NSObject
