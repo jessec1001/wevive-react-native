@@ -8,7 +8,7 @@ import {
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
+import {getFocusedRouteNameFromRoute, useRoute} from '@react-navigation/native';
 
 import {ActionSheetCustom as ActionSheet} from '@alessiocancian/react-native-actionsheet';
 
@@ -19,9 +19,19 @@ const showActionSheet = () => {
   actionSheetRef.current.show();
 };
 
-export default function FooterTabs(props) {
+const ActionSheetElement = (props) => {
+  return (
+    <View style={styles.menuItem}>
+      <Text style={styles.menuText}>{props.text}</Text>
+      <Icon name={props.icon} style={styles.menuIcon} />
+    </View>
+  );
+};
+const iconSize = responsiveHeight(3);
+
+export default function FooterTabs({navigate}) {
   const [unread, setUnread] = React.useState(0);
-  // useRoute doesn't work here
+  const route = useRoute();
   React.useEffect(() => {
     /*if (Platform.OS === 'ios') {
       PushNotificationIOS.setApplicationIconBadgeNumber(0);
@@ -31,30 +41,21 @@ export default function FooterTabs(props) {
       });
     }*/
   }, []);
-  const params = props.route.state?.routes[props.route.state.index].params;
-  const ActionSheetElement = (props) => {
-    return (
-      <View style={styles.menuItem}>
-        <Text style={styles.menuText}>{props.text}</Text>
-        <Icon name={props.icon} style={styles.menuIcon} />
-      </View>
-    );
-  };
-  const iconSize = responsiveHeight(3);
-  const routeName = getFocusedRouteNameFromRoute(props.route);
+  const params = route.state?.routes[route.state.index].params;
+  const routeName = getFocusedRouteNameFromRoute(route);
   const createConversation = (index) => {
     switch (index) {
       case 0:
-        props.navigate('SearchContactsScreen', {type: 'nearby'});
+        navigate('SearchContactsScreen', {type: 'nearby'});
         break;
       case 1:
-        props.navigate('SearchContactsScreen', {type: 'private'});
+        navigate('SearchContactsScreen', {type: 'private'});
         break;
       case 2:
-        props.navigate('SearchContactsScreen', {type: 'public'});
+        navigate('SearchContactsScreen', {type: 'public'});
         break;
       case 3:
-        props.navigate('SearchContactsScreen', {type: 'oneToOne'});
+        navigate('SearchContactsScreen', {type: 'oneToOne'});
         break;
       default:
         break;
@@ -71,7 +72,7 @@ export default function FooterTabs(props) {
         style={styles.footerButton}
         onPress={() => {
           //props.navigate('About');
-          props.navigate('ContactsScreen', {filter: 'groups', type: null});
+          navigate('ContactsScreen', {filter: 'groups', type: null});
         }}>
         <Icon
           name="groups"
@@ -112,7 +113,7 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              props.navigate('PhoneContactsScreen');
+              navigate('PhoneContactsScreen');
             }}>
             <Icon
               name="wetalk"
@@ -137,7 +138,7 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              props.navigate('CallHistory');
+              navigate('CallHistory');
             }}>
             <Icon
               name="calls"
@@ -183,7 +184,7 @@ export default function FooterTabs(props) {
           <Pressable
             style={styles.footerButton}
             onPress={() => {
-              props.navigate('ContactsScreen', {filter: 'chats', type: null});
+              navigate('ContactsScreen', {filter: 'chats', type: null});
             }}>
             <Icon
               name="chats"

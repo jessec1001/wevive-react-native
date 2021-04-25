@@ -158,7 +158,6 @@ export default class Main extends Component {
                     {!themeSettings.hiddenFooter ? (
                       <FooterTabs
                         navigate={this.navigate}
-                        navigation={this.props.navigation}
                         route={this.props.route}
                       />
                     ) : null}
