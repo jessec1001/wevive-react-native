@@ -32,7 +32,7 @@ import {
 } from 'react-native-responsive-dimensions';
 import {getUniqueId} from 'react-native-device-info';
 
-//import {PushNotificationsService} from './service/PushNotificationsService';
+import {PushNotificationsService} from './service/PushNotificationsService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from './service/APIService';
@@ -40,10 +40,9 @@ import ChatModule from 'react-native-chat-plugin';
 
 import Icon from './components/Icon';
 import {ChatContext} from 'react-native-chat-plugin/ChatContext';
-//import VoipPushNotification from 'react-native-voip-push-notification';
+import VoipPushNotification from 'react-native-voip-push-notification';
 //import RNCallKeep from 'react-native-callkeep';
-//import CallKit from '../react/features/mobile/call-integration/CallKit';
-//import CallKit from '../react/features/mobile/call-integration/CallKit';
+import CallKit from '../react/features/mobile/call-integration/CallKit';
 
 const chat_url = 'https://chat.wevive.com/';
 //const chat_url = 'http://192.168.0.180:3001/';
@@ -80,10 +79,10 @@ export default class Main extends Component {
     //Alert.alert('onOpenNotification=' + JSON.stringify(notification));
   }
   componentDidMount() {
-    /*CallKit.addListener('RNCallKeepPerformAnswerCallAction', (aa) => {
-      //console.error('performAnswerCallAction', aa);
-    });*/
-    /*if (Platform.OS !== 'android') {
+    CallKit.addListener('performAnswerCallAction', (aa) => {
+      console.error('performAnswerCallAction', aa);
+    });
+    if (Platform.OS !== 'android') {
       VoipPushNotification.addEventListener('register', (voipToken) => {
         const name = getUniqueId();
         PushNotificationsService.register(
@@ -100,7 +99,6 @@ export default class Main extends Component {
       });
       VoipPushNotification.registerVoipToken();
     }
-    */
     if (Platform.OS === 'android') {
       changeNavigationBarColor('#ffffff', true, false);
     }
@@ -108,37 +106,13 @@ export default class Main extends Component {
     AsyncStorage.getItem('userToken').then((userToken) => {
       this.setState({userToken});
     });
-    global.toggleDonationModal = this.toggleDonationModal;
   }
 
   state = {
     userToken: '',
-    drawerType: 'profile',
-    isDonationModalVisible: false,
-    sidebarLinks: defaultSidebarLinks,
-    styles: StyleSheet.create({
-      contentBg: {
-        width: responsiveWidth(100),
-        backgroundColor: 'rgb(255,255,255)',
-        flex: 1,
-      },
-      contentBgImage: {
-        resizeMode: 'cover',
-        flex: 1,
-        width: undefined,
-        height: undefined,
-        opacity: 1,
-      },
-    }),
-  };
-  toggleDonationModal = (amount) => {
-    this.setState({
-      isDonationModalVisible: !this.state.isDonationModalVisible,
-      amount,
-    });
   };
   navigate = (route, routeParams) => {
-    if (route == 'VideoCalls') {
+    if (route === 'VideoCalls') {
       var hiddenHeader = true;
       var hiddenFooter = true;
     } else {
@@ -165,43 +139,51 @@ export default class Main extends Component {
           socketIoUrl={chat_url}
           icon={Icon}>
           <StatusBar translucent barStyle="dark-content" />
-          <ImageBackground
-            resizeMode="cover"
-            imageStyle={this.state.styles.contentBgImage}
-            style={this.state.styles.contentBg}>
-            <AppThemeContext.Consumer>
-              {({themeSettings, goBack, insets}) => (
-                <ChatContext.Consumer>
-                  {({contacts}) => (
-                    <>
-                      {!themeSettings.hiddenHeader ? (
-                        <Header
-                          themeSettings={themeSettings}
-                          navigation={this.props.navigation}
-                          hiddenBack={themeSettings.hiddenBack}
-                          goBack={goBack}
-                          navigate={this.navigate}
-                          route={this.props.route}
-                        />
-                      ) : null}
-                      <AppNavigator contacts={contacts} />
-                      {!themeSettings.hiddenFooter ? (
-                        <>
-                          <FooterTabs
-                            navigate={this.navigate}
-                            navigation={this.props.navigation}
-                            route={this.props.route}
-                          />
-                        </>
-                      ) : null}
-                    </>
-                  )}
-                </ChatContext.Consumer>
-              )}
-            </AppThemeContext.Consumer>
-          </ImageBackground>
+          <AppThemeContext.Consumer>
+            {({themeSettings, goBack, insets}) => (
+              <ChatContext.Consumer>
+                {({contacts}) => (
+                  <>
+                    {!themeSettings.hiddenHeader ? (
+                      <Header
+                        themeSettings={themeSettings}
+                        navigation={this.props.navigation}
+                        hiddenBack={themeSettings.hiddenBack}
+                        goBack={goBack}
+                        navigate={this.navigate}
+                        route={this.props.route}
+                      />
+                    ) : null}
+                    <AppNavigator contacts={contacts} />
+                    {!themeSettings.hiddenFooter ? (
+                      <FooterTabs
+                        navigate={this.navigate}
+                        navigation={this.props.navigation}
+                        route={this.props.route}
+                      />
+                    ) : null}
+                  </>
+                )}
+              </ChatContext.Consumer>
+            )}
+          </AppThemeContext.Consumer>
         </ChatModule>
       )
     );
   }
 }
+
+const styles = StyleSheet.create({
+  contentBg: {
+    width: responsiveWidth(100),
+    backgroundColor: 'rgb(255,255,255)',
+    flex: 1,
+  },
+  contentBgImage: {
+    resizeMode: 'cover',
+    flex: 1,
+    width: undefined,
+    height: undefined,
+    opacity: 1,
+  },
+});
