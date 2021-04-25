@@ -23,7 +23,8 @@
 #import "RNVoipPushNotificationManager.h"
 #import "RNCallKeep.h"
 
-@import Firebase;
+#import <Firebase.h>
+
 @import JitsiMeetSDK;
 
 @implementation AppDelegate

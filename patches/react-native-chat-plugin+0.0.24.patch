@@ -39,25 +39,42 @@ index a73d2b3..9c29aba 100644
      participants: [
        {
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 389e406..20d175c 100644
+index 389e406..a2be57b 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-@@ -169,30 +169,32 @@ const onShare = async (numbers, navigation) => {
+@@ -1,7 +1,7 @@
+ import React from "react";
+-import { View, StyleSheet, Text, TouchableOpacity, FlatList } from "react-native";
++import { View, StyleSheet, Text, TouchableOpacity, FlatList, SectionList } from "react-native";
+ 
+-//import AlphabetList from "react-native-flatlist-alphabet";
++import AlphabetList from "react-native-flatlist-alphabet";
+ import { ChatContext } from "../ChatContext";
+ import { NavigationPropType } from "../PropTypes";
+ import LinearGradient from "react-native-linear-gradient";
+@@ -13,6 +13,7 @@ import {ClientContext} from '../../../src/context/ClientContext';
+ import { clearPhoneNumber } from "../../../src/utils/phonehelpers";
+ import trans from "../../../src/utils/trans";
+ import Icon from "../../../src/components/Icon";
++import getSectionData from "react-native-flatlist-alphabet/dist/utilities/getSectionData";
+ 
+ 
+ const styles = StyleSheet.create({
+@@ -169,8 +170,7 @@ const onShare = async (numbers, navigation) => {
  }
  
  
 -const renderSectionHeader = (section) => {
-+const renderSectionHeader = React.memo((section) => {
-   //return null;
+-  //return null;
++const renderSectionHeader = ({section}) => {
    return (
      <View style={styles.sectionHeaderContainer}>
        <Text style={styles.sectionHeaderLabel}>{section.title}</Text>
-     </View>
+@@ -178,21 +178,23 @@ const renderSectionHeader = (section) => {
    );
--};
--
-+});
+ };
  
+-
 -const Contact = ({label, humanValue, clearLabel, alreadyExists, numberOfFriends, marked, toggleSelected}) => {
 -  return (
 -    <TouchableOpacity onPress={()=>!alreadyExists && toggleSelected(label, marked)}>
@@ -101,14 +118,58 @@ index 389e406..20d175c 100644
    };
    React.useEffect(() => {
      const friends = [];
-@@ -262,6 +264,7 @@ export default function PhoneContactsScreen({ navigation }) {
+@@ -246,36 +248,43 @@ export default function PhoneContactsScreen({ navigation }) {
+   const goNext = () => {
+     onShare(selectedContacts, navigation);
+   }
+-  const renderItem = ({item}) => 
+-    <Contact
++  const renderItem = ({item}) => {
++    return <Contact
+       toggleSelected={toggleSelected}
+-      alreadyExists={existingUsers.existing.indexOf(item.clearNumber) !== -1}
++      //alreadyExists={existingUsers.existing.indexOf(item.clearNumber) !== -1}
+       label={item.label}
+-      key={item.value}
++      //key={item.value}
+       humanValue={item.humanValue}
+       marked={selectedContacts.indexOf(item.label) !== -1}
+-      numberOfFriends={existingUsers.contacts && existingUsers.contacts.indexOf(item.clearNumber) !== -1 ? existingUsers.friendCounts[existingUsers.contacts.indexOf(item.clearNumber)] - 1 : 0}
++      //numberOfFriends={existingUsers.contacts && existingUsers.contacts.indexOf(item.clearNumber) !== -1 ? existingUsers.friendCounts[existingUsers.contacts.indexOf(item.clearNumber)] - 1 : 0}
+     />;
++  }
++  sections = getSectionData(contacts);
+   return contacts && (
+     <>
+       <View style={styles.headerStyle}>
          <TouchableOpacity onPress={goBack}>
            <Text style={styles.headerButtonStyle}>Cancel</Text>
          </TouchableOpacity>
-+        <Text style={styles.headerButtonStyle}>{contacts.length} contacts</Text>
++        <Text style={styles.headerButtonStyle}>{selectedContacts.length > 0 ? selectedContacts.length : contacts.length} {selectedContacts.length > 0 ? "selected" : "contacts"} </Text>
          {selectedContacts.length > 0 && <TouchableOpacity onPress={goNext}>
            <Text style={styles.headerButtonStyle}>Next</Text>
          </TouchableOpacity>}
+       </View>
+       <View style={styles.container}>
+-        <FlatList
+-          data={contacts}
++        <SectionList
++          sections={sections}
+           indexLetterColor={'white'}
+           indexLetterSize={15}
+           alphabetContainer={styles.alphabetContainer}
+           renderItem={renderItem}
+           renderSectionHeader={renderSectionHeader}
+           letterItemStyle={styles.letterItemStyle}
+-          keyExtractor={(c) => c.label}
++          //keyExtractor={(c) => c.label}
++          //maxToRenderPerBatch={20}
++          //windowSize={41}
++          //updateCellsBatchingPeriod={100}
++          //initialNumToRender={10}
+         />
+       </View>
+     </>
 diff --git a/node_modules/react-native-chat-plugin/PropTypes.js b/node_modules/react-native-chat-plugin/PropTypes.js
 index a5e3b06..2c5f0aa 100644
 --- a/node_modules/react-native-chat-plugin/PropTypes.js

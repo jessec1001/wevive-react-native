@@ -21,7 +21,7 @@
 #import "JitsiMeetView+Private.h"
 #import "RCTBridgeWrapper.h"
 #import "ReactUtils.h"
-@import Firebase;
+#import <Firebase.h>
 #import <WebRTC/RTCLogging.h>
 
 
@@ -67,7 +67,7 @@
 
 -             (BOOL)application:(UIApplication *)application
   didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [FIRApp configure];
+    //[FIRApp configure];
     _launchOptions = [launchOptions copy];
 
     return YES;
