@@ -43,7 +43,7 @@ PODS:
     - FirebaseCoreDiagnostics (~> 7.4)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
-  - FirebaseCoreDiagnostics (7.7.0):
+  - FirebaseCoreDiagnostics (7.9.0):
     - GoogleDataTransport (~> 8.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
@@ -56,12 +56,12 @@ PODS:
     - PromisesObjC (~> 1.2)
   - FirebaseDynamicLinks (7.7.0):
     - FirebaseCore (~> 7.0)
-  - FirebaseInstallations (7.7.0):
+  - FirebaseInstallations (7.11.0):
     - FirebaseCore (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/UserDefaults (~> 7.0)
     - PromisesObjC (~> 1.2)
-  - FirebaseInstanceID (7.7.0):
+  - FirebaseInstanceID (7.11.0):
     - FirebaseCore (~> 7.0)
     - FirebaseInstallations (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
@@ -80,26 +80,28 @@ PODS:
     - GoogleUtilities/Network (~> 7.0)
     - "GoogleUtilities/NSData+zlib (~> 7.0)"
     - nanopb (~> 2.30907.0)
-  - GoogleDataTransport (8.2.0):
+  - GoogleDataTransport (8.3.1):
+    - GoogleUtilities/Environment (~> 7.2)
     - nanopb (~> 2.30907.0)
-  - GoogleUtilities/AppDelegateSwizzler (7.2.2):
+    - PromisesObjC (~> 1.2)
+  - GoogleUtilities/AppDelegateSwizzler (7.3.1):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.2.2):
+  - GoogleUtilities/Environment (7.3.1):
     - PromisesObjC (~> 1.2)
-  - GoogleUtilities/Logger (7.2.2):
+  - GoogleUtilities/Logger (7.3.1):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (7.2.2):
+  - GoogleUtilities/MethodSwizzler (7.3.1):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (7.2.2):
+  - GoogleUtilities/Network (7.3.1):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.2.2)"
-  - GoogleUtilities/Reachability (7.2.2):
+  - "GoogleUtilities/NSData+zlib (7.3.1)"
+  - GoogleUtilities/Reachability (7.3.1):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.2.2):
+  - GoogleUtilities/UserDefaults (7.3.1):
     - GoogleUtilities/Logger
   - IQKeyboardManager (4.0.13)
   - libwebp (1.2.0):
@@ -121,7 +123,7 @@ PODS:
     - OLMKit/olmcpp (= 3.2.2)
   - OLMKit/olmc (3.2.2)
   - OLMKit/olmcpp (3.2.2)
-  - Permission-Notifications (3.0.1):
+  - Permission-Notifications (3.0.2):
     - RNPermissions
   - PromisesObjC (1.2.12)
   - RCT-Folly (2020.01.13.00):
@@ -325,13 +327,13 @@ PODS:
     - React
   - react-native-calendar-events (2.0.0):
     - React
-  - react-native-chat-plugin (0.0.22):
+  - react-native-chat-plugin (0.0.24):
     - React
-  - react-native-contacts (6.0.4):
+  - react-native-contacts (6.0.5):
     - React-Core
   - react-native-cookies (3.2.0):
     - React
-  - react-native-get-random-values (1.6.0):
+  - react-native-get-random-values (1.7.0):
     - React-Core
   - react-native-heic-converter (1.3.0):
     - React
@@ -345,7 +347,7 @@ PODS:
     - React
   - react-native-orientation-locker (1.2.0):
     - React
-  - react-native-safe-area-context (3.1.9):
+  - react-native-safe-area-context (3.2.0):
     - React-Core
   - react-native-sms (1.11.0):
     - React
@@ -356,9 +358,9 @@ PODS:
     - React
   - react-native-view-shot (3.1.2):
     - React
-  - react-native-webrtc (1.87.3):
+  - react-native-webrtc (1.89.1):
     - React-Core
-  - react-native-webview (11.2.3):
+  - react-native-webview (11.4.2):
     - React-Core
   - React-perflogger (0.64.0)
   - React-RCTActionSheet (0.64.0):
@@ -433,7 +435,7 @@ PODS:
     - SDWebImageWebPCoder
   - RNCallKeep (4.1.0):
     - React
-  - RNCAsyncStorage (1.14.1):
+  - RNCAsyncStorage (1.15.4):
     - React-Core
   - RNCCheckbox (0.5.7):
     - React-Core
@@ -445,11 +447,11 @@ PODS:
     - React-Core
   - RNCPushNotificationIOS (1.8.0):
     - React-Core
-  - RNDateTimePicker (3.0.9):
+  - RNDateTimePicker (3.4.7):
     - React-Core
   - RNDefaultPreference (1.4.3):
     - React
-  - RNDeviceInfo (8.0.2):
+  - RNDeviceInfo (8.1.2):
     - React-Core
   - RNFBApp (11.0.0):
     - Firebase/CoreOnly (= 7.7.0)
@@ -458,7 +460,7 @@ PODS:
     - Firebase/Messaging (= 7.7.0)
     - React-Core
     - RNFBApp
-  - RNFS (2.16.6):
+  - RNFS (2.17.0):
     - React
   - RNGestureHandler (1.10.3):
     - React-Core
@@ -473,24 +475,24 @@ PODS:
     - TOCropViewController
   - RNInAppBrowser (3.5.1):
     - React-Core
-  - RNLocalize (2.0.2):
+  - RNLocalize (2.0.3):
     - React-Core
-  - RNPermissions (3.0.1):
+  - RNPermissions (3.0.2):
     - React-Core
   - RNReactNativeHapticFeedback (1.11.0):
     - React-Core
-  - RNReanimated (1.13.2):
+  - RNReanimated (1.13.3):
     - React-Core
   - RNScreens (2.18.1):
     - React-Core
-  - RNShare (5.1.4):
+  - RNShare (5.3.0):
     - React-Core
   - RNSound (0.11.0):
     - React
     - RNSound/Core (= 0.11.0)
   - RNSound/Core (0.11.0):
     - React
-  - RNSVG (12.1.0):
+  - RNSVG (12.1.1):
     - React
   - RNVectorIcons (8.1.0):
     - React-Core
@@ -798,21 +800,21 @@ SPEC CHECKSUMS:
   Firebase: cd2ab85eec8170dc260186159f21072ecb679ad5
   FirebaseAnalytics: f3f8f75de34fe04141a69bb1c4bd7e24a80178e1
   FirebaseCore: ac35d680a0bf32319a59966a1478e0741536b97b
-  FirebaseCoreDiagnostics: 179bf3831213451c8addd036aca7fcf5492ec154
+  FirebaseCoreDiagnostics: 3d36e05da74cb8b7ce30e6594a8f201b982c725c
   FirebaseCrashlytics: 47af228115805e190b566db12c028263531b8ce0
   FirebaseDynamicLinks: 3ddc15a6f7e1813710d265acc662e5dfe034ac36
-  FirebaseInstallations: 42c86e7b02ff75b7f27f85833bf5dcb5f38a9774
-  FirebaseInstanceID: cf940324a20ac14a27ad1e931d15ac9d335526db
+  FirebaseInstallations: a58d4f72ec5861840b84df489f2668d970df558a
+  FirebaseInstanceID: ad5135045a498d7775903efd39762d2cdfa1be27
   FirebaseMessaging: ce33c2537fdda1d1a4bc82b2245e3c3bf9107684
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   GoogleAppMeasurement: 0c3b134b2c0a90c4c24833873894bfe0e42a0384
-  GoogleDataTransport: 1024b1a4dfbd7a0e92cb20d7e0a6f1fb66b449a4
-  GoogleUtilities: 31c5b01f978a70c6cff2afc6272b3f1921614b43
+  GoogleDataTransport: 8b0e733ea77c9218778e5a9e34ba9508b8328939
+  GoogleUtilities: e1d9ed4e544fc32a93e00e721400cbc3f377200d
   IQKeyboardManager: 8eab4d8111418414619d1df8e4779ce5d0f8d7e2
   libwebp: e90b9c01d99205d03b6bb8f2c8c415e5a4ef66f0
   nanopb: 59221d7f958fb711001e6a449489542d92ae113e
   OLMKit: 20d1c564033a1ae7148f8f599378d4c798363905
-  Permission-Notifications: 504dcbc12f929b72cdab0c89a4245816d53d1452
+  Permission-Notifications: fb324c0f7faa39640886e84be7dd671bfca3fef6
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
   RCTRequired: 2f8cb5b7533219bf4218a045f92768129cf7050a
@@ -829,23 +831,23 @@ SPEC CHECKSUMS:
   react-native-background-timer: 17ea5e06803401a379ebf1f20505b793ac44d0fe
   react-native-biometrics: 4020fb89e462b9d8a51a315a03d20564589ec81e
   react-native-calendar-events: 82dc6c915653a1a8a266e43fdbbfdb3b1022ca99
-  react-native-chat-plugin: 922fecd2d7c58099a620a855bfac3a60d399341a
-  react-native-contacts: f97ea51a576325eade1c1e6a9e3be224ccbd466d
+  react-native-chat-plugin: aed437b116f714f75a695aef139edc2e6b804dbd
+  react-native-contacts: 931baebf460125c5a7bbce1c4521a96c69795123
   react-native-cookies: 854d59c4135c70b92a02ca4930e68e4e2eb58150
-  react-native-get-random-values: f0fc24a5887a3341589515a86282a574407b59e4
+  react-native-get-random-values: 237bffb1c7e05fb142092681531810a29ba53015
   react-native-heic-converter: dab6fa746df207995c145cdd3cebb989ca799a1b
   react-native-keep-awake: afad8a51dfef9fe9655a6344771be32c8596d774
   react-native-libsodium: dd8ef5c485a8b1a8eb9efc5d10348424d0eb5fa7
   react-native-netinfo: e849fc21ca2f4128a5726c801a82fc6f4a6db50d
   react-native-open-settings: b002d750697429e0aff0ba083ca6fb2d73138f7a
   react-native-orientation-locker: 47aaa55d59bfc1613804dc22f159e6bb1cca5f30
-  react-native-safe-area-context: b6e0e284002381d2ff29fa4fff42b4d8282e3c94
+  react-native-safe-area-context: f0906bf8bc9835ac9a9d3f97e8bde2a997d8da79
   react-native-sms: 31fbb9d6ebb565ad32e409eaf9dc70329936a129
   react-native-sqlite-storage: cd80d46253cfb38a31eb83c67681502d4c4295df
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
   react-native-view-shot: 4475fde003fe8a210053d1f98fb9e06c1d834e1c
-  react-native-webrtc: dc1208bdca2c4d091f7b57859e69332bff6f1986
-  react-native-webview: 6520e3e7b4933de76b95ef542c8d7115cf45b68e
+  react-native-webrtc: ccb0c21eb4fb04326648fbdb4a5d49977e2cf274
+  react-native-webview: 4c85a3e5de574ee8c2c0985b4bebbdd240f49304
   React-perflogger: 9c547d8f06b9bf00cb447f2b75e8d7f19b7e02af
   React-RCTActionSheet: 3080b6e12e0e1a5b313c8c0050699b5c794a1b11
   React-RCTAnimation: 3f96f21a497ae7dabf4d2f150ee43f906aaf516f
@@ -861,29 +863,29 @@ SPEC CHECKSUMS:
   ReactNativeKeyboardManager: d0e285b82ef60a861d71834d8e996fbc09607a67
   ReactNativeWebPFormat: 4275844b80c2c385a10ab64f50264d720f2d691c
   RNCallKeep: df979b93285cd7e70df8687eacb0c9bdf3be28be
-  RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
+  RNCAsyncStorage: f47a7e8f927f7c9da947491fc55752eb9ce17f2d
   RNCCheckbox: d1749e6a92178ce5dbc31e63becd1f34f0c76bbd
   RNCClipboard: 245417a78ab585e0d4d83926c28907e7b2bc24bd
   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
   RNCPicker: 914b557e20b3b8317b084aca9ff4b4edb95f61e4
   RNCPushNotificationIOS: 61a7c72bd1ebad3568025957d001e0f0e7b32191
-  RNDateTimePicker: 8a51a2216c307769e69ef827293d59549ab1ca23
+  RNDateTimePicker: 8dcfab802edece406f4f4780130974a0e04213b4
   RNDefaultPreference: 2f8d6d54230edbd78708ada8d63bb275e5a8415b
-  RNDeviceInfo: a9601119924a67d2479d3facf04cec7b658f44ed
+  RNDeviceInfo: 3266783bcb6aa4b0c785d6080a407f8a5fc68326
   RNFBApp: 1624ffcfc328c00ec3049d2f1bbf09d3e78dcdb7
   RNFBMessaging: 43d7ae1f8b93d20ad3194cac3e31ca446d4e9828
-  RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
+  RNFS: 93d5b5535eb39d98e6b19009faa8fe717f7ea45d
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNImageCropPicker: e641bf83ac47324994cac139bde74635ec52c17c
   RNInAppBrowser: 48b95ba7a4eaff5cc223bca338d3e319561dbd1b
-  RNLocalize: 43f6c30d8e19ad92282ae434d310fb463b31f419
-  RNPermissions: 4c8a37b4dde50f1f152bf8cd08c4a43d2355829e
+  RNLocalize: 99e59cad311ca1b6872b1764514009416ccba03d
+  RNPermissions: 58c1eb5638504e3afda963a8b0f43b6752132b05
   RNReactNativeHapticFeedback: 653a8c126a0f5e88ce15ffe280b3ff37e1fbb285
-  RNReanimated: e03f7425cb7a38dcf1b644d680d1bfc91c3337ad
+  RNReanimated: 514a11da3a2bcc6c3dfd9de32b38e2b9bf101926
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
-  RNShare: 8af5349f05fc042d230674dd650d19789187ff9c
+  RNShare: 4df87d1791f50a2c7b1d89432fb9bbb7c02a9c9a
   RNSound: da030221e6ac7e8290c6b43f2b5f2133a8e225b0
-  RNSVG: ce9d996113475209013317e48b05c21ee988d42e
+  RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   RNVectorIcons: c7abe7863f6221220414dfcac1cbde5823506d37
   RNVoipPushNotification: d076a99d761f91cf6042172ec8390b6e4360f9b2
   RNWatch: a5320c959c75e72845c07985f3e935e58998f1d3

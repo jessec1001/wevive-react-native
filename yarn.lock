@@ -2160,18 +2160,18 @@
   dependencies:
     invariant "^2.2.4"
 
-"@react-native-firebase/app@^11.0.0":
-  version "11.3.2"
-  resolved "https://registry.yarnpkg.com/@react-native-firebase/app/-/app-11.3.2.tgz#43971445306cde2d09ce3022e0efae5549b47095"
-  integrity sha512-6W+Wrnj9X3zCicwWs/fMRMPhdSCNDASeypltmqAGr0jupdB5eV3dd0BoQa10xT6yw8U5QBvZSS0jXHrPWcIIdA==
+"@react-native-firebase/app@11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/app/-/app-11.0.0.tgz#dee23fd79efa42c008306d2e9163afd9391f1567"
+  integrity sha512-jsystyGQX8Vx8w32YTySJGNwBNeRpEvUIxa+u7GWR8MngkwenyJOGwGT+5sHxZwJUGQl3X/7i1UKWzcrSDG5jg==
   dependencies:
     opencollective-postinstall "^2.0.1"
     superstruct "^0.6.2"
 
-"@react-native-firebase/messaging@^11.0.0":
-  version "11.3.2"
-  resolved "https://registry.yarnpkg.com/@react-native-firebase/messaging/-/messaging-11.3.2.tgz#9ada09b6f7f34e9612636e05c9813892866832b4"
-  integrity sha512-8P8P328Asxri5/70bZDg7Fd2vPPeN1dAEHuKBKUsXHJVNzNpu6qxkArpWXyn5vJAOYY/Tny5fb2pydiDUdQkEg==
+"@react-native-firebase/messaging@11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/messaging/-/messaging-11.0.0.tgz#21c93acb5899399b0ca28fd3a6f4c7c5555b6c95"
+  integrity sha512-d1lnVyqwQ7Jzy6S4Nyn6OJ551WTF1vjaHscoh16o5Lj78UhyVMgTvz9RxdJIWlYz7W1SAvdIM3rPuwQK/qtF/g==
 
 "@react-native-picker/picker@^1.8.3":
   version "1.15.0"
