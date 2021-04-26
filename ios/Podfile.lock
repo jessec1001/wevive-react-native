@@ -103,7 +103,7 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (7.3.1):
     - GoogleUtilities/Logger
-  - IQKeyboardManager (4.0.13)
+  - IQKeyboardManagerSwift (6.5.4)
   - libwebp (1.2.0):
     - libwebp/demux (= 1.2.0)
     - libwebp/mux (= 1.2.0)
@@ -329,7 +329,7 @@ PODS:
     - React
   - react-native-chat-plugin (0.0.24):
     - React
-  - react-native-contacts (6.0.5):
+  - react-native-contacts (7.0.0):
     - React-Core
   - react-native-cookies (3.2.0):
     - React
@@ -426,8 +426,8 @@ PODS:
     - React-cxxreact (= 0.64.0)
     - React-jsi (= 0.64.0)
     - React-perflogger (= 0.64.0)
-  - ReactNativeKeyboardManager (4.0.13-17):
-    - IQKeyboardManager (= 4.0.13)
+  - ReactNativeKeyboardManager (6.5.4-1):
+    - IQKeyboardManagerSwift (= 6.5.4)
     - React
     - React-RCTText
   - ReactNativeWebPFormat (1.1.2):
@@ -494,11 +494,38 @@ PODS:
     - React-Core
   - RNReactNativeHapticFeedback (1.11.0):
     - React-Core
-  - RNReanimated (1.13.3):
+  - RNReanimated (2.1.0):
+    - DoubleConversion
+    - FBLazyVector
+    - FBReactNativeSpec
+    - glog
+    - RCT-Folly
+    - RCTRequired
+    - RCTTypeSafety
+    - React
+    - React-callinvoker
     - React-Core
+    - React-Core/DevSupport
+    - React-Core/RCTWebSocket
+    - React-CoreModules
+    - React-cxxreact
+    - React-jsi
+    - React-jsiexecutor
+    - React-jsinspector
+    - React-RCTActionSheet
+    - React-RCTAnimation
+    - React-RCTBlob
+    - React-RCTImage
+    - React-RCTLinking
+    - React-RCTNetwork
+    - React-RCTSettings
+    - React-RCTText
+    - React-RCTVibration
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNScreens (2.18.1):
     - React-Core
-  - RNShare (5.3.0):
+  - RNShare (6.0.1):
     - React-Core
   - RNSound (0.11.0):
     - React
@@ -511,7 +538,7 @@ PODS:
     - React-Core
   - RNVoipPushNotification (3.1.0):
     - React-Core
-  - RNWatch (0.4.3):
+  - RNWatch (1.0.3):
     - React
   - SDWebImage/Core (5.11.1)
   - SDWebImageWebPCoder (0.8.3):
@@ -630,7 +657,7 @@ SPEC REPOS:
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleUtilities
-    - IQKeyboardManager
+    - IQKeyboardManagerSwift
     - libwebp
     - nanopb
     - OLMKit
@@ -828,7 +855,7 @@ SPEC CHECKSUMS:
   GoogleAppMeasurement: 1c863b1161fc3c8cf614a7460d1be6a7c262aab3
   GoogleDataTransport: cd9db2180fcecd8da1b561aea31e3e56cf834aa7
   GoogleUtilities: e1d9ed4e544fc32a93e00e721400cbc3f377200d
-  IQKeyboardManager: 8eab4d8111418414619d1df8e4779ce5d0f8d7e2
+  IQKeyboardManagerSwift: 2dde0fc70110e8eac7ccce2a46fdbec6a850b414
   libwebp: e90b9c01d99205d03b6bb8f2c8c415e5a4ef66f0
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   OLMKit: 20d1c564033a1ae7148f8f599378d4c798363905
@@ -850,7 +877,7 @@ SPEC CHECKSUMS:
   react-native-biometrics: 4020fb89e462b9d8a51a315a03d20564589ec81e
   react-native-calendar-events: 82dc6c915653a1a8a266e43fdbbfdb3b1022ca99
   react-native-chat-plugin: aed437b116f714f75a695aef139edc2e6b804dbd
-  react-native-contacts: 931baebf460125c5a7bbce1c4521a96c69795123
+  react-native-contacts: 493b583e87eb9cb1ab09268e89e526baf1a7cb30
   react-native-cookies: 854d59c4135c70b92a02ca4930e68e4e2eb58150
   react-native-get-random-values: 237bffb1c7e05fb142092681531810a29ba53015
   react-native-heic-converter: dab6fa746df207995c145cdd3cebb989ca799a1b
@@ -878,7 +905,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: 0fd6b21751a33cb72fce1a4a33ab9678416d307a
   React-runtimeexecutor: cad74a1eaa53ee6e7a3620231939d8fe2c6afcf0
   ReactCommon: cfe2b7fd20e0dbd2d1185cd7d8f99633fbc5ff05
-  ReactNativeKeyboardManager: d0e285b82ef60a861d71834d8e996fbc09607a67
+  ReactNativeKeyboardManager: 93ac3934a51f548c54ac02d61c90e33220bba086
   ReactNativeWebPFormat: 4275844b80c2c385a10ab64f50264d720f2d691c
   RNCallKeep: df979b93285cd7e70df8687eacb0c9bdf3be28be
   RNCAsyncStorage: f47a7e8f927f7c9da947491fc55752eb9ce17f2d
@@ -902,20 +929,20 @@ SPEC CHECKSUMS:
   RNLocalize: 99e59cad311ca1b6872b1764514009416ccba03d
   RNPermissions: 58c1eb5638504e3afda963a8b0f43b6752132b05
   RNReactNativeHapticFeedback: 653a8c126a0f5e88ce15ffe280b3ff37e1fbb285
-  RNReanimated: 514a11da3a2bcc6c3dfd9de32b38e2b9bf101926
+  RNReanimated: b8c8004b43446e3c2709fe64b2b41072f87428ad
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
-  RNShare: 4df87d1791f50a2c7b1d89432fb9bbb7c02a9c9a
+  RNShare: 755de6bac084428f8fd8fb54c376f126f40e560c
   RNSound: da030221e6ac7e8290c6b43f2b5f2133a8e225b0
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   RNVectorIcons: c7abe7863f6221220414dfcac1cbde5823506d37
   RNVoipPushNotification: d076a99d761f91cf6042172ec8390b6e4360f9b2
-  RNWatch: a5320c959c75e72845c07985f3e935e58998f1d3
+  RNWatch: e4c5d19506c94506860032fb68aedd5991beb985
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: bbf46e29fb8d1980a78ad3d5e9b4123c77f10ebc
   SQLCipher: 155ffeafc9ac102e5c9b68e3e9a1297a98a27096
   TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   Yoga: 8c8436d4171c87504c648ae23b1d81242bdf3bbf
 
-PODFILE CHECKSUM: c24991dafbffee9cd76d4d628abe8e1e04eead4c
+PODFILE CHECKSUM: 0bbf923b29ef65b5a6966edb7decdbe4dd3c5c63
 
 COCOAPODS: 1.10.1

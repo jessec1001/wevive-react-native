@@ -58,7 +58,7 @@ class AppContainer extends Component {
   };
   componentDidMount() {
     bootstrap();
-    APIService('users/geoip/', null, 60).then((geo) => {
+    APIService('users/geoip/', null, 3600*24*365).then((geo) => {
       this.setState({geo});
     });
     if (Platform.OS === 'android') {

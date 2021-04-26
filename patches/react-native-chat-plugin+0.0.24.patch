@@ -1,3 +1,184 @@
+diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
+index 621e6d1..78f86e8 100644
+--- a/node_modules/react-native-chat-plugin/ChatContainer.js
++++ b/node_modules/react-native-chat-plugin/ChatContainer.js
+@@ -138,9 +138,8 @@ const emitEvents = (recreateKeys = false) => {
+     socket.emit("conversations:fetch", options, async (res) => {
+       if (res && res.success && Array.isArray(res.conversations)) {
+         const conversations = await decryptConversationsBasic(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys);
+-        ctx.setConversations(conversations);
+         conversations.map(c=>{
+-          ctx.saveConversationToDB(c)
++          ctx.saveConversationToDB(c);
+           c.participants && c.participants.map(u=>{
+             if (u.id) {
+               ctx.saveUserToDB(u.id, u.avatar, u.username, u.phone_number, u.lastOnline);
+@@ -151,6 +150,7 @@ const emitEvents = (recreateKeys = false) => {
+           ctx.saveMessageToDB(c.id, event?.text, event?.owner ? event.owner.id : 0, event?.type, event?.id, event?.time);
+           //c.lastEvent
+         });
++        ctx.setConversations(conversations);
+       }
+     });
+   });
+diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
+index e8395c1..93ebeed 100644
+--- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
++++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
+@@ -11,7 +11,7 @@ const addConversations = (state, conversations) => {
+     } else {
+       if (newConversations[conversationIdx].participants) {
+         currentParticipants = conversation.participants;
+-        delete conversation.participants;
++        //delete conversation.participants;
+       }
+       if (newConversations[conversationIdx].lastEvent && conversation.lastEvent) {
+         if (+ new Date(conversation.lastEvent.time) <  + new Date(newConversations[conversationIdx].lastEvent.time)) {
+@@ -312,11 +312,12 @@ export function createConversationActions(state, dispatch) {
+         if (!notOwner[0]) {
+           return this.getCurrentUser().avatar;
+         }
+-        const notOwnerIdx = state.users.findIndex(u=>u.id == notOwner[0].id);
+-        if (notOwnerIdx !== -1) {
+-          return state.users[notOwnerIdx].avatar;
++        const notOwnerIdxs = notOwner.map(u => u.id);
++        const notOwnerIdx = state.users.map((u,i)=>notOwnerIdxs.indexOf(u.id) !== -1 ? i : '').filter(String);
++        if (notOwnerIdx.length) {
++          return notOwnerIdx.map(idx => state.users[idx].avatar);
+         } 
+-        return notOwner[0] ? notOwner[0].avatar : "";
++        return "";
+       } return conversation.avatar;
+     },
+     getChatname(conversation) {
+@@ -324,8 +325,9 @@ export function createConversationActions(state, dispatch) {
+       if (!conversation) return "";
+       if (typeof conversation.participants !== "undefined" && (conversation.name == "" || !conversation.name)) {
+         const notOwner = conversation.participants.filter(f=>f.id != user.id)
+-        const name = notOwner[0] ? this.getContactName(notOwner[0].username) : "Me";
+-        return name;
++        if (!notOwner.length) return "Me";
++        const names = notOwner.map(u => this.getContactName(u.username));
++        return (names.length > 1 ? "Group chat ("+(names.length+1)+" users)" : names[0]);
+       } return conversation.name;
+     },
+     getContactName(phone_number) {
+diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
+index 2d8eeea..ba52c91 100644
+--- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
++++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
+@@ -170,6 +170,7 @@ export default function ChatForm({ conversation }) {
+       time: +Date.now(), 
+       text: contents,
+       is_delivered: false,
++      encrypted: true,
+     };
+     ctx.addEvent(newMessage);
+     setTimeout(()=>{
+@@ -185,7 +186,7 @@ export default function ChatForm({ conversation }) {
+           }
+         } else if (event) {
+           //console.warn('mark as read?', localMsg);
+-          ctx.updateEvent(conversation.id, localMsg, {...event, text:contents, is_delivered:true})
++          ctx.updateEvent(conversation.id, localMsg, {...event, text:contents, is_delivered:true, encrypted: true})
+           ctx.updateMessageEvent(localMsg, event)
+         }
+       });
+diff --git a/node_modules/react-native-chat-plugin/Components/Header.js b/node_modules/react-native-chat-plugin/Components/Header.js
+index 738ea59..d4ba23d 100644
+--- a/node_modules/react-native-chat-plugin/Components/Header.js
++++ b/node_modules/react-native-chat-plugin/Components/Header.js
+@@ -23,9 +23,8 @@ const styles = StyleSheet.create({
+     width: 30,
+     height: 30,
+     borderRadius: 30,
+-    marginRight: 20,
+     position: "absolute",
+-    left: 30,
++    left: 40,
+     top: 0,
+   },
+   lastOnline: {
+@@ -43,7 +42,12 @@ const styles = StyleSheet.create({
+     paddingHorizontal: 100,
+   }
+ });
+-
++const Avatar = ({avatar}) => {
++  if (typeof avatar == 'string') return <Image source={{url: avatar}} style={styles.avatar} />
++  return avatar  ? avatar.slice(0,5).map((a,i) => 
++    <Image source={{url: a}} style={{...styles.avatar, zIndex: i*1, left: 30+i*20}} />
++  ) : null;
++}
+ export default function Header({ left, right, title, avatar, lastOnline }) {
+   if (lastOnline) {
+     moment.locale('en')
+@@ -53,7 +57,7 @@ export default function Header({ left, right, title, avatar, lastOnline }) {
+     <View style={styles.topContainer}>
+       {left ? left : <View style={styles.emptyView} />}
+       <View style={styles.userInfo}>
+-        {!!avatar && <Image source={{url:avatar}} style={styles.avatar} />}
++        <Avatar avatar={avatar} />
+         <View style={styles.chatName}>
+           {title ? <Text style={styles.title} numberOfLines={1} ellipsizeMode={"tail"}>{title}</Text> : null}
+           {lastOnline ? <Text style={styles.lastOnline} numberOfLines={1} ellipsizeMode={"tail"}>Online: {lastOnlineHumanized}</Text> : null}
+diff --git a/node_modules/react-native-chat-plugin/Components/ProfilePreview.js b/node_modules/react-native-chat-plugin/Components/ProfilePreview.js
+index 904817b..3298a5b 100644
+--- a/node_modules/react-native-chat-plugin/Components/ProfilePreview.js
++++ b/node_modules/react-native-chat-plugin/Components/ProfilePreview.js
+@@ -1,8 +1,6 @@
+ import React from "react";
+ import { View, Text, StyleSheet, Image } from "react-native";
+ import PropTypes from "prop-types";
+-
+-import Colors from "../constants/Colors";
+ import { UserPropType } from "../PropTypes";
+ 
+ const styles = StyleSheet.create(
+@@ -41,23 +39,14 @@ const styles = StyleSheet.create(
+     }
+   }
+ );
+-
++const defaultAvatar = require("../images/profile.png");
+ const weviveLogo = require("../../../src/images/PNG/wewelogo.png");
+ 
+ function ProfilePreview({ text, contacts, size }) {
+   const imageUrls = contacts && contacts.filter(p => p.avatar).map(p => p.avatar);
+-  
+-  let color = null;//contacts && contacts.filter(p => p.color && p.color.length > 0).map(p => p.color)[0];
+-  if (!color) {
+-    color = Colors.ACCENT2;
+-  } else {
+-    if (color.length === 6) {
+-      color = "#" + color;
+-    }
+-  }
+-  const avatarSource = imageUrls[0] == 'default' ? weviveLogo : { uri: imageUrls[0] };
++  const avatarSource = !imageUrls || imageUrls[0] == 'default' ? weviveLogo : { uri: imageUrls[0] };
+   let child;
+-  if (imageUrls[0] == 'default') {
++  if (avatarSource == weviveLogo) {
+     child = <Image style={[styles.image, { height: size + 1, width: size + 1 }]} source={avatarSource} />;
+   } else if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+     child = <Image style={[styles.image, { height: size - 8, width: size - 8 }]} source={avatarSource} />;
+@@ -66,7 +55,7 @@ function ProfilePreview({ text, contacts, size }) {
+     //size = size || 50;
+     //child = <Text style={styles.initials}>{initials}</Text>;
+     child = <View style={[styles.emptyProfileContainer, { height: size - 8, width: size - 8 }]}>
+-      <Image style={[styles.emptyProfileImage, { height: size - 8, width: size - 8 }]} source={require("../images/profile.png")} />
++      <Image style={[styles.emptyProfileImage, { height: size - 8, width: size - 8 }]} source={defaultAvatar} />
+     </View>;
+   }
+ 
+@@ -78,7 +67,6 @@ function ProfilePreview({ text, contacts, size }) {
+         {
+           width: size,
+           height: size,
+-          backgroundColor: color,
+         }
+       ]}>
+       {child}
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
 index a73d2b3..9c29aba 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactsScreen.js
@@ -39,7 +220,7 @@ index a73d2b3..9c29aba 100644
      participants: [
        {
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 389e406..a2be57b 100644
+index 389e406..9a0e65a 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 @@ -1,7 +1,7 @@
@@ -118,7 +299,7 @@ index 389e406..a2be57b 100644
    };
    React.useEffect(() => {
      const friends = [];
-@@ -246,36 +248,43 @@ export default function PhoneContactsScreen({ navigation }) {
+@@ -246,42 +248,49 @@ export default function PhoneContactsScreen({ navigation }) {
    const goNext = () => {
      onShare(selectedContacts, navigation);
    }
@@ -170,6 +351,13 @@ index 389e406..a2be57b 100644
          />
        </View>
      </>
+   );
+ }
+-
++//Contact.whyDidYouRender = true;
+ //PhoneContactsScreen.whyDidYouRender = true;
+ 
+ PhoneContactsScreen.propTypes = {
 diff --git a/node_modules/react-native-chat-plugin/PropTypes.js b/node_modules/react-native-chat-plugin/PropTypes.js
 index a5e3b06..2c5f0aa 100644
 --- a/node_modules/react-native-chat-plugin/PropTypes.js
@@ -183,3 +371,39 @@ index a5e3b06..2c5f0aa 100644
    username: PropType.string.isRequired,
    color: PropType.string,
    avatar: PropType.string,
+diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
+index c508376..4217dce 100644
+--- a/node_modules/react-native-chat-plugin/index.js
++++ b/node_modules/react-native-chat-plugin/index.js
+@@ -120,7 +120,7 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
+   }
+   React.useEffect(() => {
+     if (!geo) return;
+-    getDB().then(async (db)=> {
++    /*getDB().then(async (db)=> {
+       const dbContactsArray = [];
+       const [dbContacts] = await db.executeSql("SELECT * FROM contacts ORDER BY familyName ASC LIMIT 10000");
+       for (let i=0;i<dbContacts.rows.length;i++) {
+@@ -139,7 +139,8 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
+         //clearTimeout(syncTimeout);
+         
+       }
+-    });
++    });*/
++    syncContacts();
+   },[geo]);
+   React.useEffect(() => {
+     if (!contacts.length || typeof geo.geo == 'undefined') {
+diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
+index 0433613..b94e8a8 100644
+--- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
++++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
+@@ -4,7 +4,7 @@ SQLite.DEBUG(false);
+ SQLite.enablePromise(true);
+ let init = false;
+ let db = null;
+-let db_version = 77;
++let db_version = 78;
+ export function getEncryptionKeys(context) {
+   return new Promise((resolve, reject) => {
+     context.getDB().then((db) => {

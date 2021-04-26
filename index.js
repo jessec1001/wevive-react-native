@@ -6,33 +6,26 @@ import './react/features/app/reducers';
 if (__DEV__) {
   //  import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
 }
-//import messaging from '@react-native-firebase/messaging';
-//messaging().setBackgroundMessageHandler(async remoteMessage => {
-//  console.log('Message handled in the background!', remoteMessage);
-//});
 import React from 'react';
 /*const whyDidYouRender = require('@welldone-software/why-did-you-render');
-  whyDidYouRender(React, {
-    trackAllPureComponents: true,
-  });
-*/
+whyDidYouRender(React, {
+  trackAllPureComponents: false,
+});*/
+
 import {AppRegistry} from 'react-native';
 import App from './App';
 //import {App} from './react/features/app/components';
 
 //import {enableScreens} from 'react-native-screens';
-//enableScreens();
+//enableScreens(true);
 //import { _initLogging } from './react/features/base/logging/functions';
 import {IncomingCallApp} from './react/features/mobile/incoming-call';
-//import RNCallKeep from 'react-native-callkeep';
+import RNCallKeep from 'react-native-callkeep';
 
 function HeadlessCheck(initialProps) {
   return <App initialProps={initialProps} />;
 }
 //_initLogging();
-nextButton = () => {
-  console.log('nextButton');
-};
 
 const options = {
   ios: {
@@ -55,8 +48,7 @@ const options = {
     },
   }
 };
-//RNCallKeep.setup(options).then(accepted => {});
-
-AppRegistry.registerComponent('App', () => HeadlessCheck);
+RNCallKeep.setup(options).then(accepted => {});
+AppRegistry.registerComponent('App', () => App);
 // Register the main/root Component of IncomingCallView.
 AppRegistry.registerComponent('IncomingCallApp', () => IncomingCallApp);

@@ -35,13 +35,13 @@ export default class AuthView extends Component {
     if (Platform.OS === 'ios') {
       KeyboardManager.setEnable(false);
       KeyboardManager.setKeyboardDistanceFromTextField(10);
-      KeyboardManager.setPreventShowingBottomBlankSpace(true);
+      //KeyboardManager.setPreventShowingBottomBlankSpace(true);
       KeyboardManager.setEnableAutoToolbar(false);
       KeyboardManager.setToolbarDoneBarButtonItemText('Done');
-      KeyboardManager.setToolbarManageBehaviour(0);
+      //KeyboardManager.setToolbarManageBehaviour(0);
       KeyboardManager.setToolbarPreviousNextButtonEnable(true);
-      KeyboardManager.setShouldToolbarUsesTextFieldTintColor(true); // deprecated, use setShouldShowToolbarPlaceholder
-      KeyboardManager.setShouldShowToolbarPlaceholder(true);
+      //KeyboardManager.setShouldToolbarUsesTextFieldTintColor(true); // deprecated, use setShouldShowToolbarPlaceholder
+      //KeyboardManager.setShouldShowToolbarPlaceholder(true);
       KeyboardManager.setOverrideKeyboardAppearance(false);
       KeyboardManager.setShouldResignOnTouchOutside(true);
       KeyboardManager.resignFirstResponder();

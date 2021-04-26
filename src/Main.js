@@ -1,17 +1,9 @@
 import React, {Component} from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
-  ScrollView,
-  Image,
-  View,
-  Text,
   StatusBar,
   Platform,
-  ImageBackground,
   Alert,
-  PermissionsAndroid,
-  NativeModules,
 } from 'react-native';
 
 import {AppThemeContext} from './context/UserContext';
@@ -23,8 +15,6 @@ import AppNavigator from './navigation/AppNavigator';
 
 //import DonationModal from './modals/DonationModal';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-
-const background = require('./images/PNG/background.png');
 import {colors, domainReversed} from '../app.json';
 import {
   responsiveHeight,
@@ -41,7 +31,7 @@ import ChatModule from 'react-native-chat-plugin';
 import Icon from './components/Icon';
 import {ChatContext} from 'react-native-chat-plugin/ChatContext';
 import VoipPushNotification from 'react-native-voip-push-notification';
-//import RNCallKeep from 'react-native-callkeep';
+import RNCallKeep from 'react-native-callkeep';
 import CallKit from '../react/features/mobile/call-integration/CallKit';
 
 const chat_url = 'https://chat.wevive.com/';
@@ -79,8 +69,8 @@ export default class Main extends Component {
     //Alert.alert('onOpenNotification=' + JSON.stringify(notification));
   }
   componentDidMount() {
-    CallKit.addListener('performAnswerCallAction', (aa) => {
-      console.error('performAnswerCallAction', aa);
+    RNCallKeep.addEventListener('answerCall', ({ callUUID }) => {
+      this.navigate("VideoCalls",{callId: callUUID, video: false});
     });
     if (Platform.OS !== 'android') {
       VoipPushNotification.addEventListener('register', (voipToken) => {
