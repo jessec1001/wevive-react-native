@@ -24,7 +24,7 @@
 		0BCA49601EC4B6C600B793EE /* POSIX.m in Sources */ = {isa = PBXBuildFile; fileRef = 0BCA495D1EC4B6C600B793EE /* POSIX.m */; };
 		0BCA49611EC4B6C600B793EE /* Proximity.m in Sources */ = {isa = PBXBuildFile; fileRef = 0BCA495E1EC4B6C600B793EE /* Proximity.m */; };
 		0BD906EA1EC0C00300C8C18E /* JitsiMeet.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BD906E81EC0C00300C8C18E /* JitsiMeet.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		528745FD2636239F002D1901 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 528745FC2636239F002D1901 /* GoogleService-Info.plist */; };
+		528748A42636BF1D002D1901 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 528748A32636BF1D002D1901 /* GoogleService-Info.plist */; };
 		6C31EDC820C06D490089C899 /* recordingOn.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 6C31EDC720C06D490089C899 /* recordingOn.mp3 */; };
 		6C31EDCA20C06D530089C899 /* recordingOff.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 6C31EDC920C06D530089C899 /* recordingOff.mp3 */; };
 		6F08DF7D4458EE3CF3F36F6D /* libPods-JitsiMeetSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4376CA6886DE68FD7A4294B /* libPods-JitsiMeetSDK.a */; };
@@ -85,7 +85,7 @@
 		0BD906E51EC0C00300C8C18E /* JitsiMeetSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = JitsiMeetSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BD906E81EC0C00300C8C18E /* JitsiMeet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JitsiMeet.h; sourceTree = "<group>"; };
 		0BD906E91EC0C00300C8C18E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		528745FC2636239F002D1901 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../Documents/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		528748A32636BF1D002D1901 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6C31EDC720C06D490089C899 /* recordingOn.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = recordingOn.mp3; path = ../../sounds/recordingOn.mp3; sourceTree = "<group>"; };
 		6C31EDC920C06D530089C899 /* recordingOff.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = recordingOff.mp3; path = ../../sounds/recordingOff.mp3; sourceTree = "<group>"; };
 		75635B0820751D6D00F29C9F /* joined.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = joined.wav; path = ../../sounds/joined.wav; sourceTree = "<group>"; };
@@ -170,7 +170,7 @@
 		0BD906DB1EC0C00300C8C18E = {
 			isa = PBXGroup;
 			children = (
-				528745FC2636239F002D1901 /* GoogleService-Info.plist */,
+				528748A32636BF1D002D1901 /* GoogleService-Info.plist */,
 				9C3C6FA2341729836589B856 /* Frameworks */,
 				C5E72ADFC30ED96F9B35F076 /* Pods */,
 				0BD906E61EC0C00300C8C18E /* Products */,
@@ -378,7 +378,7 @@
 				75635B0B20751D6D00F29C9F /* left.wav in Resources */,
 				75635B0A20751D6D00F29C9F /* joined.wav in Resources */,
 				C6245F5E2053091D0040BE68 /* image-resize@3x.png in Resources */,
-				528745FD2636239F002D1901 /* GoogleService-Info.plist in Resources */,
+				528748A42636BF1D002D1901 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -841,7 +841,7 @@ SPEC CHECKSUMS:
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   FBLazyVector: 49cbe4b43e445b06bf29199b6ad2057649e4c8f5
-  FBReactNativeSpec: 334330801a0c2f80a8be7f2bef5907dd8a374a36
+  FBReactNativeSpec: eb736294a798c4d73beafb214a127e7dd9dbf413
   Firebase: fffddd0bab8677d07376538365faa93ff3889b39
   FirebaseAnalytics: 4641d7ae4220174f6ca5626163ffc5de2e90391e
   FirebaseCore: ec566d917b2195fc2610aeb148dae99f57a788f9
