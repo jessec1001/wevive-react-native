@@ -19,7 +19,7 @@ import KeyboardManager from 'react-native-keyboard-manager';
 
 
 
-import {AppRegistry} from 'react-native';
+import {AppRegistry, Platform} from 'react-native';
 import App from './App';
 
 
@@ -29,32 +29,34 @@ import RNCallKeep from 'react-native-callkeep';
 
 //enableScreens(true);
 //_initLogging();
-
-const options = {
-  ios: {
-    appName: 'Wevive',
-  },
-  android: {
-    alertTitle: 'Permissions required',
-    alertDescription: 'This application needs to access your phone accounts',
-    cancelButton: 'Cancel',
-    okButton: 'ok',
-    imageName: 'phone_account_icon',
-
-    //additionalPermissions: [PermissionsAndroid.PERMISSIONS.example],
-    // Required to get audio in background when using Android 11
-    foregroundService: {
-      channelId: 'com.wevive.weviveapp',
-      channelName: 'Foreground service for my app',
-      notificationTitle: 'Wevive',
-      //notificationIcon: 'Path to the resource icon of the notification',
+if (Platform.OS == 'ios') {
+  const options = {
+    ios: {
+      appName: 'Wevive',
     },
-  }
-};
-//TODO: disable incoming calls if not accepted on Android
-RNCallKeep.setup(options).then(accepted => {});
+    android: {
+      alertTitle: 'Permissions required',
+      alertDescription: 'This application needs to access your phone accounts',
+      cancelButton: 'Cancel',
+      okButton: 'ok',
+      imageName: 'phone_account_icon',
 
-KeyboardManager.setEnable(true);
+      //additionalPermissions: [PermissionsAndroid.PERMISSIONS.example],
+      // Required to get audio in background when using Android 11
+      foregroundService: {
+        channelId: 'com.wevive.weviveapp',
+        channelName: 'Foreground service for my app',
+        notificationTitle: 'Wevive',
+        //notificationIcon: 'Path to the resource icon of the notification',
+      },
+    }
+  };
+  //TODO: disable incoming calls if not accepted on Android
+  RNCallKeep.setup(options).then(accepted => {});
+
+
+  KeyboardManager.setEnable(true);
+}
 
 AppRegistry.registerComponent('App', () => App);
 // Register the main/root Component of IncomingCallView.
