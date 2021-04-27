@@ -22,7 +22,7 @@ index 621e6d1..78f86e8 100644
      });
    });
 diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
-index e8395c1..93ebeed 100644
+index e8395c1..3baabf6 100644
 --- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
 @@ -11,7 +11,7 @@ const addConversations = (state, conversations) => {
@@ -63,8 +63,19 @@ index e8395c1..93ebeed 100644
        } return conversation.name;
      },
      getContactName(phone_number) {
+@@ -333,9 +335,8 @@ export function createConversationActions(state, dispatch) {
+       return contactIdx !== -1 ? state.phoneContacts[contactIdx].humanValue : (state.user.username !== phone_number && phone_number != 'Me' ? phone_number : "Me");
+     },
+     getUsernameByUserId(userId) {
+-
+       const users = state.users;
+-      const userIdx = state.users.findIndex(u => u.userId == userId);
++      const userIdx = state.users.findIndex(u => u.userId == userId || u.id == userId);
+       return userIdx !== -1 ? this.getContactName(users[userIdx].username) : `Me`; 
+     },
+     getUsers() {
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 2d8eeea..ba52c91 100644
+index 2d8eeea..0a3573c 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -170,6 +170,7 @@ export default function ChatForm({ conversation }) {
@@ -84,6 +95,26 @@ index 2d8eeea..ba52c91 100644
            ctx.updateMessageEvent(localMsg, event)
          }
        });
+@@ -279,6 +280,7 @@ export default function ChatForm({ conversation }) {
+     <View style={styles.container}>
+       <Image source={messageIcon} style={styles.messageIcon} />
+       <TextInput
++        textContentType="none"
+         textAlignVertical={"top"}
+         numberOfLines={5}
+         multiline={false}
+diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
+index 2419a3d..20b8887 100644
+--- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
++++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
+@@ -138,7 +138,6 @@ export default function ChatScreen({ navigation, route }) {
+   }
+   const insets = useSafeArea();
+   const [selectedEvent, setSelectedEvent] = React.useState(false);
+-  const [showMenu, setShowMenu] = React.useState(false);
+   const [reply, setReply] = React.useState(false);
+   const [lastpage, setLastPage] = React.useState(false);
+   const ctx = React.useContext(ChatContext);
 diff --git a/node_modules/react-native-chat-plugin/Components/Header.js b/node_modules/react-native-chat-plugin/Components/Header.js
 index 738ea59..d4ba23d 100644
 --- a/node_modules/react-native-chat-plugin/Components/Header.js
@@ -220,7 +251,7 @@ index a73d2b3..9c29aba 100644
      participants: [
        {
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 389e406..9a0e65a 100644
+index 389e406..f4b36be 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 @@ -1,7 +1,7 @@
@@ -233,15 +264,16 @@ index 389e406..9a0e65a 100644
  import { ChatContext } from "../ChatContext";
  import { NavigationPropType } from "../PropTypes";
  import LinearGradient from "react-native-linear-gradient";
-@@ -13,6 +13,7 @@ import {ClientContext} from '../../../src/context/ClientContext';
+@@ -13,6 +13,8 @@ import {ClientContext} from '../../../src/context/ClientContext';
  import { clearPhoneNumber } from "../../../src/utils/phonehelpers";
  import trans from "../../../src/utils/trans";
  import Icon from "../../../src/components/Icon";
 +import getSectionData from "react-native-flatlist-alphabet/dist/utilities/getSectionData";
++import TextInput from "react-native-chat-plugin/Components/TextInput";
  
  
  const styles = StyleSheet.create({
-@@ -169,8 +170,7 @@ const onShare = async (numbers, navigation) => {
+@@ -169,8 +171,7 @@ const onShare = async (numbers, navigation) => {
  }
  
  
@@ -251,7 +283,7 @@ index 389e406..9a0e65a 100644
    return (
      <View style={styles.sectionHeaderContainer}>
        <Text style={styles.sectionHeaderLabel}>{section.title}</Text>
-@@ -178,21 +178,23 @@ const renderSectionHeader = (section) => {
+@@ -178,21 +179,23 @@ const renderSectionHeader = (section) => {
    );
  };
  
@@ -290,7 +322,39 @@ index 389e406..9a0e65a 100644
  
  export default function PhoneContactsScreen({ navigation }) {
    
-@@ -213,7 +215,7 @@ export default function PhoneContactsScreen({ navigation }) {
+@@ -200,8 +203,30 @@ export default function PhoneContactsScreen({ navigation }) {
+   const clientctx = React.useContext(ClientContext);
+   const [selectedContacts, setSelectedContacts] = React.useState([]);
+   const [filter, setFilter] = React.useState(false)
+-  const [existingUsers, setExistingUsers] = React.useState({existing:[],contacts:[],friendCounts: []});
++  const [existingUsers, setExistingUsers] = React.useState({existing:[],contacts:[],friendCounts: [],init:false});
+   const contacts = ctx.getPhoneContacts();
++  const [query, setQuery] = React.useState("");
++  function searchAsyncForContacts(ctx, query) {
++    searchForMessages(ctx, query).then((resultsFromDB) => {
++      if (JSON.stringify(resultsFromDB) != JSON.stringify(results)) {
++        setResults(resultsFromDB);
++      }
++    });
++  }
++  const displayContacts = React.useMemo(() => {
++    if (query && query.length > 0) {
++      const searchRegex = new RegExp(`${query}`, 'g');
++      return contacts.filter((c) => 
++        searchRegex.test(String(c.humanValue))
++        ||
++        searchRegex.test(String(c.clearLabel))
++        ||
++        searchRegex.test(String(c.label))
++      );
++    } else {
++      return contacts;
++    }
++  }, [query, contacts]);
+   const getNumbers = () => {
+     const numbers = [];
+     contacts.forEach(c => {
+@@ -213,12 +238,23 @@ export default function PhoneContactsScreen({ navigation }) {
          })
        }
      });
@@ -299,7 +363,31 @@ index 389e406..9a0e65a 100644
    };
    React.useEffect(() => {
      const friends = [];
-@@ -246,42 +248,49 @@ export default function PhoneContactsScreen({ navigation }) {
+     const friendCounts = [];
++    global.appIsLoading('Syncing contacts..');
++    if (!global.isInternetReachable) {
++      global.appIsNotLoading();
++      setExistingUsers(
++        {
++          ...existingUsers,
++          init: true,
++        }
++      );
++    }
+     APIService('phone-contacts/sync/',{numbers: getNumbers()}).then((r)=>{
++      global.appIsNotLoading();
+       r.contacts.forEach(u => {
+         friends.push(u.phone_number);
+         friendCounts.push(u.users);
+@@ -228,6 +264,7 @@ export default function PhoneContactsScreen({ navigation }) {
+           existing: r.users.map(u => u.phone_number),
+           contacts: friends,
+           friendCounts: friendCounts,
++          init: true,
+         }
+       );
+     });
+@@ -246,42 +283,50 @@ export default function PhoneContactsScreen({ navigation }) {
    const goNext = () => {
      onShare(selectedContacts, navigation);
    }
@@ -309,18 +397,19 @@ index 389e406..9a0e65a 100644
 +    return <Contact
        toggleSelected={toggleSelected}
 -      alreadyExists={existingUsers.existing.indexOf(item.clearNumber) !== -1}
-+      //alreadyExists={existingUsers.existing.indexOf(item.clearNumber) !== -1}
++      alreadyExists={existingUsers.existing.indexOf(item.clearLabel) !== -1}
        label={item.label}
 -      key={item.value}
 +      //key={item.value}
        humanValue={item.humanValue}
        marked={selectedContacts.indexOf(item.label) !== -1}
 -      numberOfFriends={existingUsers.contacts && existingUsers.contacts.indexOf(item.clearNumber) !== -1 ? existingUsers.friendCounts[existingUsers.contacts.indexOf(item.clearNumber)] - 1 : 0}
-+      //numberOfFriends={existingUsers.contacts && existingUsers.contacts.indexOf(item.clearNumber) !== -1 ? existingUsers.friendCounts[existingUsers.contacts.indexOf(item.clearNumber)] - 1 : 0}
++      numberOfFriends={existingUsers.contacts && existingUsers.contacts.indexOf(item.clearLabel) !== -1 ? existingUsers.friendCounts[existingUsers.contacts.indexOf(item.clearLabel)] - 1 : 0}
      />;
+-  return contacts && (
 +  }
-+  sections = getSectionData(contacts);
-   return contacts && (
++  sections = getSectionData(displayContacts || contacts || []);
++  return contacts && existingUsers.init && (
      <>
        <View style={styles.headerStyle}>
          <TouchableOpacity onPress={goBack}>
@@ -331,6 +420,7 @@ index 389e406..9a0e65a 100644
            <Text style={styles.headerButtonStyle}>Next</Text>
          </TouchableOpacity>}
        </View>
++      <TextInput placeholder={"Search"} onChangeText={query => setQuery(query)} />
        <View style={styles.container}>
 -        <FlatList
 -          data={contacts}
@@ -345,8 +435,8 @@ index 389e406..9a0e65a 100644
 -          keyExtractor={(c) => c.label}
 +          //keyExtractor={(c) => c.label}
 +          //maxToRenderPerBatch={20}
-+          //windowSize={41}
-+          //updateCellsBatchingPeriod={100}
++          //windowSize={3}
++          //updateCellsBatchingPeriod={1}
 +          //initialNumToRender={10}
          />
        </View>
@@ -372,10 +462,47 @@ index a5e3b06..2c5f0aa 100644
    color: PropType.string,
    avatar: PropType.string,
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index c508376..4217dce 100644
+index c508376..5ed6789 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
-@@ -120,7 +120,7 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
+@@ -72,7 +72,7 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
+         key:getContactName(r, true),
+         humanValue:getContactName(r),
+         value:getContactName(r, true),
+-        labels:r.phoneNumbers.map(p=>p.number),
++        labels:r.phoneNumbers.map(p=>clearPhoneNumber(clientctx.geo.geo.country_code, p.number)),
+         label: r.phoneNumbers[0].number,
+         clearLabel: clearPhoneNumber(clientctx.geo.geo.country_code, r.phoneNumbers[0].number)
+       }
+@@ -102,15 +102,18 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
+       );
+     } else {
+       Contacts.getAllWithoutPhotos().then(fetchedContacts => {
+-        /*for (let i=0;i<1000;i++) {
+-          fetchedContacts.push(
+-            {"givenName": "Test "+i,"familyName":"Testo","phoneNumbers":[
+-              {
+-                "number":"+79211474434"+i
+-              }
+-            ]}
+-          )
+-        }*/
++        const test = false;
++        if (test) {
++          for (let i=0;i<3000;i++) {
++            fetchedContacts.push(
++              {"givenName": "Test "+i,"familyName":"Testo","phoneNumbers":[
++                {
++                  "number":"+79211474434"+i
++                }
++              ]}
++            )
++          }
++        }
+         const newContacts = getClearedContacts(fetchedContacts);
+         setContacts(newContacts);
+         deleteContactsFromDB();
+@@ -120,7 +123,7 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
    }
    React.useEffect(() => {
      if (!geo) return;
@@ -384,7 +511,7 @@ index c508376..4217dce 100644
        const dbContactsArray = [];
        const [dbContacts] = await db.executeSql("SELECT * FROM contacts ORDER BY familyName ASC LIMIT 10000");
        for (let i=0;i<dbContacts.rows.length;i++) {
-@@ -139,7 +139,8 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
+@@ -139,7 +142,8 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
          //clearTimeout(syncTimeout);
          
        }

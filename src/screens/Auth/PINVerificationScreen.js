@@ -11,7 +11,7 @@ import AuthView from '../../views/AuthView';
 import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import trans from '../../utils/trans';
-import { UserContext } from '../../context/UserContext';
+import {UserContext} from '../../context/UserContext';
 
 export default function PINVerificationScreen({navigation, route}) {
   const {authData} = React.useContext(UserContext);
@@ -60,6 +60,7 @@ export default function PINVerificationScreen({navigation, route}) {
               cellStyleFocused={styles.cellStyleFocused}
               value={values.pin}
               onTextChange={handleChange('pin')}
+              inputProps={{textContentType: 'numeric'}}
             />
             {values.pin.length > 0 && !errors.pin && (
               <View style={styles.buttonContainerStyle}>

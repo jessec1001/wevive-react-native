@@ -1,6 +1,6 @@
 import React, {createRef} from 'react';
 import {Text, StyleSheet, View, Pressable, Platform} from 'react-native';
-//import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import Icon from './components/Icon';
 import {
   responsiveHeight,
@@ -33,13 +33,16 @@ export default function FooterTabs({navigate}) {
   const [unread, setUnread] = React.useState(0);
   const route = useRoute();
   React.useEffect(() => {
-    /*if (Platform.OS === 'ios') {
+    setUnread(0);
+    if (Platform.OS === 'ios') {
       PushNotificationIOS.setApplicationIconBadgeNumber(0);
-      addUnreadCountListener((value) => {
+    }
+    addUnreadCountListener((value) => {
+      setUnread(value);
+      if (Platform.OS === 'ios') {
         PushNotificationIOS.setApplicationIconBadgeNumber(value);
-        setUnread(value);
-      });
-    }*/
+      }
+    });
   }, []);
   const params = route.state?.routes[route.state.index].params;
   const routeName = getFocusedRouteNameFromRoute(route);
