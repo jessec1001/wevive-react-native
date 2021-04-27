@@ -1,30 +1,33 @@
+if (__DEV__) {
+  //  import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
+  /*const whyDidYouRender = require('@welldone-software/why-did-you-render');
+whyDidYouRender(React, {
+  trackAllPureComponents: false,
+});*/
+}
+import React from 'react';
+
+/*Jitsi*/
 import 'react-native-get-random-values';
 import './react/features/mobile/polyfills';
 import './react/features/app/middlewares';
 import './react/features/app/reducers';
+//import { _initLogging } from './react/features/base/logging/functions';
 
-if (__DEV__) {
-  //  import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
-}
-import React from 'react';
-/*const whyDidYouRender = require('@welldone-software/why-did-you-render');
-whyDidYouRender(React, {
-  trackAllPureComponents: false,
-});*/
+import KeyboardManager from 'react-native-keyboard-manager';
+
+
+
 
 import {AppRegistry} from 'react-native';
 import App from './App';
-//import {App} from './react/features/app/components';
 
-//import {enableScreens} from 'react-native-screens';
-//enableScreens(true);
-//import { _initLogging } from './react/features/base/logging/functions';
+
 import {IncomingCallApp} from './react/features/mobile/incoming-call';
 import RNCallKeep from 'react-native-callkeep';
+//import {enableScreens} from 'react-native-screens';
 
-function HeadlessCheck(initialProps) {
-  return <App initialProps={initialProps} />;
-}
+//enableScreens(true);
 //_initLogging();
 
 const options = {
@@ -48,7 +51,11 @@ const options = {
     },
   }
 };
+//TODO: disable incoming calls if not accepted on Android
 RNCallKeep.setup(options).then(accepted => {});
+
+KeyboardManager.setEnable(true);
+
 AppRegistry.registerComponent('App', () => App);
 // Register the main/root Component of IncomingCallView.
 AppRegistry.registerComponent('IncomingCallApp', () => IncomingCallApp);

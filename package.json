@@ -88,7 +88,7 @@
     "react-native-infinite-scrolling": "^2.0.0",
     "react-native-keep-awake": "^4.0.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.3",
-    "react-native-keyboard-manager": "4.0.13-17",
+    "react-native-keyboard-manager": "^6.5.4-1",
     "react-native-libsodium": "git+ssh://git@gitlab.com/wevive/react-native-libsodium#master",
     "react-native-linear-gradient": "^2.5.6",
     "react-native-loading-spinner-overlay": "^2.0.0",

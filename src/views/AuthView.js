@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import authStyles from '../styles/auth';
 import ClientLogo from '../components/ClientLogo';
-import KeyboardManager from 'react-native-keyboard-manager';
+//import KeyboardManager from 'react-native-keyboard-manager';
 
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {UIManager, LayoutAnimation, Linking, Platform} from 'react-native';
@@ -32,6 +32,7 @@ export default class AuthView extends Component {
     styles: authStyles(false),
   };
   componentDidMount() {
+    /*
     if (Platform.OS === 'ios') {
       KeyboardManager.setEnable(false);
       KeyboardManager.setKeyboardDistanceFromTextField(10);
@@ -46,6 +47,7 @@ export default class AuthView extends Component {
       KeyboardManager.setShouldResignOnTouchOutside(true);
       KeyboardManager.resignFirstResponder();
     }
+    */
     this.focusListener = this.props.navigation.addListener('focus', () => {
       if (this.props.route) {
         if (!this.props.route.params || !this.props.route.params.BioID) {
