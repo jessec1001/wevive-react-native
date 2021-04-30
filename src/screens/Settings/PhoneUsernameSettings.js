@@ -30,6 +30,7 @@ export default function PhoneUsernameSettings(props) {
   if (userIdx !== -1) {
     avatarUrlToUse = users[userIdx].avatar;
   }
+
   const [name, setName] = React.useState('');
   const [changedImage, setChangedImage] = React.useState(false);
   const [image, setImage] = React.useState({

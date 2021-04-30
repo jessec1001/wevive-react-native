@@ -215,6 +215,7 @@ const styles = (keyboard) => {
     inputStyleAndroid: {
       marginLeft: responsiveWidth(10),
       fontSize: responsiveHeight(2.5),
+      color: 'black',
     },
     inputContainerStyle: {
       marginBottom: responsiveHeight(2),
@@ -397,8 +398,8 @@ const styles = (keyboard) => {
       width: responsiveWidth(14.5),
       height: responsiveWidth(6),
       position: 'absolute',
-      top: responsiveWidth(4.5),
-      left: responsiveWidth(12.5),
+      bottom: responsiveWidth(7.5),
+      left: responsiveWidth(11),
     },
     countryFlag: {
       width: responsiveWidth(14.5),
