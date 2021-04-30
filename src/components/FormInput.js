@@ -142,6 +142,7 @@ export default class extends Component {
                         onValueChange={(value) =>
                           setFieldValue(this.props.name, value)
                         }
+                        useNativeAndroidPickerStyle={false}
                         value={this.props.value}
                         items={items}
                         placeholder={{label: this.props.label}}
