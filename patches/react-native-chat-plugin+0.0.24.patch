@@ -251,7 +251,7 @@ index a73d2b3..9c29aba 100644
      participants: [
        {
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 389e406..451cd0e 100644
+index 389e406..b75d7cb 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 @@ -1,7 +1,7 @@
@@ -406,7 +406,7 @@ index 389e406..451cd0e 100644
      />;
 -  return contacts && (
 +  }
-+  sections = getSectionData(displayContacts || contacts || []);
++  //sections = getSectionData(displayContacts || contacts || []);
 +  return contacts && existingUsers.init && (
      <>
        <View style={styles.headerStyle}>
@@ -423,7 +423,7 @@ index 389e406..451cd0e 100644
 -        <FlatList
 -          data={contacts}
 +        <AlphabetList
-+          data={sections}
++          data={displayContacts || contacts}
            indexLetterColor={'white'}
            indexLetterSize={15}
            alphabetContainer={styles.alphabetContainer}
