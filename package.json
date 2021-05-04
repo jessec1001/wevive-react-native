@@ -35,6 +35,7 @@
     "@svgr/webpack": "5.5.0",
     "base64-js": "^1.5.1",
     "buffer": "^6.0.3",
+    "clipboard-copy": "^4.0.1",
     "crypto-js": "3.3.0",
     "date-fns": "^2.21.1",
     "deep-equal": "^2.0.5",
@@ -69,6 +70,7 @@
     "react-native-cache-store": "^1.0.2",
     "react-native-calendar-events": "github:jitsi/react-native-calendar-events#df48ecdc4e1e90c5352f803ddbab1fa7269b74a7",
     "react-native-callkeep": "^4.1.0",
+    "react-native-callstats": "^3.72.0",
     "react-native-chat-plugin": "git+ssh://git@gitlab.com/wevive/chat-plugin#master",
     "react-native-collapsible": "^1.5.3",
     "react-native-contacts": "^7.0.0",
@@ -112,6 +114,7 @@
     "react-native-smooth-pincode-input": "^1.0.9",
     "react-native-sms": "^1.11.0",
     "react-native-sound": "^0.11.0",
+    "react-native-splash-screen": "^3.2.0",
     "react-native-sqlite-storage": "git+ssh://git@gitlab.com/wevive/react-native-sqlite-storage#master",
     "react-native-svg": "^12.1.1",
     "react-native-svg-transformer": "0.14.3",
@@ -137,7 +140,8 @@
     "uuid": "^8.3.2",
     "webpack": "^5.35.1",
     "xmldom": "0.6.0",
-    "yup": "^0.32.9"
+    "yup": "^0.32.9",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@babel/core": "^7.13.16",

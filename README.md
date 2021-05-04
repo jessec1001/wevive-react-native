@@ -1,6 +1,6 @@
 Known issues:
 
-If iOS fails to build because of AccessibilityResources, go to 
-ios/Pods/Target Support Files/Pods-JitsiMeet/Pods-JitsiMeet-resources.sh
-and comment out
-install_resource "${PODS_CONFIGURATION_BUILD_DIR}/React-Core.common/AccessibilityResources.bundle"
+Windows:
+1) “.ps1 is not digitally signed. The script will not execute on the system.”
+Run:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
