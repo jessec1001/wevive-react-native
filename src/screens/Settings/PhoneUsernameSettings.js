@@ -101,7 +101,7 @@ export default function PhoneUsernameSettings(props) {
     });
   };
   return (
-    <ScrollView>
+    <ScrollView style={{backgroundColor: "white"}}>
       <View style={styles.avatarBox}>
         <TouchableOpacity
           onPress={image.default ? pickImage : saveImage}

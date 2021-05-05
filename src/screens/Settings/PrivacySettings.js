@@ -19,7 +19,7 @@ export default function PrivacySettings ({navigation}) {
     };
   };
   return (
-    <ScrollView>
+    <ScrollView style={{backgroundColor: "white"}}>
       <MenuDivider />
       <MenuItem
         type="info"

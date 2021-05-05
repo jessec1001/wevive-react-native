@@ -38,6 +38,7 @@ export const MenuItem = (props) => {
   return (
     <TouchableOpacity
       style={styles.menuRow}
+      activeOpacity={1.0}
       onPress={props.onPress ? props.onPress : () => {
         if (props.type == 'textinput') {
           input.current.focus();

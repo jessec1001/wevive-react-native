@@ -6,7 +6,7 @@ import {MenuItem, MenuDivider} from '../../components/Menu';
 export default class NetworkUsage extends Component {
   render() {
     return (
-      <ScrollView>
+      <ScrollView style={{backgroundColor: "white"}}>
         <MenuDivider text="Messages" />
         <MenuItem type={'info'}>Sent</MenuItem>
         <MenuItem type={'info'}>Received</MenuItem>

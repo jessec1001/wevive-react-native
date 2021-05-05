@@ -128,7 +128,7 @@ export default class Main extends Component {
           options={{token: this.state.userToken}}
           socketIoUrl={chat_url}
           icon={Icon}>
-          <StatusBar translucent barStyle="dark-content" />
+          <StatusBar backgroundColor="white" barStyle="dark-content" />
           <AppThemeContext.Consumer>
             {({themeSettings, goBack, insets}) => (
               <ChatContext.Consumer>

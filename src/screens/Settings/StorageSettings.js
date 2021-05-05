@@ -7,7 +7,7 @@ import {MenuItem, MenuDivider, MenuDescription} from '../../components/Menu';
 export default class StorageSettings extends Component {
   render() {
     return (
-      <ScrollView>
+      <ScrollView style={{backgroundColor: "white"}}>
         <MenuDivider text={"Storage"} />
         <MenuItem>Manage Storage</MenuItem>
         <MenuDivider text={"Network"} />

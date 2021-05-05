@@ -31,7 +31,7 @@ const onInvite = async () => {
 export default class Settings extends Component {
   render() {
     return (
-      <ScrollView>
+      <ScrollView style={{backgroundColor: "white"}}>
         <MenuItem
           onPress={() => {
             this.props.navigation.navigate('PhoneUsernameSettings');

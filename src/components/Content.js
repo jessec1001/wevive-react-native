@@ -18,6 +18,7 @@ export default class extends Component {
         marginBottom: responsiveWidth(2.5),
         marginHorizontal: this.props.noMargin ? 0 : responsiveWidth(2),
         padding: responsiveWidth(2.5),
+        backgroundColor: "white",
         justifyContent: "center",
         position: "relative",
         flex: 1,

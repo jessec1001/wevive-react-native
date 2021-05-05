@@ -65,7 +65,10 @@ class AppContainer extends Component {
       changeNavigationBarColor('#000000', false, false);
     }
     if (Platform.OS === 'android') {
-      //BackHandler.addEventListener('hardwareBackPress', this.goBack.bind(this));
+      //FIXME
+      BackHandler.addEventListener('hardwareBackPress', () => {
+        return true;
+      });
     }
 
     Dimensions.removeEventListener('change', this.dimensionListener);

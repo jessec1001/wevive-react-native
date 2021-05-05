@@ -6,7 +6,7 @@ import {MenuItem, MenuDivider} from '../../components/Menu';
 export default class AccountSettings extends Component {
   render() {
     return (
-      <ScrollView>
+      <ScrollView style={{backgroundColor: "white"}}>
         <MenuDivider />
         <MenuItem
           onPress={() => {

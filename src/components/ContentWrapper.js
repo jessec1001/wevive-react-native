@@ -58,6 +58,7 @@ const ScrollComponent = (props) => {
             ? styles.contentContainerStyle
             : styles.contentContainerStyleCenter
         }
+        style={{backgroundColor: "white"}}
         scrollEnabled={props.scrollEnabled}
         ref={(ref) => (global.contentScrollView = ref)}
         bounces={false}>

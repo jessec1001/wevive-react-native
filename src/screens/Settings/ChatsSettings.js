@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default class ChatsSettings extends Component {
   render() {
     return (
-      <ScrollView>
+      <ScrollView style={{backgroundColor: "white"}}>
         <Text>Chat settings</Text>
       </ScrollView>
     );

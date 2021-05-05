@@ -8,7 +8,7 @@ export default class SecuritySettings extends Component {
     return (
       <BioIDContext.Consumer>
         {({available, keysExist, signMessage, toggleBioID}) => (
-          <ScrollView>
+          <ScrollView style={{backgroundColor: "white"}}>
             <MenuDivider />
             <MenuItem
               type={'toggle'}

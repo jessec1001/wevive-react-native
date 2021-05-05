@@ -8,7 +8,7 @@ export default function NotificationSettings({navigation}) {
   const MessageSound = ctx.getSetting('MessageSound') || "Chord 1";
   const GroupSound = ctx.getSetting('GroupSound') || "Chord 1";
   return (
-    <ScrollView>
+    <ScrollView style={{backgroundColor: "white"}}>
       <MenuDivider text="Message Notifications" />
       <MenuItem type={'toggle'}>Show Notifications</MenuItem>
       <MenuItem
