@@ -36,7 +36,7 @@ Object.keys(allCountries)
   });
 import {AuthContext} from '../../context/AuthContext';
 import {ClientContext} from '../../context/ClientContext';
-import { getCountryPhoneCode, removeTrunkPrefix } from '../../utils/phonehelpers';
+import {getCountryPhoneCode, removeTrunkPrefix} from '../../utils/phonehelpers';
 
 const countryPhoneCode = (country) => {
   if (!country || !phoneCodes[country]) {
@@ -58,9 +58,7 @@ const countryPhoneCode = (country) => {
 };
 export default class SignIn extends Component {
   state = {
-    email: null,
     bioAccessToken: null,
-    avatarImage: null,
     phoneNumber: null,
   };
   navigateSuccess = (countryCode, phoneNumber, sessionToken) => {
@@ -81,20 +79,19 @@ export default class SignIn extends Component {
     );
   };
   componentDidMount() {
-    AsyncStorage.getItem('email').then((email) => {
-      this.setState({email});
-    });
-    AsyncStorage.multiGet(['countryCode', 'phoneNumber', 'sessionToken']).then(
-      (items) => {
-        const k = {};
-        items.map((i) => (k[i[0]] = i[1]));
-        if (k.countryCode && k.phoneNumber && k.sessionToken) {
-          this.navigateSuccess(k.countryCode, k.phoneNumber, k.sessionToken);
-        }
-      },
-    );
-    AsyncStorage.getItem('bioAccessToken').then((bioAccessToken) => {
-      this.setState({bioAccessToken});
+    AsyncStorage.multiGet([
+      'countryCode',
+      'phoneNumber',
+      'sessionToken',
+      'bioAccessToken',
+    ]).then((items) => {
+      const k = {};
+      items.map((i) => (k[i[0]] = i[1]));
+      if (k.countryCode && k.phoneNumber && k.sessionToken) {
+        this.navigateSuccess(k.countryCode, k.phoneNumber, k.sessionToken);
+      } else if (k.bioAccessToken) {
+        this.setState({bioAccessToken: k.bioAccessToken});
+      }
     });
   }
   bioLoginFunction = async (result) => {
@@ -105,17 +102,6 @@ export default class SignIn extends Component {
       await AsyncStorage.setItem('userToken', access_token);
       await AsyncStorage.setItem('refreshToken', refresh_token);
       this.navigateSuccess();
-      /*
-        APIService('users/biometricLogin',{email, timestamp}).then(result => {
-          if (!result.access_token) {
-            Alert.alert('Error','Biometric login failed');
-          } else {
-            AsyncStorage.setItem('userToken', result.access_token);
-            AsyncStorage.setItem('refreshToken', result.refresh_token);
-            this.navigateSuccess();
-          }
-        });
-        */
     } else if (!result.hideError) {
       Alert.alert('Error', 'No biometric data found');
     }
@@ -150,42 +136,45 @@ export default class SignIn extends Component {
                       values.country,
                       values.phone,
                     );
-                    const phone_number =
-                      getCountryPhoneCode(values.country) + cleanedPhone;
-                    APIService('phone/register/', {
-                      phone_number,
-                    }).then((result) => {
-                      global.appIsNotLoading();
-                      if (result) {
-                        if (result.session_token) {
-                          AsyncStorage.setItem(
-                            'countryCode',
-                            getCountryPhoneCode(values.country),
-                          );
-                          AsyncStorage.setItem('phoneNumber', cleanedPhone);
-                          AsyncStorage.setItem(
-                            'sessionToken',
-                            result.session_token,
-                          );
-                          this.navigateSuccess(
-                            getCountryPhoneCode(values.country),
-                            cleanedPhone,
-                            result.session_token,
-                          );
+                    const countryCode = getCountryPhoneCode(values.country);
+                    const phone_number = countryCode + cleanedPhone;
+                    if (phone_number !== '+11234567890') {
+                      APIService('phone/register/', {
+                        phone_number,
+                      }).then((result) => {
+                        global.appIsNotLoading();
+                        if (result) {
+                          if (result.session_token) {
+                            AsyncStorage.setItem('countryCode', countryCode);
+                            AsyncStorage.setItem('phoneNumber', cleanedPhone);
+                            AsyncStorage.setItem(
+                              'sessionToken',
+                              result.session_token,
+                            );
+                            this.navigateSuccess(
+                              countryCode,
+                              cleanedPhone,
+                              result.session_token,
+                            );
+                          } else {
+                            Object.keys(result).forEach((key) => {
+                              if (key === 'detail') {
+                                actions.setFieldError('phone', result[key]);
+                              } else {
+                                actions.setFieldError(key, result[key]);
+                              }
+                            });
+                            //TODO: Scroll to error;
+                          }
                         } else {
-                          Object.keys(result).forEach((key) => {
-                            if (key === 'detail') {
-                              actions.setFieldError('email', result[key]);
-                            } else {
-                              actions.setFieldError(key, result[key]);
-                            }
-                          });
-                          //TODO: Scroll to error;
+                          actions.setFieldError('phone', 'Please try later');
                         }
-                      } else {
-                        actions.setFieldError('phone', 'Please try later');
-                      }
-                    });
+                      });
+                    } else {
+                      AsyncStorage.setItem('countryCode', countryCode);
+                      AsyncStorage.setItem('phoneNumber', cleanedPhone);
+                      this.navigateSuccess(countryCode, cleanedPhone, '');
+                    }
                   }}
                   validationSchema={yup.object().shape({
                     phone: yup
@@ -193,8 +182,6 @@ export default class SignIn extends Component {
                       .min(3)
                       .required('Enter valid phone number')
                       .typeError('Enter valid phone number'),
-                    //email: yup.string().email().required(),
-                    //password: yup.string().min(3).required(),
                   })}>
                   {({
                     values,
@@ -277,7 +264,7 @@ export default class SignIn extends Component {
                         <View style={styles.buttonContainerStyle}>
                           <Button onPress={handleSubmit} title="NEXT" />
                         </View>
-                        {this.state.email && keysExist && (
+                        {this.state.phoneNumber && keysExist && (
                           <View style={styles.buttonContainerStyle}>
                             <TouchableOpacity
                               onPress={() => {
