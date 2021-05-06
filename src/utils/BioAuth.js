@@ -7,12 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const BioIDContext = createContext();
 
 export function BioID(props) {
-  const [available, setAvailable] = useState(false);
+  const [available, toggleAvailable] = useState(false);
   const [keysExist, setKeysExist] = useState(false);
   const [ready, setReady] = useState(false);
-  function toggleAvailable(available) {
-    setAvailable(available);
-  }
   function isAvailable() {
     return ReactNativeBiometrics.isSensorAvailable()
       .then((resultObject) => {
@@ -39,7 +36,7 @@ export function BioID(props) {
   }
   useEffect(() => {
     isAvailable().then((sensorAvailable) => {
-      setAvailable(sensorAvailable);
+      toggleAvailable(sensorAvailable);
       if (sensorAvailable) {
         _keysExist().then((isExists) => {
           setReady(true);
@@ -53,9 +50,8 @@ export function BioID(props) {
   function _keysExist() {
     return ReactNativeBiometrics.biometricKeysExist()
       .then((resultObject) => {
-        const {keysExist} = resultObject;
-        setKeysExist(keysExist);
-        if (keysExist) {
+        setKeysExist(resultObject.keysExist);
+        if (resultObject.keysExist) {
           return true;
         } else {
           return false;
@@ -77,6 +73,8 @@ export function BioID(props) {
           AsyncStorage.getItem('refreshToken').then((refreshToken) => {
             AsyncStorage.setItem('bioRefreshToken', refreshToken);
           });
+          resolve(true);
+          //TODO: Send publicKey to server
           /*APIService('users/biometrics/',{publicKey}).then((result)=>{
                         resolve(result);
                     }).catch((error)=>{
@@ -84,7 +82,7 @@ export function BioID(props) {
                     });*/
         })
         .catch(() => {
-          return false;
+          reject();
         });
     });
   }
@@ -141,34 +139,28 @@ export function BioID(props) {
   }
 
   function toggleBioID() {
-    console.warn('bio id ');
-    isAvailable().then((isAvailable) => {
-        console.warn('bio id ',isAvailable);
+    return isAvailable().then((isAvailable) => {
       if (!isAvailable) {
         toggleAvailable(false);
         return false;
-      } else {
+      } else if (!available) {
         toggleAvailable(true);
       }
-      _keysExist().then((keysExist) => {
-        if (keysExist) {
-          prompt('Please confirm to disable Face ID').then(
-            (success) => {
-              if (success) {
-                setKeysExist(false);
-                return deleteKeys();
-              }
-            },
-          );
+      _keysExist().then((biometric_enabled) => {
+        if (biometric_enabled) {
+          prompt('Please confirm to disable Face ID').then((success) => {
+            if (success) {
+              setKeysExist(false);
+              return deleteKeys();
+            }
+          });
         } else {
-          prompt('Please confirm to enable Face ID').then(
-            (success) => {
-              if (success) {
-                setKeysExist(true);
-                return createKeys();
-              }
-            },
-          );
+          prompt('Please confirm to enable Face ID').then((success) => {
+            if (success) {
+              setKeysExist(true);
+              return createKeys();
+            }
+          });
         }
       });
     });
@@ -179,9 +171,7 @@ export function BioID(props) {
       value={{
         ready,
         available,
-        toggleAvailable,
         keysExist,
-        _keysExist,
         toggleBioID,
         prompt,
         signMessage,

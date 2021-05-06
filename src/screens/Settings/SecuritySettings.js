@@ -7,17 +7,22 @@ export default class SecuritySettings extends Component {
   render() {
     return (
       <BioIDContext.Consumer>
-        {({available, keysExist, signMessage, toggleBioID}) => (
-          <ScrollView style={{backgroundColor: "white"}}>
+        {({available, keysExist, toggleBioID}) => (
+          <ScrollView style={{backgroundColor: 'white'}}>
             <MenuDivider />
-            <MenuItem
-              type={'toggle'}
-              onChange={toggleBioID}>
-              Enable Face ID
-            </MenuItem>
-            <MenuDescription>
-              Require Touch ID or Face ID to unlock Wevive
-            </MenuDescription>
+            {available && (
+              <>
+                <MenuItem
+                  type={'toggle'}
+                  value={keysExist}
+                  onChange={toggleBioID}>
+                  Enable Face ID
+                </MenuItem>
+                <MenuDescription>
+                  Require Touch ID or Face ID to unlock Wevive
+                </MenuDescription>
+              </>
+            )}
             <MenuDivider />
             <MenuItem
               type={'toggle'}

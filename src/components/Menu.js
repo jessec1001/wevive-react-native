@@ -33,7 +33,7 @@ export const MenuDivider = (props) => {
 };
 
 export const MenuItem = (props) => {
-  const [toggle, setToggle] = React.useState(false);
+  const [toggle, setToggle] = React.useState(!!props.value);
   const input = React.useRef();
   return (
     <TouchableOpacity
