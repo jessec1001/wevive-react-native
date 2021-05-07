@@ -84,12 +84,15 @@ export const MenuItem = (props) => {
           <Switch
             trackColor={{true: '#2bbb50', false: '#bababa'}}
             thumbColor="#ffffff"
-            value={toggle}
+            value={typeof props.value == 'boolean' ? props.value : toggle}
             accessibilityRole="button"
             style={styles.toggleStyle}
             onValueChange={(value) =>  {
-              setToggle(value);
-              typeof props.onChange !== 'undefined' && props.onChange(value)
+              if (typeof props.onChange !== 'undefined') {
+                setToggle(props.onChange(value));
+              } else {
+                setToggle(value);
+              }
             }}
           />
         </View>

@@ -18,7 +18,7 @@ import {
   UserContext as AppUserContext,
   AppThemeContext,
 } from '../context/UserContext';
-
+let rootLoaded = false;
 const forFade = ({current}) => ({
   cardStyle: {opacity: current.progress},
 });
@@ -67,7 +67,7 @@ import {StackActions} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import APIService from '../service/APIService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+let i = 0;
 const RootStack = ({initialProps}) => {
   let goBackFunction = () => {
     if (themeSettings.backFunction) {
@@ -102,44 +102,24 @@ const RootStack = ({initialProps}) => {
   });
   const onStateChange = (navState, backFunction) => {
     const changedTheme = {...themeSettings};
-    if (navState.url) {
-      if (themeSettings.hiddenBack) {
-        changedTheme.hiddenBack = false;
-      }
-      if (navState.url.startsWith('https://thewildlifetrusts.teemill.co.uk/')) {
-        if (!themeSettings.hiddenHeader) {
-          changedTheme.hiddenHeader = true;
-        }
-      } else {
-        if (themeSettings.hiddenHeader) {
-          changedTheme.hiddenHeader = true;
-        }
+    const routeName = navState.name;
+    if (routeName == 'VideoCalls') {
+      if (!themeSettings.hiddenHeader) {
+        changedTheme.hiddenHeader = true;
+        changedTheme.hiddenFooter = true;
       }
     } else {
-      const routeName = navState.name;
-      if (routeName == 'VideoCalls') {
-        if (!themeSettings.hiddenHeader) {
-          changedTheme.hiddenHeader = true;
-          changedTheme.hiddenFooter = true;
-        }
-      } else {
-        if (themeSettings.hiddenHeader) {
-          changedTheme.hiddenHeader = false;
-          changedTheme.hiddenFooter = false;
-        }
-      }
-      if (routeName === 'ContactsScreen') {
-        changedTheme.hiddenBack = true;
-      } else {
-        changedTheme.hiddenBack = false;
+      if (themeSettings.hiddenHeader) {
+        changedTheme.hiddenHeader = false;
+        changedTheme.hiddenFooter = false;
       }
     }
-    /* if (backFunction) {
-            changedTheme.goBack = backFunction;
-        } else {
-            changedTheme.goBack = null;
-        }*/
-    setThemeSettings(changedTheme);
+    if (routeName === 'ContactsScreen') {
+      changedTheme.hiddenBack = true;
+    } else {
+      changedTheme.hiddenBack = false;
+    }
+    //setThemeSettings(changedTheme);
     return true;
   };
 
@@ -147,33 +127,39 @@ const RootStack = ({initialProps}) => {
   const navigationRef = React.useRef();
   global.navigation = navigationRef.current;
   const [authData, setAuthData] = useState(null);
-  const updateMe = () => {
-    APIService('users/me/', null, 5)
-      .then((result) => {
-        setAuthData(result);
-      })
-      .catch(() => {
-        AsyncStorage.removeItem('userToken');
-        navigationRef.current.navigate('Auth', {
-          screen: 'SignIn',
-          params: {
-            BioID: false,
-          },
+  const updateMe = async () => {
+    const userToken = await AsyncStorage.getItem('userToken');
+    if (userToken) {
+      APIService('users/me/', null, 5)
+        .then((result) => {
+          setAuthData(result);
+        })
+        .catch(() => {
+          AsyncStorage.removeItem('userToken');
+          navigationRef.current.navigate('Auth', {
+            screen: 'SignIn',
+            params: {
+              BioID: false,
+            },
+          });
         });
-      });
+    }
   };
   React.useEffect(() => {
-    updateMe();
+    //updateMe();
   }, []);
+
+  //resendFailed {"avatar": "https://fra1.digitaloceanspaces.com/wevive-staging/user/a705599c-1798-46cc-85f7-27b844d4793d.png", "color": null, "id": "7", "lastOnline": "2021-05-06T22:23:18.793Z", "name": "Michail", "public_key": null, "salt": "SALT", "status": null, "username": "+79211474434"} 
   const [avatarUrl, setAvatarUrl] = React.useState(false);
-  AsyncStorage.getItem('avatarUrl').then((URL) => {
-    if (URL) {
-      setAvatarUrl(URL.slice(1, -1));
-    }
-  });
+  //AsyncStorage.getItem('avatarUrl').then((URL) => {
+  //  if (URL) {
+  //    setAvatarUrl(URL.slice(1, -1));
+  //  }
+  //});
   if (!authData) {
     AsyncStorage.getItem('userId').then((userId) => {
-      if (userId) {
+      if (userId && !rootLoaded) {
+        rootLoaded = true;
         setAuthData({id: userId});
       }
     });
@@ -229,4 +215,5 @@ const RootStack = ({initialProps}) => {
   );
 };
 
+//RootStack.whyDidYouRender = true;
 export default RootStack;

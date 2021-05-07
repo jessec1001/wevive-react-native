@@ -71,14 +71,6 @@ const ScrollComponent = (props) => {
 };
 
 export default function ContentWrapper(props) {
-  const {authData, updateMe} = useContext(UserContext);
-  const [scrollEnabled, setScrollEnabled] = useState(true);
-  const navigation = useNavigation();
-  useEffect(() => {
-    if (!authData) {
-      updateMe();
-    }
-  });
   return (
     <View style={styles.scrollView}>
       {props.title && (

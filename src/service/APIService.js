@@ -15,12 +15,17 @@ const decodejwt = function (token) {
 };
 
 const APIService = async (endpoint, data, cache_time) => {
-  var cache_time = 0;
+  //var cache_time = 0;
   let json_data = JSON.stringify(data);
-  var hmac = await CryptoJS.HmacSHA256(api_url + endpoint + json_data, api_hmac_secret);
+  var hmac = await CryptoJS.HmacSHA256(
+    api_url + endpoint + json_data,
+    api_hmac_secret,
+  );
   CookieManager.clearAll();
   const fetchFromAPI = (url, requestData, hmac, userToken) => {
-    if (requestData == 'null') {requestData = null;}
+    if (requestData == 'null') {
+      requestData = null;
+    }
     let headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -68,7 +73,7 @@ const APIService = async (endpoint, data, cache_time) => {
       })
       .then((responseJson) => {
         if (cache_time !== undefined && cache_time > 0) {
-          CacheStore.set(hmac, responseJson, cache_time);
+          CacheStore.set(url + '_' + hmac, responseJson, cache_time);
         }
         return responseJson;
       })
@@ -78,26 +83,53 @@ const APIService = async (endpoint, data, cache_time) => {
         }
       });
   };
-  const tokens = await AsyncStorage.multiGet(['userToken','refreshToken']);
+  const tokens = await AsyncStorage.multiGet(['userToken', 'refreshToken']);
   const userToken = tokens[0][0] === 'userToken' ? tokens[0][1] : tokens[1][1];
-  const refreshToken = tokens[0][0] === 'userToken' ? tokens[1][1] : tokens[0][1];
+  const refreshToken =
+    tokens[0][0] === 'userToken' ? tokens[1][1] : tokens[0][1];
   //const jwt = userToken ? decodejwt(userToken) : {};
   //const jwtR = refreshToken ? decodejwt(refreshToken) : {};
   if (cache_time !== undefined && cache_time > 0) {
-    return CacheStore.get(api_url + endpoint + '_' + hmac);
+    return new Promise((resolve) => {
+      CacheStore.get(api_url + endpoint + '_' + hmac).then(
+        async (cached_response) => {
+          if (cached_response !== null) {
+            resolve(cached_response);
+          } else {
+            const result = userToken
+              ? await fetchFromAPI(
+                  api_url + endpoint,
+                  json_data,
+                  hmac,
+                  userToken,
+                )
+              : await fetchFromAPI(api_url + endpoint, json_data, hmac);
+            resolve(result);
+          }
+        },
+      );
+    });
   } else {
     if (userToken) {
-      return new Promise(async (resolve,reject)=> {
-        const result = userToken ?
-          await fetchFromAPI(api_url + endpoint, json_data, hmac, userToken)
-          :
-          await fetchFromAPI(api_url + endpoint, json_data, hmac);
+      return new Promise(async (resolve, reject) => {
+        const result = userToken
+          ? await fetchFromAPI(api_url + endpoint, json_data, hmac, userToken)
+          : await fetchFromAPI(api_url + endpoint, json_data, hmac);
         if (userToken && result && result.code === 'token_not_valid') {
-          const refreshedToken = await fetchFromAPI(api_url + 'token/refresh/', JSON.stringify({'refresh':refreshToken}), hmac);
+          const refreshedToken = await fetchFromAPI(
+            api_url + 'token/refresh/',
+            JSON.stringify({refresh: refreshToken}),
+            hmac,
+          );
           if (refreshedToken && refreshedToken.access) {
-            AsyncStorage.setItem('userToken',refreshedToken.access);
-            AsyncStorage.setItem('refreshToken',refreshedToken.refresh);
-            const newResult = await fetchFromAPI(api_url + endpoint, json_data, hmac, refreshedToken.access);
+            AsyncStorage.setItem('userToken', refreshedToken.access);
+            AsyncStorage.setItem('refreshToken', refreshedToken.refresh);
+            const newResult = await fetchFromAPI(
+              api_url + endpoint,
+              json_data,
+              hmac,
+              refreshedToken.access,
+            );
             resolve(newResult);
           } else if (userToken) {
             AsyncStorage.removeItem('userToken');
@@ -111,7 +143,6 @@ const APIService = async (endpoint, data, cache_time) => {
       return result;
     }
   }
-
 };
 
 export default APIService;

@@ -1,9 +1,9 @@
 if (__DEV__) {
   //  import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
   /*const whyDidYouRender = require('@welldone-software/why-did-you-render');
-whyDidYouRender(React, {
-  trackAllPureComponents: false,
-});*/
+  whyDidYouRender(React, {
+    trackAllPureComponents: false,
+  });*/
 }
 import React from 'react';
 
@@ -15,9 +15,6 @@ import './react/features/app/reducers';
 //import { _initLogging } from './react/features/base/logging/functions';
 
 import KeyboardManager from 'react-native-keyboard-manager';
-
-
-
 
 import {AppRegistry, Platform} from 'react-native';
 import App from './App';

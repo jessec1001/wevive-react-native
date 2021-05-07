@@ -60,7 +60,7 @@ export default function PINVerificationScreen({navigation, route}) {
               cellStyleFocused={styles.cellStyleFocused}
               value={values.pin}
               onTextChange={handleChange('pin')}
-              inputProps={{textContentType: 'numeric'}}
+              inputProps={{textContentType: 'none', keyboardType: 'numeric'}}
             />
             {values.pin.length > 0 && !errors.pin && (
               <View style={styles.buttonContainerStyle}>

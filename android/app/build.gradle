@@ -161,7 +161,7 @@ gradle.projectsEvaluated {
                 workingDir androidRoot
 
                 // Run the packager
-                commandLine("scripts/run-packager.bat")
+                commandLine("scripts/run-packager.sh")
             }
 
             // Set up dev mode
