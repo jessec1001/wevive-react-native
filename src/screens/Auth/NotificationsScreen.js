@@ -11,11 +11,6 @@ import AuthView from '../../views/AuthView';
 import {CommonActions} from '@react-navigation/native';
 const notificationsDemo = require('../../images/PNG/notifications_demo.png');
 export default class NotificationsScreen extends Component {
-  state = {
-    email: null,
-    bioAccessToken: null,
-    avatarImage: null,
-  };
   navigateSuccess = (notificationsEnabled) => {
     this.props.navigation.dispatch(
       CommonActions.reset({

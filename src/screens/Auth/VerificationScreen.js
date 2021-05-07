@@ -13,11 +13,6 @@ import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 
 import {UserContext} from '../../context/UserContext';
 export default class VerificationScreen extends Component {
-  state = {
-    email: null,
-    bioAccessToken: null,
-    avatarImage: null,
-  };
   navigateSuccess = (user) => {
     let screen = 'VerificationSuccess';
     if (user.new) {

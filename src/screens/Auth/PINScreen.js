@@ -13,11 +13,6 @@ import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import trans from '../../utils/trans';
 
 export default class PINScreen extends Component {
-  state = {
-    email: null,
-    bioAccessToken: null,
-    avatarImage: null,
-  };
   navigateSuccess = () => {
     this.props.navigation.dispatch(
       CommonActions.reset({

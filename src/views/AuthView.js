@@ -58,10 +58,10 @@ export default class AuthView extends Component {
         this.props.signMessage &&
         (!this.props.route.params || this.props.route.params.BioID)
       ) {
-        AsyncStorage.getItem('email').then((email) => {
-          if (email) {
+        AsyncStorage.getItem('phoneNumber').then((phoneNumber) => {
+          if (phoneNumber) {
             this.props
-              .signMessage(':biometric_login', 'Sign in using ' + email + '?')
+              .signMessage(':biometric_login', 'Sign in using ' + phoneNumber + '?')
               .then((success) => {
                 this.props.bioLoginFunction({success, hideError: true});
               });

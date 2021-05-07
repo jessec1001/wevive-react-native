@@ -11,11 +11,6 @@ import AuthView from '../../views/AuthView';
 import {CommonActions} from '@react-navigation/native';
 
 export default class VerificationSuccess extends Component {
-  state = {
-    email: null,
-    bioAccessToken: null,
-    avatarImage: null,
-  };
   navigateSuccess = () => {
     this.props.navigation.dispatch(
       CommonActions.reset({

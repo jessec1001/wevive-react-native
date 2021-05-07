@@ -46,11 +46,6 @@ const countryPhoneCode = (country) => {
     }
   };
 export default class ChangeNumberVerification extends Component {
-  state = {
-    email: null,
-    bioAccessToken: null,
-    avatarImage: null,
-  };
   navigateSuccess = () => {
     this.props.navigation.navigate('DeleteAccountSuccess');
   };

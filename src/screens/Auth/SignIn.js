@@ -78,6 +78,20 @@ export default class SignIn extends Component {
       }),
     );
   };
+
+  navigateToApp = (countryCode, phoneNumber, sessionToken) => {
+    this.props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'App',
+          },
+        ],
+      }),
+    );
+  };
+
   componentDidMount() {
     AsyncStorage.multiGet([
       'countryCode',
@@ -87,7 +101,7 @@ export default class SignIn extends Component {
     ]).then((items) => {
       const k = {};
       items.map((i) => (k[i[0]] = i[1]));
-      if (k.countryCode && k.phoneNumber && k.sessionToken) {
+      if (k.countryCode && k.phoneNumber && k.sessionToken && !k.bioAccessToken) {
         this.navigateSuccess(k.countryCode, k.phoneNumber, k.sessionToken);
       } else if (k.bioAccessToken) {
         this.setState({bioAccessToken: k.bioAccessToken});
@@ -101,7 +115,7 @@ export default class SignIn extends Component {
 
       await AsyncStorage.setItem('userToken', access_token);
       await AsyncStorage.setItem('refreshToken', refresh_token);
-      this.navigateSuccess();
+      this.navigateToApp();
     } else if (!result.hideError) {
       Alert.alert('Error', 'No biometric data found');
     }

@@ -47,11 +47,6 @@ const countryPhoneCode = (country) => {
     }
   };
 export default class DeleteChats extends Component {
-  state = {
-    email: null,
-    bioAccessToken: null,
-    avatarImage: null,
-  };
   navigateSuccess = () => {
     this.props.navigation.navigate('DeleteChatsConfirmation');
   };

@@ -47,11 +47,6 @@ const countryPhoneCode = (country) => {
     }
   };
 export default class ChangeNumberVerification extends Component {
-  state = {
-    email: null,
-    bioAccessToken: null,
-    avatarImage: null,
-  };
   navigateSuccess = () => {
     AsyncStorage.removeItem('sessionToken');
     AsyncStorage.removeItem('userToken');

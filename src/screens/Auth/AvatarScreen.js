@@ -29,8 +29,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const defaultAvatar = require('../../images/PNG/wewelogo.png');
 export default class AvatarScreen extends Component {
   state = {
-    email: null,
-    bioAccessToken: null,
     avatarImage: null,
     filename: null,
     mime: null,
