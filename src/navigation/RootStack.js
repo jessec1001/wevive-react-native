@@ -119,7 +119,7 @@ const RootStack = ({initialProps}) => {
     } else {
       changedTheme.hiddenBack = false;
     }
-    //setThemeSettings(changedTheme);
+    setThemeSettings(changedTheme);
     return true;
   };
 

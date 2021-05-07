@@ -102,23 +102,6 @@ export default class Main extends Component {
     userToken: '',
   };
   navigate = (route, routeParams) => {
-    if (route === 'VideoCalls') {
-      var hiddenHeader = true;
-      var hiddenFooter = true;
-    } else {
-      var hiddenHeader = false;
-      var hiddenFooter = false;
-    }
-    if (this.state.hiddenHeader && !hiddenHeader) {
-      this.setState({hiddenHeader: false});
-    } else if (!this.state.hiddenHeader && hiddenHeader) {
-      this.setState({hiddenHeader: true});
-    }
-    if (this.state.hiddenFooter && !hiddenFooter) {
-      this.setState({hiddenFooter: false});
-    } else if (!this.state.hiddenFooter && hiddenFooter) {
-      this.setState({hiddenFooter: true});
-    }
     this.props.navigation.navigate(route, routeParams);
   };
   render() {
@@ -126,8 +109,7 @@ export default class Main extends Component {
       this.state.userToken.length > 0 && (
         <ChatModule
           options={{token: this.state.userToken}}
-          socketIoUrl={chat_url}
-          icon={Icon}>
+          socketIoUrl={chat_url}>
           <StatusBar backgroundColor="white" barStyle="dark-content" />
           <AppThemeContext.Consumer>
             {({themeSettings, goBack, insets}) => (

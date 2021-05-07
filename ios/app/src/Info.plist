@@ -49,8 +49,6 @@
 	<true/>
 	<key>FirebaseScreenReportingEnabled</key>
 	<true/>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -73,7 +71,7 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Local network is used for establishing Peer-to-Peer connections.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Allow to chat to Wevive users near you</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Used for audio calls and audio messages.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

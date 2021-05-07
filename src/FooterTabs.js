@@ -133,7 +133,7 @@ export default function FooterTabs({navigate}) {
                   ? styles.footerText
                   : styles.activeFooterText
               }>
-              Invite
+              Contacts
             </Text>
           </Pressable>
         </View>
