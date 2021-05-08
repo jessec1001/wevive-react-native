@@ -126,8 +126,8 @@ const RootStack = ({initialProps}) => {
   const updateAuthData = (newData) => {
     setAuthData({
       ...newData,
-      userName: newData.name ? newData.name : authData.userName,
-      avatarUrl: newData.avatar ? newData.avatar : authData.avatarUrl,
+      userName: "name" in newData ? newData.name : authData.userName,
+      avatarUrl: "avatar" in newData ? newData.avatar : authData.avatarUrl,
       userToken: newData.userToken ? newData.userToken : authData.userToken,
     });
   };

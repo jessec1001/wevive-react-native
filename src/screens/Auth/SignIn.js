@@ -185,6 +185,7 @@ export default class SignIn extends Component {
                         }
                       });
                     } else {
+                      global.appIsNotLoading();
                       AsyncStorage.setItem('countryCode', countryCode);
                       AsyncStorage.setItem('phoneNumber', cleanedPhone);
                       this.navigateSuccess(countryCode, cleanedPhone, '');
