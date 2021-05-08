@@ -67,6 +67,7 @@ import {StackActions} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import APIService from '../service/APIService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import deepEqual from 'deep-equal';
 let i = 0;
 const RootStack = ({initialProps}) => {
   let goBackFunction = () => {
@@ -103,7 +104,7 @@ const RootStack = ({initialProps}) => {
   const onStateChange = (navState, backFunction) => {
     const changedTheme = {...themeSettings};
     const routeName = navState.name;
-    if (routeName == 'VideoCalls') {
+    if (routeName === 'VideoCalls') {
       if (!themeSettings.hiddenHeader) {
         changedTheme.hiddenHeader = true;
         changedTheme.hiddenFooter = true;
@@ -114,12 +115,15 @@ const RootStack = ({initialProps}) => {
         changedTheme.hiddenFooter = false;
       }
     }
-    if (routeName === 'ContactsScreen') {
+    if (routeName === 'ContactsScreen' || routeName === 'Main') {
       changedTheme.hiddenBack = true;
     } else {
       changedTheme.hiddenBack = false;
     }
-    setThemeSettings(changedTheme);
+    const sameTheme = deepEqual(changedTheme, themeSettings);
+    if (!sameTheme) {
+      setThemeSettings(changedTheme);
+    }
     return true;
   };
 

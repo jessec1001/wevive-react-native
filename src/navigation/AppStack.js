@@ -6,11 +6,6 @@ const defaultConfig = {
   headerShown: false,
   cardStyleInterpolator: forFade,
 };
-import {
-  UserContext as AppUserContext,
-  AppThemeContext,
-} from '../context/UserContext';
-
 
 const forFade = ({current}) => ({
   cardStyle: {opacity: current.progress},

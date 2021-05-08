@@ -19,6 +19,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors} from '../app.json';
 import {UserContext} from './context/UserContext';
 import { ChatContext } from 'react-native-chat-plugin/ChatContext';
+import { useNavigation } from '@react-navigation/core';
 const getTitlePrefix = (name, params) => {
   if (name == 'ContactsScreen' && params?.type == 'archived') {
     return 'Archived ';
@@ -140,7 +141,7 @@ const getNextRoute = (name, params) => {
   }
 };
 const getNextParams = (name, params) => {};
-const getNextOrProfile = (props, name, params, avatarUrl) => {
+const getNextOrProfile = (navigate, name, params, avatarUrl) => {
   const styleSuffix = getStyleSuffix(name);
   const next = [
     'ChangeNumber',
@@ -151,7 +152,7 @@ const getNextOrProfile = (props, name, params, avatarUrl) => {
     ? styles[`mainLogoStyle${styleSuffix}`]
     : styles.mainLogoStyle;
   return next.indexOf(name) === -1 ? (
-    <TouchableOpacity onPress={() => props.navigate('Settings')}>
+    <TouchableOpacity onPress={() => navigate('Settings')}>
       <Image
         resizeMode="cover"
         source={{uri: avatarUrl}}
@@ -163,7 +164,7 @@ const getNextOrProfile = (props, name, params, avatarUrl) => {
       onPress={() => {
         const nextRoute = getNextRoute(name, params);
         if (nextRoute !== '') {
-          props.navigate(nextRoute, getNextParams(name, params));
+          navigate(nextRoute, getNextParams(name, params));
         } else {
           if (typeof nextButton == 'function') {
             // eslint-disable-next-line no-undef
@@ -175,12 +176,14 @@ const getNextOrProfile = (props, name, params, avatarUrl) => {
     </TouchableOpacity>
   );
 };
-export default function Header(props) {
+export default function Header({route, themeSettings, goBack}) {
+  const navigation = useNavigation();
+  const navigate = navigation.navigate;
   const ctx = React.useContext(UserContext);
   const chatCtx = React.useContext(ChatContext);
   const users = chatCtx.getUsers();
-  const name = props.route.state?.routes[props.route.state.index].name;
-  const params = props.route.state?.routes[props.route.state.index].params;
+  const name = route.state?.routes[route.state.index].name;
+  const params = route.state?.routes[route.state.index].params;
   const title = name ? getTitle(name, params) : false;
   const styleSuffix = getStyleSuffix(name);
   const style = name ? styles[`headerTitle${styleSuffix}`] : styles.headerTitle;
@@ -193,16 +196,16 @@ export default function Header(props) {
   if (userIdx !== -1) {
     avatarUrl = users[userIdx].avatar;
   }
-  const nextOrProfile = getNextOrProfile(props, name, params, avatarUrl);
+  const nextOrProfile = getNextOrProfile(navigate, name, params, avatarUrl);
   return (
     <SafeAreaView edges={['top']}>
       <View style={styles.header}>
         <View style={styles.left}>
-          {!props.hiddenBack ? (
+          {!themeSettings.hiddenBack ? (
             <TouchableOpacity
               transparent
               onPress={() => {
-                props.goBack();
+                goBack();
               }}>
               <View style={{padding: 15}}>
                 <Icon

@@ -8,7 +8,7 @@ import {
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {getFocusedRouteNameFromRoute, useRoute} from '@react-navigation/native';
+import {getFocusedRouteNameFromRoute, useNavigation, useRoute} from '@react-navigation/native';
 
 import {ActionSheetCustom as ActionSheet} from '@alessiocancian/react-native-actionsheet';
 
@@ -29,8 +29,32 @@ const ActionSheetElement = (props) => {
 };
 const iconSize = responsiveHeight(3);
 
-export default function FooterTabs({navigate}) {
+const FooterButton = ({text, onPress, icon, active, unreadCounter, unread}) => {
+  return (
+    <View style={styles.footerItem}>
+      <Pressable style={styles.footerButton} onPress={onPress}>
+        <Icon
+          name={icon}
+          size={iconSize}
+          color={!active ? colors.footerIcons : colors.activeFooterIcon}
+        />
+        <Text style={!active ? styles.footerText : styles.activeFooterText}>
+          {text}
+        </Text>
+        {unreadCounter && unread > 0 && (
+          <View style={styles.unreadBox}>
+            <Text style={styles.unreadText}>{unread}</Text>
+          </View>
+        )}
+      </Pressable>
+    </View>
+  );
+};
+
+export default function FooterTabs() {
   const [unread, setUnread] = React.useState(0);
+  const navigation = useNavigation();
+  const navigate = navigation.navigate;
   const route = useRoute();
   React.useEffect(() => {
     setUnread(0);
@@ -64,160 +88,72 @@ export default function FooterTabs({navigate}) {
         break;
     }
   };
-  let groupActions = [
+  const actionSheet = [
+    <ActionSheetElement text="Nearby contact" icon="mapmarker" />,
     <ActionSheetElement text="Private group" icon="lock" />,
     <ActionSheetElement text="Public group" icon="lock" />,
+    <ActionSheetElement text="1-to-1 Chat" icon="lock" />,
+    'Cancel',
   ];
-  //groupActions = [];
-  let groupsButton = (
-    <View style={styles.footerItem}>
-      <Pressable
-        style={styles.footerButton}
-        onPress={() => {
-          //props.navigate('About');
-          navigate('ContactsScreen', {filter: 'groups', type: null});
-        }}>
-        <Icon
-          name="groups"
-          size={iconSize}
-          color={
-            routeName !== 'ContactsScreen' || params?.filter !== 'groups'
-              ? colors.footerIcons
-              : colors.activeFooterIcon
-          }
-        />
-        <Text
-          style={
-            routeName !== 'ContactsScreen' || params?.filter !== 'groups'
-              ? styles.footerText
-              : styles.activeFooterText
-          }>
-          Groups
-        </Text>
-      </Pressable>
-    </View>
-  );
-  //groupsButton = null;
+  const navigateToPhoneContacts = () => {
+    navigate('PhoneContactsScreen');
+  };
+  const navigateToCallHistory = () => {
+    navigate('CallHistory');
+  };
+  const navigateToContacts = () => {
+    navigate('ContactsScreen', {filter: 'chats', type: null});
+  };
+  const navigateToGroups = () => {
+    navigate('ContactsScreen', {filter: 'groups', type: null});
+  };
   return (
     <SafeAreaView edges={['bottom']} style={styles.footerBackground}>
       <ActionSheet
         ref={actionSheetRef}
         title={'Create conversation'}
-        options={[
-          <ActionSheetElement text="Nearby contact" icon="mapmarker" />,
-          ...groupActions,
-          <ActionSheetElement text="1-to-1 Chat" icon="lock" />,
-          'Cancel',
-        ]}
+        options={actionSheet}
         onPress={createConversation}
       />
       <View style={styles.footer}>
-        <View style={styles.footerItem}>
-          <Pressable
-            style={styles.footerButton}
-            onPress={() => {
-              navigate('PhoneContactsScreen');
-            }}>
-            <Icon
-              name="wetalk"
-              size={iconSize}
-              color={
-                routeName !== 'PhoneContactsScreen'
-                  ? colors.footerIcons
-                  : colors.activeFooterIcon
-              }
-            />
-            <Text
-              style={
-                routeName !== 'PhoneContactsScreen'
-                  ? styles.footerText
-                  : styles.activeFooterText
-              }>
-              Contacts
-            </Text>
-          </Pressable>
-        </View>
-        <View style={styles.footerItem}>
-          <Pressable
-            style={styles.footerButton}
-            onPress={() => {
-              navigate('CallHistory');
-            }}>
-            <Icon
-              name="calls"
-              size={iconSize}
-              color={
-                routeName !== 'CallHistory'
-                  ? colors.footerIcons
-                  : colors.activeFooterIcon
-              }
-            />
-            <Text
-              style={
-                routeName !== 'CallHistory'
-                  ? styles.footerText
-                  : styles.activeFooterText
-              }>
-              Calls
-            </Text>
-          </Pressable>
-        </View>
-        <View style={styles.footerItem}>
-          <Pressable style={styles.footerButton} onPress={showActionSheet}>
-            <Icon
-              name="add-new"
-              size={iconSize}
-              color={
-                routeName !== 'SearchContactsScreen'
-                  ? colors.footerIcons
-                  : colors.activeFooterIcon
-              }
-            />
-            <Text
-              style={
-                routeName !== 'SearchContactsScreen'
-                  ? styles.footerText
-                  : styles.activeFooterText
-              }>
-              Add new
-            </Text>
-          </Pressable>
-        </View>
-        <View style={styles.footerItem}>
-          <Pressable
-            style={styles.footerButton}
-            onPress={() => {
-              navigate('ContactsScreen', {filter: 'chats', type: null});
-            }}>
-            <Icon
-              name="chats"
-              size={iconSize}
-              color={
-                routeName !== 'ContactsScreen' || params?.filter !== 'chats'
-                  ? colors.footerIcons
-                  : colors.activeFooterIcon
-              }
-            />
-            <Text
-              style={
-                routeName !== 'ContactsScreen' || params?.filter !== 'chats'
-                  ? styles.footerText
-                  : styles.activeFooterText
-              }>
-              Chats
-            </Text>
-            {unread > 0 && (
-              <View style={styles.unreadBox}>
-                <Text style={styles.unreadText}>{unread}</Text>
-              </View>
-            )}
-          </Pressable>
-        </View>
-        {groupsButton}
+        <FooterButton
+          text="Contacts"
+          onPress={navigateToPhoneContacts}
+          icon="wetalk"
+          active={routeName === 'PhoneContactsScreen'}
+        />
+        <FooterButton
+          text="Calls"
+          onPress={navigateToCallHistory}
+          icon="calls"
+          active={routeName === 'CallHistory'}
+        />
+        <FooterButton
+          text="Add new"
+          onPress={showActionSheet}
+          icon="add-new"
+          active={routeName === 'SearchContactsScreen'}
+        />
+        <FooterButton
+          text="Chats"
+          onPress={navigateToContacts}
+          icon="chats"
+          active={routeName === 'ContactsScreen' && params?.filter !== 'groups'}
+          unreadCounter
+          unread={unread}
+        />
+        <FooterButton
+          text="Groups"
+          onPress={navigateToGroups}
+          icon="groups"
+          active={routeName === 'ContactsScreen' && params?.filter === 'groups'}
+        />
       </View>
     </SafeAreaView>
   );
 }
+
+//FooterTabs.whyDidYouRender = false;
 const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
