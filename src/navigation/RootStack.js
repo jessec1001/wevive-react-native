@@ -1,8 +1,5 @@
 import React, {useState} from 'react';
-import {
-  createStackNavigator,
-  CardStyleInterpolators,
-} from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -12,7 +9,6 @@ import {
 import AppBootstrap from './AppBootstrap';
 import AppStack from './AppStack';
 import AuthStack from './AuthStack';
-import {CommonActions} from '@react-navigation/native';
 import {domainReversed, deepLinkURL} from '../../app.json';
 import {
   UserContext as AppUserContext,
@@ -26,11 +22,6 @@ const forFade = ({current}) => ({
 const defaultConfig = {
   headerShown: false,
   cardStyleInterpolator: forFade,
-};
-
-const verticalConfig = {
-  headerShown: false,
-  cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
 };
 
 const MainStack = createStackNavigator();
@@ -92,10 +83,11 @@ const RootStack = ({initialProps}) => {
         video: true,
       });
     }
-  },[navigationRef, initialProps]);
+  }, [navigationRef, initialProps]);
   const [themeSettings, setThemeSettings] = useState({
     hiddenBack: true,
     hiddenHeader: false,
+    hiddenFooter: false,
     canGoBack: false,
   });
   const [goBack, setGoBack] = useState(() => () => {
@@ -131,12 +123,19 @@ const RootStack = ({initialProps}) => {
   const navigationRef = React.useRef();
   global.navigation = navigationRef.current;
   const [authData, setAuthData] = useState(null);
+  const updateAuthData = (newData) => {
+    setAuthData({
+      ...newData,
+      avatarUrl: authData.avatarUrl,
+      userToken: authData.userToken,
+    })
+  }
   const updateMe = async () => {
-    const userToken = await AsyncStorage.getItem('userToken');
+    const userToken = authData.userToken;
     if (userToken) {
       APIService('users/me/', null, 5)
         .then((result) => {
-          setAuthData(result);
+          updateAuthData(result);
         })
         .catch(() => {
           AsyncStorage.removeItem('userToken');
@@ -149,26 +148,23 @@ const RootStack = ({initialProps}) => {
         });
     }
   };
-  React.useEffect(() => {
-    //updateMe();
-  }, []);
-
-  //resendFailed {"avatar": "https://fra1.digitaloceanspaces.com/wevive-staging/user/a705599c-1798-46cc-85f7-27b844d4793d.png", "color": null, "id": "7", "lastOnline": "2021-05-06T22:23:18.793Z", "name": "Michail", "public_key": null, "salt": "SALT", "status": null, "username": "+79211474434"} 
-  const [avatarUrl, setAvatarUrl] = React.useState(false);
-  //AsyncStorage.getItem('avatarUrl').then((URL) => {
-  //  if (URL) {
-  //    setAvatarUrl(URL.slice(1, -1));
-  //  }
-  //});
   if (!authData) {
-    AsyncStorage.getItem('userId').then((userId) => {
-      if (userId && !rootLoaded) {
-        rootLoaded = true;
-        setAuthData({id: userId});
-      }
-    });
+    AsyncStorage.multiGet(['userId', 'avatarUrl', 'userToken']).then(
+      (items) => {
+        const k = {};
+        items.map((i) => (k[i[0]] = i[1]));
+        if (k.userId && !rootLoaded) {
+          rootLoaded = true;
+          setAuthData({
+            id: k.userId,
+            avatarUrl: k.avatarUrl ? k.avatarUrl.slice(1, -1) : null,
+            userToken: k.userToken,
+          });
+        }
+      },
+    );
   }
-  const appUserContextValue = {authData, setAuthData, updateMe, avatarUrl};
+  const appUserContextValue = {authData, setAuthData: updateAuthData, updateMe};
   const insets = useSafeAreaInsets();
   return (
     <AppUserContext.Provider value={appUserContextValue}>

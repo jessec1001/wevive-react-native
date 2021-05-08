@@ -104,7 +104,7 @@ const Stack = createStackNavigator();
 const forFade = ({current}) => ({
   cardStyle: {opacity: current.progress},
 });
-const AppNavigator = ({contacts}) => {
+const AppNavigator = () => {
   return (
     <Stack.Navigator
       initialRouteName="ContactsScreen"
