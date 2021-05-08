@@ -59,6 +59,7 @@ export default class VerificationScreen extends Component {
                   if (result) {
                     if (result.access_token) {
                       setAuthData({...result, userToken: result.access_token});
+                      AsyncStorage.removeItem('sessionToken');
                       AsyncStorage.setItem('userId', String(result.id));
                       AsyncStorage.setItem('userName', result.name);
                       AsyncStorage.setItem('userToken', result.access_token);

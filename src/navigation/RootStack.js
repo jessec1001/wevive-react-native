@@ -106,6 +106,7 @@ const RootStack = ({initialProps}) => {
   global.navigation = navigationRef.current;
   const [authData, setAuthData] = useState(null);
   const updateAuthData = (newData) => {
+    if (!newData) return;
     setAuthData({
       ...newData,
       userName: 'name' in newData ? newData.name : authData.userName,
