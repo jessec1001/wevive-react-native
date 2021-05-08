@@ -126,10 +126,11 @@ const RootStack = ({initialProps}) => {
   const updateAuthData = (newData) => {
     setAuthData({
       ...newData,
-      avatarUrl: authData.avatarUrl,
-      userToken: authData.userToken,
-    })
-  }
+      userName: newData.name ? newData.name : authData.userName,
+      avatarUrl: newData.avatar ? newData.avatar : authData.avatarUrl,
+      userToken: newData.userToken ? newData.userToken : authData.userToken,
+    });
+  };
   const updateMe = async () => {
     const userToken = authData.userToken;
     if (userToken) {
@@ -149,7 +150,7 @@ const RootStack = ({initialProps}) => {
     }
   };
   if (!authData) {
-    AsyncStorage.multiGet(['userId', 'avatarUrl', 'userToken']).then(
+    AsyncStorage.multiGet(['userId', 'avatarUrl', 'userToken', 'userName']).then(
       (items) => {
         const k = {};
         items.map((i) => (k[i[0]] = i[1]));
@@ -159,6 +160,7 @@ const RootStack = ({initialProps}) => {
             id: k.userId,
             avatarUrl: k.avatarUrl ? k.avatarUrl.slice(1, -1) : null,
             userToken: k.userToken,
+            userName: k.userName,
           });
         }
       },

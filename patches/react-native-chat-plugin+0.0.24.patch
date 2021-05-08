@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index 621e6d1..84661cb 100644
+index 621e6d1..9400409 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
-@@ -34,6 +34,36 @@ const styles = StyleSheet.create({
+@@ -34,18 +34,106 @@ const styles = StyleSheet.create({
    },
  });
  
@@ -16,7 +16,7 @@ index 621e6d1..84661cb 100644
 +  });
 +  whoosh.release();
 +}
-+
+ 
 +const getEntity = (list, params) => {
 +  const entity = {};
 +  const keys = Object.keys(list);
@@ -37,9 +37,14 @@ index 621e6d1..84661cb 100644
 +  return getEntity(list, ['event_id','is_read','is_starred','created_at','text','is_delivered','retry_at', 'type'])
 +}
  
- 
++let init = false;
  export default function ChatContainer({ options, contacts, children }) {
-@@ -45,7 +75,65 @@ export default function ChatContainer({ options, contacts, children }) {
+   const ctx = React.useContext(ChatContext);
+   const socket = getSocket();
+-  const [init, setInit] = React.useState(false);
++  //const [init, setInit] = React.useState(false);
+   const [retry, setRetry] = React.useState(false);
+   const [connected, setConnected] = React.useState(true);
    const [showRetryButton, setShowRetryButton] = React.useState(false);
    const user = ctx.getUser();
    const users = ctx.getUsers();
@@ -127,7 +132,7 @@ index 621e6d1..84661cb 100644
      /*getEncryptionKeys(ctx).then(({ private_key, public_key, salt }) => {
        socket.chat_public_key = public_key;
        socket.chat_private_key = private_key;
-@@ -97,72 +189,72 @@ export default function ChatContainer({ options, contacts, children }) {
+@@ -97,234 +189,149 @@ export default function ChatContainer({ options, contacts, children }) {
          ctx.authenticate({...options,public_key, salt}, authenticationCallback);
        }
      });*/
@@ -254,32 +259,142 @@ index 621e6d1..84661cb 100644
 +  };
    React.useEffect(() => {
      //if (init) return;
-     //init = true;
-@@ -174,14 +266,15 @@ const emitEvents = (recreateKeys = false) => {
-       for (let i=0;i<users.length;i++) {
-         let user = users.item(i);
-         user.userId = user.id;
+-    //init = true;
+     //return;
+     // get latest users from the DB:
+-    ctx.getUsersFromDB().then((users)=> {
+-      if (init) return;
+-      const usersList = {};
+-      for (let i=0;i<users.length;i++) {
+-        let user = users.item(i);
+-        user.userId = user.id;
 -        user.avatar = user.path;
-+        user.avatar = "file://"+user.path;
-         user.phone_number = user.username;
-         delete user.path;
-         user.lastOnline = user.lastOnline * 1000;
-         ctx.addUser(user);
-         usersList[user.id] = user;
-       }
+-        user.phone_number = user.username;
+-        delete user.path;
+-        user.lastOnline = user.lastOnline * 1000;
+-        ctx.addUser(user);
+-        usersList[user.id] = user;
+-      }
 -      if (!userContext.authData.username) {
-+      //console.error(usersList);
-+      if (!userContext.authData.username && userContext.authData.id) {
-         userContext.setAuthData(usersList[userContext.authData.id]);
-       }
-       
-@@ -235,96 +328,11 @@ const emitEvents = (recreateKeys = false) => {
-         ctx.setConversations(conversationsArrayR);
-         setInit(true);
-         updateLastOnline();
+-        userContext.setAuthData(usersList[userContext.authData.id]);
+-      }
++    if (!init) {
++      init = true;
++      ctx.getUsersFromDB().then((users)=> {
++        const usersList = {};
++        for (let i=0;i<users.length;i++) {
++          let user = users.item(i);
++          user.userId = user.id;
++          user.avatar = "file://"+user.path;
++          user.phone_number = user.username;
++          delete user.path;
++          user.lastOnline = user.lastOnline * 1000;
++          ctx.addUser(user);
++          usersList[user.id] = user;
++        }
++        if (!userContext.authData.username && userContext.authData.id) {
++          userContext.setAuthData(usersList[userContext.authData.id]);
++        }
+         
+-      ctx.getConversationsFromDB().then((conversations)=> {
+-        let conversationsArray = {};
+-        for (let i=0;i<conversations.length;i++) {
+-          let conversation = conversations.item(i);
+-          if (typeof conversationsArray[conversation.groupId] == 'undefined') {
+-            const conversationEntity = getConversationEntity(conversation)
++        ctx.getConversationsFromDB().then((conversations)=> {
++          let conversationsArray = {};
++          for (let i=0;i<conversations.length;i++) {
++            let conversation = conversations.item(i);
++            if (typeof conversationsArray[conversation.groupId] == 'undefined') {
++              const conversationEntity = getConversationEntity(conversation)
+               
+-            conversationEntity.id = conversation.groupId;
+-            conversationEntity.events = [];
+-            conversationEntity.participants = [];
+-            conversationEntity.time = new Date(conversation.createdAt * 1000);
+-            conversationEntity.createdAt = conversation.createdAt;
+-            conversationEntity.pinned = conversation.is_pin;
+-            conversationEntity.muted = conversation.is_mute;
+-            conversationEntity.archived = conversation.is_archive;
+-            conversationsArray[conversation.groupId] = conversationEntity;
+-          }
+-          const messageEntity = getMessageEntity(conversation);
+-          messageEntity.id = conversation.eventId;
+-          //messageEntity.type = "MESSAGE";
+-          conversationsArray[conversation.groupId].lastEvent = messageEntity;
+-          const userEntity = getUserEntity(conversation);
+-          userEntity.avatar = userEntity.avatarUrl;
+-          userEntity.id = String(conversation.userId);
+-          messageEntity.owner = usersList[conversation.eventUserId];
+-          messageEntity.type = "MESSAGE";
+-          messageEntity.time = new Date(conversation.eventCreatedAt * 1000);
+-          if (messageEntity.time > conversationsArray[conversation.groupId].time) {
+-            conversationsArray[conversation.groupId].time = messageEntity.time;
+-          }
+-          const userIdx = conversationsArray[conversation.groupId].participants.findIndex(c => c.userId == userEntity.id);
+-          if (userIdx == -1) {
+-            const avatar = usersList[userEntity.id]?.avatar;
+-            if (avatar) {
+-              userEntity.avatar = avatar;
++              conversationEntity.id = conversation.groupId;
++              conversationEntity.events = [];
++              conversationEntity.participants = [];
++              conversationEntity.time = new Date(conversation.createdAt * 1000);
++              conversationEntity.createdAt = conversation.createdAt;
++              conversationEntity.pinned = conversation.is_pin;
++              conversationEntity.muted = conversation.is_mute;
++              conversationEntity.archived = conversation.is_archive;
++              conversationsArray[conversation.groupId] = conversationEntity;
++            }
++            const messageEntity = getMessageEntity(conversation);
++            messageEntity.id = conversation.eventId;
++            //messageEntity.type = "MESSAGE";
++            conversationsArray[conversation.groupId].lastEvent = messageEntity;
++            const userEntity = getUserEntity(conversation);
++            userEntity.avatar = userEntity.avatarUrl;
++            userEntity.id = String(conversation.userId);
++            messageEntity.owner = usersList[conversation.eventUserId];
++            messageEntity.type = "MESSAGE";
++            messageEntity.time = new Date(conversation.eventCreatedAt * 1000);
++            if (messageEntity.time > conversationsArray[conversation.groupId].time) {
++              conversationsArray[conversation.groupId].time = messageEntity.time;
++            }
++            const userIdx = conversationsArray[conversation.groupId].participants.findIndex(c => c.userId == userEntity.id);
++            if (userIdx == -1) {
++              const avatar = usersList[userEntity.id]?.avatar;
++              if (avatar) {
++                userEntity.avatar = avatar;
++              }
++              conversationsArray[conversation.groupId].participants.push(userEntity);
++            }
++            const messageIdx = conversationsArray[conversation.groupId].events.findIndex(e => e.id == messageEntity.event_id);
++            if (messageIdx == -1) {
++              conversationsArray[conversation.groupId].events.push(messageEntity);
+             }
+-            conversationsArray[conversation.groupId].participants.push(userEntity);
+-          }
+-          const messageIdx = conversationsArray[conversation.groupId].events.findIndex(e => e.id == messageEntity.event_id);
+-          if (messageIdx == -1) {
+-            conversationsArray[conversation.groupId].events.push(messageEntity);
+-          }
+           
+-        }
+-        const conversationsArrayR = Object.values(conversationsArray).sort((a,b)=> {
+-          return a.time > b.time
++          }
++          const conversationsArrayR = Object.values(conversationsArray).sort((a,b)=> {
++            return a.time > b.time
++          });
++          ctx.setConversations(conversationsArrayR);
++          updateLastOnline();
+         });
+-        ctx.setConversations(conversationsArrayR);
+-        setInit(true);
+-        updateLastOnline();
 -        resendFailed(user.id);
        });
-     });
+-    });
 -    const getEntity = (list, params) => {
 -      const entity = {};
 -      const keys = Object.keys(list);
@@ -289,7 +404,7 @@ index 621e6d1..84661cb 100644
 -        }
 -      }
 -      return entity;
--    }
+     }
 -    const getConversationEntity = (list) => {
 -      return getEntity(list, ['created_by','is_archive','group_id','is_delete','is_read','is_mute','created_at','is_pin','name'])
 -    }
@@ -309,7 +424,7 @@ index 621e6d1..84661cb 100644
 -        }
 -        // loaded successfully
 -        //console.log('duration in seconds: ' + whoosh.getDuration() + 'number of channels: ' + whoosh.getNumberOfChannels());
-     
+-      
 -        // Play the sound with an onEnd callback
 -        whoosh.play((success) => {
 -          if (success) {
@@ -324,7 +439,7 @@ index 621e6d1..84661cb 100644
 -      //whoosh.setVolume(0.5);
 -      whoosh.release();
 -    }
--
+     
 -    async function handleEventCreated ({ event }) {
 -      if (event && event.id) {
 -        const [decryptedEvent] = await decryptEventsBasic(event.conversationId, [event], socket.chat_private_key, ctx);
@@ -370,7 +485,7 @@ index 621e6d1..84661cb 100644
      const cleanAuthenticationHooks = ctx.setUpAuthenticationHooks(authenticationCallback);
      const netinfo_unsubscribe = NetInfo.addEventListener((state) => {
        if (state.isConnected) {
-@@ -333,11 +341,9 @@ const emitEvents = (recreateKeys = false) => {
+@@ -333,11 +340,9 @@ const emitEvents = (recreateKeys = false) => {
          setConnected(false);
        }
      });
@@ -384,7 +499,7 @@ index 621e6d1..84661cb 100644
        cleanAuthenticationHooks();
        netinfo_unsubscribe();
      };
-@@ -368,7 +374,7 @@ const emitEvents = (recreateKeys = false) => {
+@@ -368,7 +373,7 @@ const emitEvents = (recreateKeys = false) => {
        <>
          {children}
          { showRetryButton ? <Pressable style={styles.errorView} onPress={() => setRetry(!retry)}><Icon style={styles.errorIcon} name="refreshbold" /><Text style={styles.errorText}>
@@ -807,7 +922,7 @@ index a73d2b3..9c29aba 100644
      participants: [
        {
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 389e406..a23913d 100644
+index 389e406..e6db127 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 @@ -1,7 +1,7 @@
@@ -944,6 +1059,7 @@ index 389e406..a23913d 100644
    React.useEffect(() => {
      const friends = [];
      const friendCounts = [];
+-    APIService('phone-contacts/sync/',{numbers: getNumbers()}).then((r)=>{
 +    global.appIsLoading('Syncing contacts..');
 +    if (!global.isInternetReachable) {
 +      global.appIsNotLoading();
@@ -954,7 +1070,7 @@ index 389e406..a23913d 100644
 +        }
 +      );
 +    }
-     APIService('phone-contacts/sync/',{numbers: getNumbers()}).then((r)=>{
++    APIService('phone-contacts/sync/',{numbers: getNumbers()}, 3).then((r)=>{
 +      global.appIsNotLoading();
        r.contacts.forEach(u => {
          friends.push(u.phone_number);
@@ -44789,7 +44905,7 @@ index 0000000..8039f9f
 +com/ourengineroom/rnchatplugin/BuildConfig.java
 + com.ourengineroom.rnchatplugin.BuildConfig
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index c508376..03cd3c4 100644
+index c508376..39bc7bd 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
 @@ -12,6 +12,7 @@ export const { ChatPlugin } = NativeModules;
@@ -44916,7 +45032,7 @@ index c508376..03cd3c4 100644
  }
  
 +
-+ChatModule.whyDidYouRender = true;
++//ChatModule.whyDidYouRender = true;
  ChatModule.propTypes = {
    options: PropTypes.object.isRequired,
    socketIoUrl: PropTypes.string.isRequired,

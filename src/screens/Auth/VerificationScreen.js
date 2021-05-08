@@ -58,8 +58,9 @@ export default class VerificationScreen extends Component {
                   global.appIsNotLoading();
                   if (result) {
                     if (result.access_token) {
-                      setAuthData(result);
+                      setAuthData({...result, userToken: result.access_token});
                       AsyncStorage.setItem('userId', String(result.id));
+                      AsyncStorage.setItem('userName', result.name);
                       AsyncStorage.setItem('userToken', result.access_token);
                       AsyncStorage.setItem(
                         'refreshToken',

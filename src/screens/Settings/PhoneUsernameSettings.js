@@ -128,7 +128,7 @@ export default function PhoneUsernameSettings(props) {
         type={'textinput'}
         onChange={onUsernameChange}
         onChangeText={onUsernameChange}
-        placeholder={authData.name}>
+        placeholder={authData.userName}>
         User Name
       </MenuItem>
       <MenuDivider blank />

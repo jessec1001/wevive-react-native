@@ -177,6 +177,7 @@ const getNextOrProfile = (navigate, name, params, avatarUrl) => {
   );
 };
 export default function Header({route, themeSettings, goBack}) {
+  
   const navigation = useNavigation();
   const navigate = navigation.navigate;
   const ctx = React.useContext(UserContext);
@@ -188,9 +189,10 @@ export default function Header({route, themeSettings, goBack}) {
   const styleSuffix = getStyleSuffix(name);
   const style = name ? styles[`headerTitle${styleSuffix}`] : styles.headerTitle;
   const logo = getLogo(name);
-  if (!ctx.authData) {
+  if (!ctx.authData || !name) {
     return null;
   }
+  //console.error(ctx.authData);
   const userIdx = users.findIndex(u => u.id == ctx.authData.id);
   let avatarUrl = ctx.avatarUrl || ctx.authData.avatar;
   if (userIdx !== -1) {
