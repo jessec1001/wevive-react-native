@@ -20,25 +20,8 @@ import DetailsNavigator from '../../components/DetailsNavigator';
 import { AuthContext } from '../../context/AuthContext';
 import form_styles from '../../styles/forms';
 import P from '../../components/P';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from '../../service/APIService';
 import { UserContext } from '../../context/UserContext';
-
-import trans from '../../utils/trans';
-import getFlag from '../../../countryflags';
-import allCountries from '../../../countries.json';
-import phoneCodes from '../../../phones.json';
-const sortedCountries = {};
-Object.keys(allCountries)
-  .sort((a, b) => {
-    return allCountries[a].localeCompare(allCountries[b]);
-  })
-  .map((s) => {
-    sortedCountries[s] = allCountries[s];
-  });
-import {AuthContext} from '../../context/AuthContext';
-import {ClientContext} from '../../context/ClientContext';
-import { getCountryPhoneCode, removeTrunkPrefix } from '../../utils/phonehelpers';
 
 const validationSchema = {
     phone_number: yup

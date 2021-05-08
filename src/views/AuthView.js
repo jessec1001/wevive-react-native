@@ -1,53 +1,23 @@
 import React, {Fragment, Component} from 'react';
-import {
-  Image,
-  Keyboard,
-  ImageBackground,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Text,
-  TextInput,
-  StyleSheet,
-  View,
-  StatusBar,
-  ScrollView,
-} from 'react-native';
+import {Keyboard, ImageBackground, Text, View, StatusBar} from 'react-native';
 import authStyles from '../styles/auth';
 import ClientLogo from '../components/ClientLogo';
 //import KeyboardManager from 'react-native-keyboard-manager';
 
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {UIManager, LayoutAnimation, Linking, Platform} from 'react-native';
+import {Linking, Platform} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {ScrollContext} from '../context/ScrollContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AppThemeContext} from '../context/UserContext';
-
-const logo = require('../images/PNG/logo-line.png');
+import {SafeAreaView} from 'react-native-safe-area-context';
 const background = require('../images/PNG/wevive_bg.png');
-const mainHeadline = 'Register';
 export default class AuthView extends Component {
   state = {
     scrollView: null,
     styles: authStyles(false),
   };
   componentDidMount() {
-    /*
-    if (Platform.OS === 'ios') {
-      KeyboardManager.setEnable(false);
-      KeyboardManager.setKeyboardDistanceFromTextField(10);
-      //KeyboardManager.setPreventShowingBottomBlankSpace(true);
-      KeyboardManager.setEnableAutoToolbar(false);
-      KeyboardManager.setToolbarDoneBarButtonItemText('Done');
-      //KeyboardManager.setToolbarManageBehaviour(0);
-      KeyboardManager.setToolbarPreviousNextButtonEnable(true);
-      //KeyboardManager.setShouldToolbarUsesTextFieldTintColor(true); // deprecated, use setShouldShowToolbarPlaceholder
-      //KeyboardManager.setShouldShowToolbarPlaceholder(true);
-      KeyboardManager.setOverrideKeyboardAppearance(false);
-      KeyboardManager.setShouldResignOnTouchOutside(true);
-      KeyboardManager.resignFirstResponder();
-    }
-    */
     this.focusListener = this.props.navigation.addListener('focus', () => {
       if (this.props.route) {
         if (!this.props.route.params || !this.props.route.params.BioID) {
@@ -61,7 +31,10 @@ export default class AuthView extends Component {
         AsyncStorage.getItem('phoneNumber').then((phoneNumber) => {
           if (phoneNumber) {
             this.props
-              .signMessage(':biometric_login', 'Sign in using ' + phoneNumber + '?')
+              .signMessage(
+                ':biometric_login',
+                'Sign in using ' + phoneNumber + '?',
+              )
               .then((success) => {
                 this.props.bioLoginFunction({success, hideError: true});
               });
@@ -90,6 +63,10 @@ export default class AuthView extends Component {
       this.setState({styles: authStyles(false)}),
     );
   }
+  componentWillUnmount() {
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
+  } 
   handleOpenURL = async (url) => {
     const lastURL = global.Auth_Last_URL;
     if (lastURL === url) {
@@ -107,42 +84,43 @@ export default class AuthView extends Component {
 
   render() {
     return (
-      <AppThemeContext.Consumer>
-        {({themeSettings, goBack, insets}) => (
-          <>
-            {!this.props.noHeader && <StatusBar
-              backgroundColor="rgba(0,56,104,0)"
-              translucent={true}
-              barStyle="dark-content"
-            />}
-            <ImageBackground
-              resizeMode="cover"
-              imageStyle={this.state.styles.bgStyle}
-              style={this.state.styles.contentBg}
-              source={background}>
-              {!this.props.noHeader && <View style={this.state.styles.mainLogoContainerStyle}>
-                <View style={{marginTop: insets.top}}>
-                  <ClientLogo
-                    style={this.state.styles.mainLogoStyle}
-                    imageStyle={this.state.styles.mainLogoImageStyle}
-                  />
-                </View>
-                {this.props.headline && (
-                  <Text style={this.state.styles.mainHeadlineStyle}>
-                    {this.props.headline}
-                  </Text>
-                )}
-              </View>}
-              <KeyboardAwareScrollView
-                ref={(ref) => (this.state.scrollView = ref)}>
-                <ScrollContext.Provider value={{scroll: this.state.scrollView}}>
-                  <View style={this.state.styles.container}>{this.props.children}</View>
-                </ScrollContext.Provider>
-              </KeyboardAwareScrollView>
-            </ImageBackground>
-          </>
+      <>
+        {!this.props.noHeader && (
+          <StatusBar
+            backgroundColor="rgba(0,56,104,0)"
+            translucent={true}
+            barStyle="dark-content"
+          />
         )}
-      </AppThemeContext.Consumer>
+        <ImageBackground
+          resizeMode="cover"
+          imageStyle={this.state.styles.bgStyle}
+          style={this.state.styles.contentBg}
+          source={background}>
+          {!this.props.noHeader && (
+            <View style={this.state.styles.mainLogoContainerStyle}>
+              <SafeAreaView edges={['top']}>
+                <ClientLogo
+                  style={this.state.styles.mainLogoStyle}
+                  imageStyle={this.state.styles.mainLogoImageStyle}
+                />
+              </SafeAreaView>
+              {this.props.headline && (
+                <Text style={this.state.styles.mainHeadlineStyle}>
+                  {this.props.headline}
+                </Text>
+              )}
+            </View>
+          )}
+          <KeyboardAwareScrollView ref={(ref) => (this.state.scrollView = ref)}>
+            <ScrollContext.Provider value={{scroll: this.state.scrollView}}>
+              <View style={this.state.styles.container}>
+                {this.props.children}
+              </View>
+            </ScrollContext.Provider>
+          </KeyboardAwareScrollView>
+        </ImageBackground>
+      </>
     );
   }
 }

@@ -14,8 +14,9 @@ import trans from '../../utils/trans';
 import FormInput from '../../components/FormInput';
 
 import getFlag from '../../../countryflags';
+import {AuthContext} from '../../context/AuthContext';
+
 import allCountries from '../../../countries.json';
-import phoneCodes from '../../../phones.json';
 const sortedCountries = {};
 Object.keys(allCountries)
   .sort((a, b) => {
@@ -24,27 +25,7 @@ Object.keys(allCountries)
   .map((s) => {
     sortedCountries[s] = allCountries[s];
   });
-import {AuthContext} from '../../context/AuthContext';
-import {ClientContext} from '../../context/ClientContext';
-import { getCountryPhoneCode, removeTrunkPrefix } from '../../utils/phonehelpers';
-const countryPhoneCode = (country) => {
-    if (!country || !phoneCodes[country]) {
-      return;
-    }
-    if (Array.isArray(phoneCodes[country])) {
-      return (
-        <View style={styles.countryCodeBox}>
-          <Text style={styles.countryCode}>{getCountryPhoneCode(country)}</Text>
-        </View>
-      );
-    } else {
-      return (
-        <View style={styles.countryCodeBox}>
-          <Text style={styles.countryCode}>{getCountryPhoneCode(country)}</Text>
-        </View>
-      );
-    }
-  };
+
 export default class ChangeNumberVerification extends Component {
   navigateSuccess = () => {
     this.props.navigation.dispatch(

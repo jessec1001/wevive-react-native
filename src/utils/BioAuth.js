@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React from 'react';
 import ReactNativeBiometrics from 'react-native-biometrics';
-import {createContext, useContext, useState, useEffect} from 'react';
+import {createContext, useState, useEffect} from 'react';
 import APIService from '../service/APIService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

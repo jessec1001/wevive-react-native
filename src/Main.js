@@ -20,8 +20,7 @@ const chat_url = 'https://chat.wevive.com/';
 
 export default function Main({navigation, route}) {
   global.mainNavigation = navigation;
-  const {themeSettings, goBack, insets} = React.useContext(AppThemeContext);
-  const {contacts} = React.useContext(ChatContext);
+  const themeSettings = React.useContext(AppThemeContext);
   const {authData} = React.useContext(UserContext);
   React.useEffect(() => {
     RNCallKeep.addEventListener('answerCall', ({callUUID}) => {
@@ -45,7 +44,7 @@ export default function Main({navigation, route}) {
     <ChatModule options={{token: authData.userToken}} socketIoUrl={chat_url}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />
       {!themeSettings.hiddenHeader && (
-        <Header themeSettings={themeSettings} goBack={goBack} route={route} />
+        <Header themeSettings={themeSettings} route={route} />
       )}
       <AppNavigator />
       {!themeSettings.hiddenFooter && <FooterTabs />}

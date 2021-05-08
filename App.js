@@ -94,7 +94,7 @@ class AppContainer extends Component {
       <>
         {this.state.ready && (
           <SafeAreaProvider>
-            <ClientContext.Provider value={{geo: this.state.geo}}>
+            <ClientContext.Provider value={this.state.geo}>
               <BioID>
                 <RootStack initialProps={this.props.initialProps} />
               </BioID>

@@ -61,21 +61,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import deepEqual from 'deep-equal';
 let i = 0;
 const RootStack = ({initialProps}) => {
-  let goBackFunction = () => {
-    if (themeSettings.backFunction) {
-      themeSettings.backFunction();
-    } else {
-      if (navigationRef.current.goBack) {
-        navigationRef.current?.dispatch(StackActions.pop(1));
-      } else {
-        const tryToPop = navigationRef.pop();
-        if (!tryToPop) {
-          //AsyncStorage.removeItem('userToken');
-          navigationRef.navigate('SignIn');
-        }
-      }
-    }
-  };
   React.useEffect(() => {
     if (navigationRef.current && initialProps?.url?.room) {
       navigationRef.current.navigate('VideoCalls', {
@@ -89,9 +74,6 @@ const RootStack = ({initialProps}) => {
     hiddenHeader: false,
     hiddenFooter: false,
     canGoBack: false,
-  });
-  const [goBack, setGoBack] = useState(() => () => {
-    goBackFunction();
   });
   const onStateChange = (navState, backFunction) => {
     const changedTheme = {...themeSettings};
@@ -126,8 +108,8 @@ const RootStack = ({initialProps}) => {
   const updateAuthData = (newData) => {
     setAuthData({
       ...newData,
-      userName: "name" in newData ? newData.name : authData.userName,
-      avatarUrl: "avatar" in newData ? newData.avatar : authData.avatarUrl,
+      userName: 'name' in newData ? newData.name : authData.userName,
+      avatarUrl: 'avatar' in newData ? newData.avatar : authData.avatarUrl,
       userToken: newData.userToken ? newData.userToken : authData.userToken,
     });
   };
@@ -150,27 +132,29 @@ const RootStack = ({initialProps}) => {
     }
   };
   if (!authData) {
-    AsyncStorage.multiGet(['userId', 'avatarUrl', 'userToken', 'userName']).then(
-      (items) => {
-        const k = {};
-        items.map((i) => (k[i[0]] = i[1]));
-        if (k.userId && !rootLoaded) {
-          rootLoaded = true;
-          setAuthData({
-            id: k.userId,
-            avatarUrl: k.avatarUrl ? k.avatarUrl.slice(1, -1) : null,
-            userToken: k.userToken,
-            userName: k.userName,
-          });
-        }
-      },
-    );
+    AsyncStorage.multiGet([
+      'userId',
+      'avatarUrl',
+      'userToken',
+      'userName',
+    ]).then((items) => {
+      const k = {};
+      items.map((i) => (k[i[0]] = i[1]));
+      if (k.userId && !rootLoaded) {
+        rootLoaded = true;
+        setAuthData({
+          id: k.userId,
+          avatarUrl: k.avatarUrl ? k.avatarUrl.slice(1, -1) : null,
+          userToken: k.userToken,
+          userName: k.userName,
+        });
+      }
+    });
   }
   const appUserContextValue = {authData, setAuthData: updateAuthData, updateMe};
-  const insets = useSafeAreaInsets();
   return (
     <AppUserContext.Provider value={appUserContextValue}>
-      <AppThemeContext.Provider value={{themeSettings, goBack, insets}}>
+      <AppThemeContext.Provider value={themeSettings}>
         <NavigationContainer
           theme={DefaultTheme}
           linking={linking}

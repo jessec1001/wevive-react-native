@@ -176,8 +176,7 @@ const getNextOrProfile = (navigate, name, params, avatarUrl) => {
     </TouchableOpacity>
   );
 };
-export default function Header({route, themeSettings, goBack}) {
-  
+export default function Header({route, themeSettings}) {
   const navigation = useNavigation();
   const navigate = navigation.navigate;
   const ctx = React.useContext(UserContext);
@@ -207,7 +206,7 @@ export default function Header({route, themeSettings, goBack}) {
             <TouchableOpacity
               transparent
               onPress={() => {
-                goBack();
+                global.navigation.goBack();
               }}>
               <View style={{padding: 15}}>
                 <Icon
