@@ -21,7 +21,6 @@ export function isCallIntegrationEnabled(stateful: Function | Object) {
 export function getCallUUID(stateful: Function | Object) {
     const state = toState(stateful);
     const { callUUID } = state['features/base/flags'];
-    //console.error('getCallUUID', callUUID);
     // The feature flag has precedence.
     return callUUID;
 }

@@ -14,7 +14,7 @@ import {
 } from '../base/config';
 import { connect, disconnect, setLocationURL } from '../base/connection';
 import { loadConfig } from '../base/lib-jitsi-meet';
-import { MEDIA_TYPE } from '../base/media';
+import { MEDIA_TYPE, setVideoMuted } from '../base/media';
 import { toState } from '../base/redux';
 import { createDesiredLocalTracks, isLocalCameraTrackMuted, isLocalTrackMuted } from '../base/tracks';
 import {
@@ -85,7 +85,10 @@ export function appNavigate(uri: ?string) {
         if (navigator.product === 'ReactNative') {
             dispatch(disconnect());
             if (disconnected) {
-                global.navigation.dispatch(StackActions.pop());
+                setTimeout(() => {
+                    dispatch(setVideoMuted(true));
+                    global.navigation.dispatch(StackActions.pop());
+                }, 100);
             }
         }
         

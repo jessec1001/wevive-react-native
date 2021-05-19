@@ -475,6 +475,22 @@ const styles = (keyboard) => {
       height: 40,
       tintColor: 'rgba(230,60,60,0.9)',
     },
+    termsIcon: {
+      width: responsiveWidth(16.5)/1.5,
+      height: responsiveWidth(20)/1.5,
+      alignSelf: 'center',
+      marginVertical: responsiveWidth(2),
+    },
+    eulaContainer: {
+      borderRadius: 10,
+      paddingHorizontal: responsiveWidth(2.5),
+      marginHorizontal: responsiveWidth(5),
+      borderWidth: 2,
+      borderColor: "rgb(230,155,82)",
+      height: responsiveWidth(85),
+      marginVertical: responsiveWidth(2),
+      marginBottom: responsiveWidth(5),
+    },
   });
 };
 export default styles;

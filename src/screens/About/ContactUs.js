@@ -14,7 +14,6 @@ const weviveWhiteLogo = require('../../images/PNG/logo-line.png');
 export default class ContactUs extends Component {
   state = {
     contentStyles: contentStyles(),
-    licenseKey: null,
   };
   render() {
     return (
@@ -31,7 +30,7 @@ at the same time, share a general responsibility for all humanity, our particula
       }>
        
         <Content>
-          <Text>Lorem ipsum</Text>
+          <Text>Send all enquiries to support@wevive.com.</Text>
         </Content>
       </ContentWrapper>
     );

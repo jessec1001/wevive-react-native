@@ -10,6 +10,7 @@ import AvatarScreen from '../screens/Auth/AvatarScreen';
 import NotificationsScreen from '../screens/Auth/NotificationsScreen';
 import PINScreen from '../screens/Auth/PINScreen';
 import PINVerificationScreen from '../screens/Auth/PINVerificationScreen';
+import EULAScreen from '../screens/Auth/EULAScreen';
 import VerificationScreen from '../screens/Auth/VerificationScreen';
 import VerificationSuccess from '../screens/Auth/VerificationSuccess';
 const Stack = createStackNavigator();
@@ -69,6 +70,11 @@ const AuthStack = () => (
     <Stack.Screen
       name="VerificationScreen"
       component={VerificationScreen}
+      options={defaultConfig}
+    />
+    <Stack.Screen
+      name="EULAScreen"
+      component={EULAScreen}
       options={defaultConfig}
     />
     <Stack.Screen

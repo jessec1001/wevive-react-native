@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StatusBar, Platform} from 'react-native';
+import {StatusBar, Platform, Text} from 'react-native';
 
 import {AppThemeContext, UserContext} from './context/UserContext';
 import Header from './Header';
@@ -10,8 +10,6 @@ import AppNavigator from './navigation/AppNavigator';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 import ChatModule from 'react-native-chat-plugin';
-
-import {ChatContext} from 'react-native-chat-plugin/ChatContext';
 import RNCallKeep from 'react-native-callkeep';
 import registerPushNotifications from './utils/registerPushNotifications';
 
@@ -21,14 +19,15 @@ const chat_url = 'https://chat.wevive.com/';
 export default function Main({navigation, route}) {
   global.mainNavigation = navigation;
   const themeSettings = React.useContext(AppThemeContext);
-  const {authData} = React.useContext(UserContext);
-  React.useEffect(() => {
-    RNCallKeep.addEventListener('answerCall', ({callUUID}) => {
-      this.props.navigation.navigate('VideoCalls', {
-        callId: callUUID,
-        video: false,
-      });
+  const {authData, updateMe} = React.useContext(UserContext);
+
+  RNCallKeep.addEventListener('answerCall', ({callUUID}) => {
+    navigation.navigate('VideoCalls', {
+      callId: callUUID,
+      video: false,
     });
+  });
+  React.useEffect(() => {
     registerPushNotifications(
       () => {}, //onNotification
       () => {}, //onOpenNotification
@@ -37,11 +36,13 @@ export default function Main({navigation, route}) {
       changeNavigationBarColor('#ffffff', true, false);
     }
   }, []);
-  if (!authData || !authData.userToken) {
-    return null;
-  }
+  React.useEffect(() => {
+    if (!authData || !authData.userToken) {
+      updateMe();
+    }
+  },[authData]);
   return (
-    <ChatModule options={{token: authData.userToken}} socketIoUrl={chat_url}>
+    <ChatModule options={authData} socketIoUrl={chat_url}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />
       {!themeSettings.hiddenHeader && (
         <Header themeSettings={themeSettings} route={route} />

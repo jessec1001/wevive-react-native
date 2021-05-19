@@ -105,19 +105,41 @@ const RootStack = ({initialProps}) => {
   const navigationRef = React.useRef();
   global.navigation = navigationRef.current;
   const [authData, setAuthData] = useState(null);
-  const updateAuthData = (newData) => {
-    if (!newData) return;
+  const updateAuthData = async (newData) => {
+    /*if (newData && newData.access_token) {
+      newData.userToken = newData.access_token;
+    }*/
+    const userToken =
+      !newData || !newData.access_token
+        ? await AsyncStorage.getItem('userToken')
+        : newData.access_token;
+    if (!newData && userToken !== authData.userToken) {
+      setAuthData({
+        ...authData,
+        userToken: userToken,
+      });
+      return;
+    }
     setAuthData({
       ...newData,
       userName: 'name' in newData ? newData.name : authData.userName,
-      avatarUrl: 'avatar' in newData ? newData.avatar : authData.avatarUrl,
-      userToken: newData.userToken ? newData.userToken : authData.userToken,
+      avatarUrl:
+        'avatar' in newData
+          ? newData.avatar
+          : 'avatarUrl' in newData
+          ? newData.avatarUrl
+          : authData.avatarUrl,
+      avatarHosted:
+        newData.avatarUrl && newData.avatarUrl.indexOf('https://') !== -1
+          ? newData.avatarUrl
+          : authData?.avatarHosted,
+      userToken: userToken,
     });
   };
-  const updateMe = async () => {
-    const userToken = authData.userToken;
+  const updateMe = async (token) => {
+    const userToken = token || authData.userToken;
     if (userToken) {
-      APIService('users/me/', null, 5)
+      APIService('users/me/', null)
         .then((result) => {
           updateAuthData(result);
         })
@@ -143,12 +165,16 @@ const RootStack = ({initialProps}) => {
       items.map((i) => (k[i[0]] = i[1]));
       if (k.userId && !rootLoaded) {
         rootLoaded = true;
+        const avatarUrl = k.avatarUrl ? k.avatarUrl.slice(1, -1) : null;
         setAuthData({
           id: k.userId,
-          avatarUrl: k.avatarUrl ? k.avatarUrl.slice(1, -1) : null,
+          avatarUrl,
           userToken: k.userToken,
           userName: k.userName,
         });
+        setTimeout(() => {
+          updateMe(k.userToken);
+        }, 10);
       }
     });
   }

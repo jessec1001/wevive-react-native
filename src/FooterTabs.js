@@ -143,7 +143,7 @@ export default function FooterTabs() {
           unread={unread}
         />
         <FooterButton
-          text="Groups"
+          text="News"
           onPress={navigateToGroups}
           icon="groups"
           active={routeName === 'ContactsScreen' && params?.filter === 'groups'}

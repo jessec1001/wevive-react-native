@@ -54,7 +54,6 @@ if (Platform.OS == 'ios') {
 
   KeyboardManager.setEnable(true);
 }
-
 AppRegistry.registerComponent('App', () => App);
 // Register the main/root Component of IncomingCallView.
 AppRegistry.registerComponent('IncomingCallApp', () => IncomingCallApp);

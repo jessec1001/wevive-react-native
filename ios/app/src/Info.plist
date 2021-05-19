@@ -67,11 +67,11 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Send photos and videos to your contacts.</string>
 	<key>NSContactsUsageDescription</key>
-	<string>Allow syncing your phone contacts.</string>
+	<string>Upload phone numbers of your contacts to Wevive's servers to help you connect with your friends.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Local network is used for establishing Peer-to-Peer connections.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Allow to chat to Wevive users near you</string>
+	<string>Allow to chat to Wevive users near you. Your location is uploaded to the server if this feature is enabled.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Used for audio calls and audio messages.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

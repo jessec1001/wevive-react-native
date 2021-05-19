@@ -95,10 +95,10 @@ function getCallDate(call) {
 }
 function getSeconds(duration) {
   const seconds = String(duration % 60);
-  return seconds.substr(0,1) ? "0" + seconds : seconds; 
+  return seconds.substr(0,1) == seconds ? "0" + seconds : seconds; 
 }
 function getCallDuration(call) {
-  const durationString =  Math.floor(call.duration / 3600) + ":" + getSeconds(call.duration)
+  const durationString =  Math.floor(call.duration / 60) + ":" + getSeconds(call.duration)
   return (
     <Text style={styles.duration}>
       {durationString}

@@ -83,7 +83,7 @@ function _mapSettingsFieldToParticipant(settingsField) {
  */
 function _maybeHandleCallIntegrationChange({ settings }) {
     if (typeof settings?.disableCallIntegration === 'boolean') {
-        handleCallIntegrationChange(disableCallIntegration);
+        handleCallIntegrationChange(settings.disableCallIntegration);
     }
 }
 

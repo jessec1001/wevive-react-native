@@ -1,17 +1,25 @@
-import React, {Component} from 'react';
-import {StyleSheet, Image, Text, View, ImageBackground} from 'react-native';
-import ContentWrapper from '../../components/ContentWrapper';
-import Content from '../../components/Content';
-import {
-  responsiveHeight,
-  responsiveWidth,
-  responsiveFontSize,
-} from 'react-native-responsive-dimensions';
+import React, {Fragment, Component, useContext} from 'react';
+import {Text, Image, View, ScrollView} from 'react-native';
+import * as yup from 'yup';
+import {Formik} from 'formik';
+import Button from '../../components/Button';
+import authStyles from '../../styles/auth';
 
-import contentStyles from '../../styles/content';
+import APIService from '../../service/APIService';
+import AuthView from '../../views/AuthView';
+
+import {CommonActions} from '@react-navigation/native';
+import {responsiveWidth} from 'react-native-responsive-dimensions';
 import HTML from 'react-native-render-html';
-
-const weviveWhiteLogo = require('../../images/PNG/logo-line.png');
+const termsAgree = require('../../images/PNG/terms_agree.png');
+const termsInactive = require('../../images/PNG/terms_inactive.png');
+const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+  const paddingToBottom = 20;
+  return (
+    layoutMeasurement.height + contentOffset.y >=
+    contentSize.height - paddingToBottom
+  );
+};
 const EULA = `
 <p><span style="font-weight: 400;">Wevive Holdings Ltd (&ldquo;Wevive&rdquo;) adopts leading edge end-to-end encryption to provide private messaging, Internet calling and other services to users worldwide. You agree to our Terms of Service (&ldquo;Terms&rdquo;) by installing or using our apps, services, or website (together, &ldquo;Services&rdquo;).</span></p>
 <h3><strong>About our services</strong></h3>
@@ -47,98 +55,81 @@ const EULA = `
 <h1 style="color: #5e9ca0;">&nbsp;</h1>
 <p><span style="font-weight: 400;">Effective as of May 10, 2020</span></p>
 `;
-export default class About extends Component {
+export default class EULAScreen extends Component {
+  navigateSuccess = () => {
+    this.props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'PINScreen'}],
+      }),
+    );
+  };
   state = {
-    contentStyles: contentStyles(),
+    read: false,
   };
   render() {
+    const {navigate} = this.props.navigation;
     return (
-      <ContentWrapper paddingHorizontal={0} details={
-        <ImageBackground source={aboutbg} style={styles.aboutbg}>
-          <ImageBackground resizeMode={"contain"} source={weviveWhiteLogo} style={styles.weviveWhiteLogo}/>
-          <View><Text style={styles.aboutText}>"You cannot hope to build a better world without improving the individuals. To that end, each of us must work for his [or her] own improvement and,
-at the same time, share a general responsibility for all humanity, our particular duty being to aid those to whom we think we can be most useful."
-</Text></View>
-          <View>
-          <Text style={styles.aboutAuthor}>Marie Curie</Text>
-          </View>
-        </ImageBackground>
-      }>
-       
-        <Content>
-          <HTML
-            source={{html: EULA}}
-            contentWidth={responsiveWidth(80)}
-          />
-        </Content>
-      </ContentWrapper>
+      <AuthView
+        headline=""
+        route={this.props.route}
+        navigation={this.props.navigation}>
+        <Formik
+          initialValues={{
+            pin: '',
+          }}
+          onSubmit={(values, actions) => {
+            this.navigateSuccess();
+          }}
+          validationSchema={yup.object().shape({
+            //email: yup.string().email().required(),
+            //password: yup.string().min(3).required(),
+          })}>
+          {({
+            values,
+            handleChange,
+            errors,
+            setFieldTouched,
+            touched,
+            isValid,
+            handleSubmit,
+            setFieldValue,
+          }) => (
+            <View>
+              <Text style={styles.pageHeadlineStyle}>
+                End-user License Agreement
+              </Text>
+              {!this.state.read ? (
+                <Image source={termsInactive} style={styles.termsIcon} />
+              ) : (
+                <Image source={termsAgree} style={styles.termsIcon} />
+              )}
+              <ScrollView
+                style={styles.eulaContainer}
+                onScroll={({nativeEvent}) => {
+                  if (isCloseToBottom(nativeEvent)) {
+                    this.setState({read: true});
+                  }
+                }}
+                scrollEventThrottle={100}>
+                <HTML
+                  source={{html: EULA}}
+                  contentWidth={responsiveWidth(80)}
+                />
+              </ScrollView>
+              <View style={{...styles.buttonContainerStyle, margin:0}}>
+                <Button
+                  onPress={handleSubmit}
+                  title="Accept"
+                  active={this.state.read}
+                />
+              </View>
+            </View>
+          )}
+        </Formik>
+      </AuthView>
     );
   }
 }
-const aboutbg = require('../../images/PNG/aboutbg.jpg');
-const styles = StyleSheet.create({
-  weviveWhiteLogo: {
-    marginTop: responsiveWidth(5),
-    width: responsiveWidth(100),
-    height: responsiveWidth(15),
-    alignSelf: "center",
-  },
-  aboutText: {
-    marginTop: responsiveWidth(10),
-    fontSize: responsiveFontSize(1.5),
-    color: "white",
-    fontWeight: "600",
-    paddingHorizontal: responsiveWidth(15),
-    textAlign: "center",
-  },
-  aboutAuthor: {
-    marginTop: responsiveWidth(3),
-    fontSize: responsiveFontSize(2.8),
-    fontWeight: "600",
-    color: "white",
-    paddingHorizontal: 30,
-    textAlign: "center",
-  },
-  aboutbg: {
-    width: responsiveWidth(100),
-    height: responsiveWidth(70),
-  },
-  header: {
-    textAlign: 'center',
-    fontSize: responsiveFontSize(3),
-    fontWeight: '900',
-    marginBottom: responsiveWidth(3),
-  },
-  description1: {
-    textAlign: 'center',
-    fontSize: responsiveFontSize(2),
-    fontWeight: '900',
-    marginBottom: responsiveWidth(5),
-  },
-  description2: {
-    fontSize: responsiveFontSize(1.5),
-    fontWeight: '400',
-    marginBottom: responsiveWidth(1),
-  },
-  licenseBox: {
-    paddingTop: responsiveWidth(3),
-    paddingHorizontal: responsiveWidth(3),
-  },
-  licenseElement: {
-    marginBottom: responsiveWidth(5),
-  },
-  licenseLink: {
-    fontWeight: '400',
-    textDecorationLine: 'underline',
-    fontSize: responsiveFontSize(1.4),
-  },
-  licenseName: {
-    fontWeight: '900',
-    fontSize: responsiveFontSize(1.7),
-  },
-  licenseCopyright: {
-    fontWeight: '500',
-    fontSize: responsiveFontSize(1.3),
-  },
-  licenseText: {},
-});
+
+const styles = authStyles();

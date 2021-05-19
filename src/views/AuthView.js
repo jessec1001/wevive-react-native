@@ -105,14 +105,14 @@ export default class AuthView extends Component {
                   imageStyle={this.state.styles.mainLogoImageStyle}
                 />
               </SafeAreaView>
-              {this.props.headline && (
+              {this.props.headline !== "" && (
                 <Text style={this.state.styles.mainHeadlineStyle}>
                   {this.props.headline}
                 </Text>
               )}
             </View>
           )}
-          <KeyboardAwareScrollView ref={(ref) => (this.state.scrollView = ref)}>
+          <KeyboardAwareScrollView scrollEnabled={!!this.props.scrollDisabled} ref={(ref) => (this.state.scrollView = ref)}>
             <ScrollContext.Provider value={{scroll: this.state.scrollView}}>
               <View style={this.state.styles.container}>
                 {this.props.children}

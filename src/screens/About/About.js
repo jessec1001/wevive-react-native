@@ -14,7 +14,6 @@ const weviveWhiteLogo = require('../../images/PNG/logo-line.png');
 export default class About extends Component {
   state = {
     contentStyles: contentStyles(),
-    licenseKey: null,
   };
   render() {
     return (
@@ -31,7 +30,9 @@ at the same time, share a general responsibility for all humanity, our particula
       }>
        
         <Content>
-          <Text>Lorem ipsum</Text>
+          <Text>We all need inspiration from time to time, as it helps us see new possibilities in ourselves and the world. We believe the best inspiration comes from us acknowledging our positive actions, however small, and sharing it with each other. We sometimes forget that what we do matters, and by sharing it with others, it provides motivation and affirmation to us all.</Text> 
+          <Text>Our mission is to accelerate the world’s transition to a better planet.</Text>
+          <Text>Bringing a positive change to technology and our communities is ambitious. But it is through collaboration and collective action that this can be achieved.</Text>
         </Content>
       </ContentWrapper>
     );
