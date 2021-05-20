@@ -1,5 +1,5 @@
 import React, {Fragment, Component, useContext} from 'react';
-import {Text, TextInput, View} from 'react-native';
+import {Pressable, Text, TextInput, View} from 'react-native';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import Button from '../../components/Button';
@@ -12,6 +12,7 @@ import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 
 import {UserContext} from '../../context/UserContext';
+import styles from '../../styles/auth';
 export default class VerificationScreen extends Component {
   navigateSuccess = (user) => {
     let screen = 'VerificationSuccess';
@@ -29,9 +30,30 @@ export default class VerificationScreen extends Component {
       }),
     );
   };
+  state = {
+    showResend: false,
+    session_token: false,
+  }
+  componentDidMount = () => {
+    this.setState({session_token:this.props.route.params.sessionToken});
+    setTimeout(()=>{
+      this.setState({showResend:true});
+    }, 30000)
+  }
   handleBack = () => {
     this.props.navigation.goBack();
   };
+  reSend = () => {
+    APIService('phone/register/', {
+      phone_number,
+    }).then(result => {
+      AsyncStorage.setItem(
+        'sessionToken',
+        result.session_token,
+      );
+      this.setState({showResend:false,session_token:result.session_token});
+    });
+  }
   render() {
     const {navigate} = this.props.navigation;
     return (
@@ -53,7 +75,7 @@ export default class VerificationScreen extends Component {
                     this.props.route.params.phoneNumber,
                   security_code: values.pin,
                   remember_me: 1,
-                  session_token: this.props.route.params.sessionToken,
+                  session_token: this.state.session_token,
                 }).then((result) => {
                   global.appIsNotLoading();
                   if (result) {
@@ -117,6 +139,7 @@ export default class VerificationScreen extends Component {
                   {touched.pin && errors.pin && (
                     <Text style={styles.errorStyle}>{errors.pin}</Text>
                   )}
+                  {showResend && <Pressable onPress={reSend}><Text style={styles.resendStyle}>Resend</Text></Pressable>}
                   {!errors.pin && values.pin.length > 0 && (
                     <View style={styles.buttonContainerStyle}>
                       <Button onPress={handleSubmit} title="NEXT" />
