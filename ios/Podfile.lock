@@ -351,6 +351,8 @@ PODS:
     - React-Core
   - react-native-sms (1.11.0):
     - React
+  - react-native-splash-screen (3.2.0):
+    - React
   - react-native-sqlite-storage (5.1.0):
     - React
     - SQLCipher
@@ -563,6 +565,7 @@ DEPENDENCIES:
   - react-native-orientation-locker (from `../node_modules/react-native-orientation-locker`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sms (from `../node_modules/react-native-sms`)
+  - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - react-native-version-number (from `../node_modules/react-native-version-number`)
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
@@ -707,6 +710,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sms:
     :path: "../node_modules/react-native-sms"
+  react-native-splash-screen:
+    :path: "../node_modules/react-native-splash-screen"
   react-native-sqlite-storage:
     :path: "../node_modules/react-native-sqlite-storage"
   react-native-version-number:
@@ -861,6 +866,7 @@ SPEC CHECKSUMS:
   react-native-orientation-locker: 47aaa55d59bfc1613804dc22f159e6bb1cca5f30
   react-native-safe-area-context: f0906bf8bc9835ac9a9d3f97e8bde2a997d8da79
   react-native-sms: 31fbb9d6ebb565ad32e409eaf9dc70329936a129
+  react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   react-native-sqlite-storage: cd80d46253cfb38a31eb83c67681502d4c4295df
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
   react-native-view-shot: 4475fde003fe8a210053d1f98fb9e06c1d834e1c
@@ -890,11 +896,11 @@ SPEC CHECKSUMS:
   RNDateTimePicker: 8dcfab802edece406f4f4780130974a0e04213b4
   RNDefaultPreference: 2f8d6d54230edbd78708ada8d63bb275e5a8415b
   RNDeviceInfo: 3266783bcb6aa4b0c785d6080a407f8a5fc68326
-  RNFBAnalytics: 32f6148e8e5bc1bb748b87e452b97fe1b7b1baf1
-  RNFBApp: 8b1b4308daa657b8ea87dbed517e31215f5f1456
-  RNFBCrashlytics: c101babbfeb8bf12150b947e36665e19b96aace0
-  RNFBDynamicLinks: 6ed4d147b24fa297a7413c00b5c56634e5de8cb8
-  RNFBMessaging: 851ec0d1a9cb22e80dcf5f5ea57775fe1f78e629
+  RNFBAnalytics: 7ec2905027782e4018479ac7091ff417210b0d77
+  RNFBApp: 2a49da069406556825d9d26aa5aa9124ee194e16
+  RNFBCrashlytics: 80e549a078c608cc4f320e5ce4235820d1017f01
+  RNFBDynamicLinks: 63e5dd8bf1e044cb892301049f173b6ae59cbb2b
+  RNFBMessaging: 217f7b528822eba9373448fd95a9e4b7bcd74498
   RNFS: 93d5b5535eb39d98e6b19009faa8fe717f7ea45d
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNImageCropPicker: e641bf83ac47324994cac139bde74635ec52c17c
@@ -916,6 +922,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   Yoga: 8c8436d4171c87504c648ae23b1d81242bdf3bbf
 
-PODFILE CHECKSUM: 0bbf923b29ef65b5a6966edb7decdbe4dd3c5c63
+PODFILE CHECKSUM: b067189c19e411f1faf8ff9df413fee1200cb90c
 
 COCOAPODS: 1.10.1

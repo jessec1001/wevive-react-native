@@ -12,18 +12,21 @@ import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import trans from '../../utils/trans';
 import {UserContext} from '../../context/UserContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PINVerificationScreen({navigation, route}) {
-  const {authData} = React.useContext(UserContext);
   const navigateSuccess = () => {
+    const user = route.params.user;
+    AsyncStorage.setItem('userToken', user.access_token);
+    AsyncStorage.setItem('refreshToken', user.refresh_token);
+
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: !authData?.avatar ? 'AvatarScreen' : 'App'}],
+        routes: [{name: !user?.avatar ? 'AvatarScreen' : 'App'}],
       }),
     );
   };
-  const {navigate} = navigation;
   return (
     <AuthView headline={'Security'} route={route} navigation={navigation}>
       <Formik
@@ -31,7 +34,23 @@ export default function PINVerificationScreen({navigation, route}) {
           pin: '',
         }}
         onSubmit={(values, actions) => {
-          navigateSuccess();
+          global.appIsLoading();
+          APIService(
+            'users/verifyPIN/',
+            {
+              pin: values.pin,
+            },
+            0,
+            route.params.user.access_token,
+          ).then((result) => {
+            console.error(result);
+            global.appIsNotLoading();
+            if (result.success) {
+              navigateSuccess();
+            } else {
+              actions.setFieldError('pin', 'Wrong PIN.');
+            }
+          });
         }}
         validationSchema={yup.object().shape({
           //email: yup.string().email().required(),
@@ -69,6 +88,7 @@ export default function PINVerificationScreen({navigation, route}) {
             )}
             {!!errors.pin && (
               <View style={styles.buttonContainerStyle}>
+                <Text>{errors.pin}</Text>
                 <Button onPress={navigation.goBack} title="BACK" />
               </View>
             )}

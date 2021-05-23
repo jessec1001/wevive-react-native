@@ -12,13 +12,12 @@ import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 
 import {UserContext} from '../../context/UserContext';
-import styles from '../../styles/auth';
 export default class VerificationScreen extends Component {
   navigateSuccess = (user) => {
     let screen = 'VerificationSuccess';
     if (user.new || user.phone_number == '+11234567890') {
       screen = 'VerificationSuccess';
-    } else if (user.pinSet) {
+    } else if (user.pinSet !== true) {
       screen = 'PINScreen';
     } else {
       screen = 'PINVerificationScreen';
@@ -26,34 +25,38 @@ export default class VerificationScreen extends Component {
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: screen}],
+        routes: [{name: screen, params: {user}}],
       }),
     );
   };
   state = {
     showResend: false,
-    session_token: false,
-  }
+    session_token: this.props.route.params.sessionToken,
+  };
   componentDidMount = () => {
-    this.setState({session_token:this.props.route.params.sessionToken});
-    setTimeout(()=>{
-      this.setState({showResend:true});
-    }, 30000)
-  }
+    setTimeout(() => {
+      this.setState({showResend: true});
+    }, 10000);
+  };
   handleBack = () => {
-    this.props.navigation.goBack();
+    AsyncStorage.removeItem('sessionToken');
+    this.props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'SignIn'}],
+      }),
+    );
   };
   reSend = () => {
     APIService('phone/register/', {
-      phone_number,
-    }).then(result => {
-      AsyncStorage.setItem(
-        'sessionToken',
-        result.session_token,
-      );
-      this.setState({showResend:false,session_token:result.session_token});
+      phone_number:
+        this.props.route.params.countryCode +
+        this.props.route.params.phoneNumber,
+    }).then((result) => {
+      AsyncStorage.setItem('sessionToken', result.session_token);
+      this.setState({showResend: false, session_token: result.session_token});
     });
-  }
+  };
   render() {
     const {navigate} = this.props.navigation;
     return (
@@ -84,11 +87,6 @@ export default class VerificationScreen extends Component {
                       AsyncStorage.removeItem('sessionToken');
                       AsyncStorage.setItem('userId', String(result.id));
                       AsyncStorage.setItem('userName', result.name);
-                      AsyncStorage.setItem('userToken', result.access_token);
-                      AsyncStorage.setItem(
-                        'refreshToken',
-                        result.refresh_token,
-                      );
                       this.navigateSuccess(result);
                     } else {
                       actions.setFieldError('pin', result.non_field_errors[0]);
@@ -139,20 +137,24 @@ export default class VerificationScreen extends Component {
                   {touched.pin && errors.pin && (
                     <Text style={styles.errorStyle}>{errors.pin}</Text>
                   )}
-                  {showResend && <Pressable onPress={reSend}><Text style={styles.resendStyle}>Resend</Text></Pressable>}
+
                   {!errors.pin && values.pin.length > 0 && (
                     <View style={styles.buttonContainerStyle}>
                       <Button onPress={handleSubmit} title="NEXT" />
                     </View>
                   )}
-                  {(!!errors.pin || !values.pin) && (
+                  {this.state.showResend && (
                     <View style={styles.buttonContainerStyle}>
-                      <Button
-                        onPress={this.props.navigation.goBack}
-                        title="BACK"
-                      />
+                      <Pressable onPress={this.reSend.bind(this)}>
+                        <Text>Resend code via SMS</Text>
+                      </Pressable>
                     </View>
                   )}
+                  <View style={styles.buttonContainerStyle}>
+                    <Pressable onPress={this.handleBack}>
+                      <Text>Back</Text>
+                    </Pressable>
+                  </View>
                 </View>
               )}
             </Formik>

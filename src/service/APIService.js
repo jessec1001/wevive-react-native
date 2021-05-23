@@ -14,7 +14,7 @@ const decodejwt = function (token) {
   return decodedJSON;
 };
 
-const APIService = async (endpoint, data, cache_time) => {
+const APIService = async (endpoint, data, cache_time, forceToken) => {
   //var cache_time = 0;
   let json_data = JSON.stringify(data);
   var hmac = await CryptoJS.HmacSHA256(
@@ -34,7 +34,10 @@ const APIService = async (endpoint, data, cache_time) => {
       headers = {...headers, Authorization: 'Bearer ' + userToken};
     }
     var method = requestData ? 'POST' : 'GET';
-    if (url.indexOf('user-photo/update_photo/') > 0) {
+    if (
+      url.indexOf('user-photo/update_photo/') > 0 ||
+      url.indexOf('groups/') > 0
+    ) {
       headers['Content-Type'] = 'multipart/form-data';
     }
     if (url.indexOf('users/me/') > 0 && method === 'POST') {
@@ -58,6 +61,14 @@ const APIService = async (endpoint, data, cache_time) => {
           type: data.mime,
           name: data.filename,
         });
+      }
+      if (data.group_photo && data.mime && data.filename) {
+        formData.append('group_photo', {
+          uri: data.group_photo,
+          type: data.mime,
+          name: data.filename,
+        });
+        formData.append('name', data.name);
       }
       options.body = formData;
     } else {
@@ -139,7 +150,12 @@ const APIService = async (endpoint, data, cache_time) => {
         resolve(result);
       });
     } else {
-      const result = fetchFromAPI(api_url + endpoint, json_data, hmac);
+      const result = fetchFromAPI(
+        api_url + endpoint,
+        json_data,
+        hmac,
+        forceToken,
+      );
       return result;
     }
   }

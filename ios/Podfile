@@ -1,7 +1,7 @@
 
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 require_relative '../node_modules/react-native/scripts/react_native_pods'
-
+$RNFirebaseAsStaticFramework = true
 install! 'cocoapods', :deterministic_uuids => false
 workspace 'jitsi-meet'
 #use_frameworks!

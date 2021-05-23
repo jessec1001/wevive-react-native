@@ -15,7 +15,9 @@ export default class VerificationSuccess extends Component {
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: 'EULAScreen'}],
+        routes: [
+          {name: 'EULAScreen', params: {user: this.props.route.params.user}},
+        ],
       }),
     );
   };

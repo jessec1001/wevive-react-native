@@ -89,6 +89,9 @@ const RootStack = ({initialProps}) => {
         changedTheme.hiddenFooter = false;
       }
     }
+    if (routeName === 'PhoneContactsScreen') {
+      changedTheme.hiddenHeader = true;
+    }
     if (routeName === 'ContactsScreen' || routeName === 'Main') {
       changedTheme.hiddenBack = true;
     } else {

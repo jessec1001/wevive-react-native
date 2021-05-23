@@ -28,10 +28,10 @@ export default class NotificationsScreen extends Component {
         navigation={this.props.navigation}>
         <Formik
           initialValues={{
-            pin: '',
+            notificationsEnabled: true,
           }}
           onSubmit={(values, actions) => {
-            this.navigateSuccess(values.giftaid);
+            this.navigateSuccess(values.notificationsEnabled);
           }}
           validationSchema={yup.object().shape({
             //email: yup.string().email().required(),
@@ -63,14 +63,14 @@ export default class NotificationsScreen extends Component {
               <View style={styles.toggleContainerStyle}>
                 <Text style={styles.toggleLabel}>Enable notifications?</Text>
                 <Switch
-                    trackColor={{true: '#2bbb50', false: '#bababa'}}
-                    thumbColor="#ffffff"
-                    value={values.giftaid}
-                    style={styles.switchStyle}
-                    accessibilityRole="button"
-                    onValueChange={(value) =>
-                      setFieldValue('giftaid', value)
-                    }
+                  trackColor={{true: '#2bbb50', false: '#bababa'}}
+                  thumbColor="#ffffff"
+                  value={values.notificationsEnabled}
+                  style={styles.switchStyle}
+                  accessibilityRole="button"
+                  onValueChange={(value) =>
+                    setFieldValue('notificationsEnabled', value)
+                  }
                 />
               </View>
               <View style={styles.buttonContainerStyle}>

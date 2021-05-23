@@ -42,7 +42,6 @@ export default class AppBootstrap extends Component {
       $this.setState({isReady: true});
       $this.props.navigation.navigate(k.userToken && !k.bioAccessToken ? 'App' : 'Auth');
     });
-    
   };
 
   render() {

@@ -257,9 +257,9 @@ const styles = StyleSheet.create({
     color: 'rgb(227,140,57)',
   },
   headerTitle: {
-    top: -responsiveWidth(3.3),
+    top: -responsiveWidth(3.5),
     fontFamily: 'SFProDisplay-Regular',
-    fontSize: responsiveFontSize(1.3),
+    fontSize: responsiveFontSize(1.6),
     fontWeight: '100',
   },
   mainLogoContainerStyle: {

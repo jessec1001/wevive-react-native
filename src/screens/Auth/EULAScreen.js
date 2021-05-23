@@ -60,7 +60,9 @@ export default class EULAScreen extends Component {
     this.props.navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: 'PINScreen'}],
+        routes: [
+          {name: 'PINScreen', params: {user: this.props.route.params.user}},
+        ],
       }),
     );
   };
@@ -117,7 +119,7 @@ export default class EULAScreen extends Component {
                   contentWidth={responsiveWidth(80)}
                 />
               </ScrollView>
-              <View style={{...styles.buttonContainerStyle, margin:0}}>
+              <View style={{...styles.buttonContainerStyle, margin: 0}}>
                 <Button
                   onPress={handleSubmit}
                   title="Accept"

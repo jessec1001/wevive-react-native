@@ -11,15 +11,28 @@ import AuthView from '../../views/AuthView';
 import {CommonActions} from '@react-navigation/native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import trans from '../../utils/trans';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class PINScreen extends Component {
   navigateSuccess = () => {
-    this.props.navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{name: 'AvatarScreen'}],
-      }),
-    );
+    const user = this.props.route.params.user;
+    AsyncStorage.setItem('userToken', user.access_token);
+    AsyncStorage.setItem('refreshToken', user.refresh_token);
+    if (!user.avatar) {
+      this.props.navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: 'AvatarScreen'}],
+        }),
+      );
+    } else {
+      this.props.navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: 'NotificationsScreen'}],
+        }),
+      );
+    }
   };
   makeid = (length) => {
     var result = '';
@@ -44,11 +57,11 @@ export default class PINScreen extends Component {
           }}
           onSubmit={(values, actions) => {
             global.appIsLoading();
-            APIService('users/set_pin/', {
+            APIService('users/savePIN/', {
               pin: values.pin,
             }).then((result) => {
               global.appIsNotLoading();
-              if (result) {
+              if (result.success) {
                 this.navigateSuccess();
               } else {
                 actions.setFieldError('pin', 'Failed to save PIN.');
@@ -57,7 +70,7 @@ export default class PINScreen extends Component {
           }}
           validationSchema={yup.object().shape({
             //email: yup.string().email().required(),
-            pin: yup.string().min(6).required().oneOf([rand, null], trans('auth.password_must_match')),
+            pin: yup.string().min(6).required(), //.oneOf([rand, null], trans('auth.password_must_match')),
           })}>
           {({
             values,
@@ -70,14 +83,13 @@ export default class PINScreen extends Component {
             setFieldValue,
           }) => (
             <>
-              <Text style={styles.pageHeadlineStyle}>Save this PIN!</Text>
-              <Text style={styles.pageTextStyleBold}>{rand}</Text>
+              <Text style={styles.pageHeadlineStyle}>Create your PIN!</Text>
               <Text style={styles.pageTextStyle}>
                 Your PIN keeps your information safe and accessible to you in
-                case you need to reinstall WeTalk.
+                case you need to reinstall Wevive WeTalk.
               </Text>
               <Text style={styles.pageTextStyle}>
-                Please write it down and then enter it below to continue.
+                Please enter it below to continue.
               </Text>
               <SmoothPinCodeInput
                 codeLength={6}
