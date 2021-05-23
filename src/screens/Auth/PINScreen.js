@@ -57,9 +57,14 @@ export default class PINScreen extends Component {
           }}
           onSubmit={(values, actions) => {
             global.appIsLoading();
-            APIService('users/savePIN/', {
-              pin: values.pin,
-            }).then((result) => {
+            APIService(
+              'users/savePIN/',
+              {
+                pin: values.pin,
+              },
+              0,
+              this.props.route.params.user.access_token,
+            ).then((result) => {
               global.appIsNotLoading();
               if (result.success) {
                 this.navigateSuccess();

@@ -43,7 +43,6 @@ export default function PINVerificationScreen({navigation, route}) {
             0,
             route.params.user.access_token,
           ).then((result) => {
-            console.error(result);
             global.appIsNotLoading();
             if (result.success) {
               navigateSuccess();
