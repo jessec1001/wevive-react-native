@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StatusBar, Platform, Text} from 'react-native';
+import {StatusBar, Platform, Text, Alert} from 'react-native';
 
 import {AppThemeContext, UserContext} from './context/UserContext';
 import Header from './Header';
@@ -29,8 +29,17 @@ export default function Main({navigation, route}) {
   });
   React.useEffect(() => {
     registerPushNotifications(
-      () => {}, //onNotification
-      () => {}, //onOpenNotification
+      (a) => {
+        //Alert.alert('onNotification:'+JSON.stringify(b));
+      }, //onNotification
+      (b) => {
+        //Alert.alert('onOpen:'+JSON.stringify(b));
+        if (b.data.conversationId) {
+          navigation.navigate('ChatScreen', {
+            conversation: b.data.conversationId,
+          });
+        }
+      }, //onOpenNotification
     );
     if (Platform.OS === 'android') {
       changeNavigationBarColor('#ffffff', true, false);

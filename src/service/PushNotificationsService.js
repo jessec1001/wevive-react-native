@@ -107,7 +107,7 @@ class FCM_Service {
         );
         if (remoteMessage) {
           onOpenNotification(remoteMessage);
-          PushNotification.setApplicationIconBadgeNumber(0);
+          //PushNotification.setApplicationIconBadgeNumber(0);
         }
       });
     // Foreground state messages
