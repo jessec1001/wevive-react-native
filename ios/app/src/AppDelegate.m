@@ -135,43 +135,35 @@
 
 // --- Handle incoming pushes
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void (^)(void))completion {
-  
-
-  // --- NOTE: apple forced us to invoke callkit ASAP when we receive voip push
-  // --- see: react-native-callkeep
-
-  // --- Retrieve information from your voip push payload
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
-  NSString *callerName = [NSString stringWithFormat:@"%@", payload.dictionaryPayload[@"callerName"]];
-  NSString *handle = payload.dictionaryPayload[@"handle"];
+  NSString *message = payload.dictionaryPayload[@"message"];
+  if (message == @"hangup") { 
+    [RNCallKeep endCallWithUUID: uuid reason:6];
+  } else {
+    NSString *callerName = [NSString stringWithFormat:@"%@", payload.dictionaryPayload[@"callerName"]];
+    NSString *handle = payload.dictionaryPayload[@"handle"];
 
-  // --- this is optional, only required if you want to call `completion()` on the js side
-  [RNVoipPushNotificationManager addCompletionHandler:uuid completionHandler:completion];
+    // --- this is optional, only required if you want to call `completion()` on the js side
+    [RNVoipPushNotificationManager addCompletionHandler:uuid completionHandler:completion];
 
-  // --- Process the received push
-  [RNVoipPushNotificationManager didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];
-  [RNCallKeep reportNewIncomingCall: uuid
-                           handle: handle
-                       handleType: @"generic"
-                         hasVideo: false
-              localizedCallerName: callerName
-                  supportsHolding: false
-                     supportsDTMF: false
-                 supportsGrouping: false
-               supportsUngrouping: false
-                      fromPushKit: YES
-                          payload: nil
-            withCompletionHandler: nil];
-  //  --- You should make sure to report to callkit BEFORE execute `completion()`
-  // --- You don't need to call it if you stored `completion()` and will call it on the js side.
-  completion();
-  /*[JitsiMeetView setPropsInViews: [JitsiMeetConferenceOptions fromBuilder:^(JitsiMeetConferenceOptionsBuilder *builder) {
-    [builder setFeatureFlag:@"resolution" withValue:@(720)];
-    builder.serverURL = [NSURL URLWithString:@"https://webrtc.wevive.com"];
-    builder.welcomePageEnabled = YES;
-    builder.room = uuid;
-  }]];*/
-  /**/
+    // --- Process the received push
+    [RNVoipPushNotificationManager didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];
+    [RNCallKeep reportNewIncomingCall: uuid
+                            handle: handle
+                        handleType: @"number"
+                          hasVideo: false
+                localizedCallerName: nil
+                    supportsHolding: false
+                      supportsDTMF: false
+                  supportsGrouping: false
+                supportsUngrouping: false
+                        fromPushKit: YES
+                            payload: nil
+              withCompletionHandler: nil];
+    //  --- You should make sure to report to callkit BEFORE execute `completion()`
+    // --- You don't need to call it if you stored `completion()` and will call it on the js side.
+    completion();
+  }
 }
 
 @end

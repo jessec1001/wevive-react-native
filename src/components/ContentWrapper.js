@@ -1,18 +1,16 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {useState, useEffect, useContext} from 'react';
-import {StyleSheet, ScrollView, View, Text, Image} from 'react-native';
+import React from 'react';
+import {StyleSheet, ScrollView, View, Text} from 'react-native';
 
 import {
   responsiveHeight,
   responsiveWidth,
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
-const logo = require('../images/PNG/balls.png');
-const logo2 = require('../images/PNG/praxislogo.png');
-const logo3 = require('../images/PNG/begambleaware.png');
 import {
   wrapScrollView, // simple wrapper, no config
 } from 'react-native-scroll-into-view';
+
+import {colors} from '../../app.json';
 
 // Available options with their default value
 const ScrollIntoViewOptions = {
@@ -43,10 +41,7 @@ const ScrollIntoViewOptions = {
 
 // Wrap the original ScrollView
 const CustomScrollView = wrapScrollView(ScrollView);
-import {colors} from '../../app.json';
-import APIService from '../service/APIService';
-import {useNavigation} from '@react-navigation/native';
-import {UserContext} from '../context/UserContext';
+
 
 const ScrollComponent = (props) => {
   if (!props.scrollElement) {

@@ -54,8 +54,6 @@ const linking = {
   },
 };
 
-import {StackActions} from '@react-navigation/native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import APIService from '../service/APIService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import deepEqual from 'deep-equal';
@@ -135,7 +133,8 @@ const RootStack = ({initialProps}) => {
       avatarHosted:
         newData.avatarUrl && newData.avatarUrl.indexOf('https://') !== -1
           ? newData.avatarUrl
-          : authData?.avatarHosted,
+          : newData.avatar && newData.avatar.indexOf('https://') !== -1
+          ? newData.avatar : authData?.avatarHosted,
       userToken: userToken,
     });
   };

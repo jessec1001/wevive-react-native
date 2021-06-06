@@ -2,10 +2,8 @@ import React, {Component} from 'react';
 import {
   ActivityIndicator,
   Image,
-  StatusBar,
   StyleSheet,
   View,
-  Text,
   ImageBackground,
   Platform,
 } from 'react-native';
@@ -15,32 +13,23 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
-import {colors} from '../../app.json';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 const logo = require('../images/PNG/logo-line.png');
 const background = require('../images/PNG/wevive_bg.png');
 
 export default class AppBootstrap extends Component {
-  state = {
-    isReady: false,
-  };
   async componentDidMount() {
-    var $this = this;
     if (Platform.OS === 'android') {
-      changeNavigationBarColor('#082136', false, false);
+      changeNavigationBarColor('#ffffff', true, false);
     }
-    setTimeout(function () {
-      $this._bootstrapAsync($this);
-    }, 300);
+    this._bootstrapAsync(this);
   }
 
   _bootstrapAsync = async ($this) => {
-    const userToken = await AsyncStorage.getItem('userToken');
     AsyncStorage.multiGet(['userToken', 'bioAccessToken', 'TFA']).then(
       (items) => {
         const k = {};
         items.map((i) => (k[i[0]] = i[1]));
-        $this.setState({isReady: true});
         $this.props.navigation.navigate(
           k.userToken && !k.bioAccessToken && k.TFA !== 'enabled'
             ? 'App'

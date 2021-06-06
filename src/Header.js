@@ -189,9 +189,11 @@ export default function Header({route, themeSettings}) {
   const style = name ? styles[`headerTitle${styleSuffix}`] : styles.headerTitle;
   const logo = getLogo(name);
   const userIdx = users.findIndex(u => u.id == ctx.authData.id);
-  let avatarUrl = ctx.avatarUrl || ctx.authData.avatar;
+  let avatarUrl;
   if (userIdx !== -1) {
     avatarUrl = users[userIdx].avatar;
+  } else {
+    avatarUrl = ctx.avatarUrl || ctx.authData.avatar;
   }
   const nextOrProfile = getNextOrProfile(navigate, name, params, avatarUrl);
   return (

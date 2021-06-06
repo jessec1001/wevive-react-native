@@ -22,11 +22,11 @@ import APIService from '../../service/APIService';
 import { ChatContext } from 'react-native-chat-plugin/ChatContext';
 
 export default function PhoneUsernameSettings(props) {
-  const {authData, avatarUrl, updateMe} = useContext(UserContext);
+  const {authData, updateMe} = useContext(UserContext);
   const chatCtx = useContext(ChatContext);
   const users = chatCtx.getUsers();
   const userIdx = users.findIndex(u => u.id == authData.id);
-  let avatarUrlToUse = avatarUrl || authData.avatar;
+  let avatarUrlToUse = authData.avatar;
   if (userIdx !== -1) {
     avatarUrlToUse = users[userIdx].avatar;
   }
@@ -63,7 +63,7 @@ export default function PhoneUsernameSettings(props) {
   const saveImage = () => {
     APIService('users/me/', {
       name,
-    }).then((aa) => {
+    }).then((me) => {
       if (changedImage) {
         APIService('user-photo/update_photo/', {
           photo: image.avatarImage,
@@ -73,8 +73,12 @@ export default function PhoneUsernameSettings(props) {
         }).then((result) => {
           global.appIsNotLoading();
           if (result) {
+            chatCtx.saveUserToDB(me.id, result, name, me.phone_number);
+            ctx.setAuthData({
+              avatar: result,
+            });
             AsyncStorage.setItem('avatarUrl', result);
-            updateMe();
+            //updateMe();
             setImage({
               ...image,
               default: true,

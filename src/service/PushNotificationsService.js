@@ -1,7 +1,8 @@
 import messaging from '@react-native-firebase/messaging';
 import {Platform} from 'react-native';
+import IncomingCall from 'react-native-incoming-call';
 import {requestNotifications} from 'react-native-permissions';
-import PushNotification from "react-native-push-notification";
+//import PushNotification from 'react-native-push-notification';
 class FCM_Service {
   register = (onRegister, onNotification, onOpenNotification) => {
     this.registerAppWithFCM(onRegister);
@@ -45,9 +46,9 @@ class FCM_Service {
     messaging()
       .getToken()
       .then(async (fcmToken) => {
-        let apnsToken = await messaging().getAPNSToken();
         if (fcmToken) {
-          onRegister(fcmToken, apnsToken);
+          console.log('[FCMService] getToken', fcmToken);
+          onRegister(fcmToken);
         } else {
           console.log('[FCMService] User does not have a device token');
         }
@@ -86,6 +87,7 @@ class FCM_Service {
     onNotification,
     onOpenNotification,
   ) => {
+    console.log('[FCMService] createNotificationListeners');
     // When the application is running, but in the background
     messaging().onNotificationOpenedApp((remoteMessage) => {
       console.log(
@@ -114,16 +116,29 @@ class FCM_Service {
     this.messageListener = messaging().onMessage(async (remoteMessage) => {
       console.log('[FCMService] A new FCM message arrived!', remoteMessage);
       if (remoteMessage) {
+        if (remoteMessage.data.callUUID) {
+          global.showCallPopup();
+          console.log('Calling IncomingCall');
+          IncomingCall.display(
+            remoteMessage.data.callUUID, // Call UUID v4
+            remoteMessage.data.username, // Username
+            remoteMessage.data.avatarURL,
+            'Wevive Call', // Info text
+            30000, // Timeout for end call after 30s
+          );
+        } else {
+          console.log('[FCMService] no callUUID');
+        }
         let notification = null;
         notification = remoteMessage.notification;
         onNotification(notification);
+      } else {
+        console.log('[FCMService] message is false');
       }
     });
     // Triggered when have new token
     messaging().onTokenRefresh(async (fcmToken) => {
-      console.log('[FCMService] New token refresh: ', fcmToken);
-      let apnsToken = await messaging().getAPNSToken();
-      onRegister(fcmToken, apnsToken);
+      onRegister(fcmToken);
     });
   };
   unRegister = () => {

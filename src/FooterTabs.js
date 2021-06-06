@@ -107,6 +107,9 @@ export default function FooterTabs() {
   const navigateToGroups = () => {
     navigate('ContactsScreen', {filter: 'groups', type: null});
   };
+  if (routeName == 'VideoCalls') {
+    return null;
+  }
   return (
     <SafeAreaView edges={['bottom']} style={styles.footerBackground}>
       <ActionSheet

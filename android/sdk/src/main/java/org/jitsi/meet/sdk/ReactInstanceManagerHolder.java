@@ -271,6 +271,9 @@ class ReactInstanceManagerHolder {
                 //new com.oney.WebRTCModule.WebRTCModulePackage(),
                 // react-native-webview
                 new com.reactnativecommunity.webview.RNCWebViewPackage(),
+                // rn-android-overlay-permission
+                new com.overlaypermission.OverlayPermissionPackage(),
+                new com.incomingcall.IncomingCallPackage(),
                 new com.facebook.react.shell.MainReactPackage(),
                 new ReactPackageAdapter() {
                     @Override
@@ -300,7 +303,7 @@ class ReactInstanceManagerHolder {
             = ReactInstanceManager.builder()
                 .setApplication(activity.getApplication())
                 .setCurrentActivity(activity)
-                .setBundleAssetName("index.bundle")
+                .setBundleAssetName("index.android.bundle")
                 .setJSMainModulePath("index")
                 .setJavaScriptExecutorFactory(jsFactory)
                 .addPackages(packages)

@@ -128,12 +128,9 @@ const contactsPath = RNFS.DocumentDirectoryPath + '/contacts.json';
 export function getPhoneContactsFromDevice(geo) {
   return new Promise(async (resolve, reject) => {
     Contacts.getAllWithoutPhotos().then((fetchedContacts) => {
-      RNFS.writeFile(
-        contactsPath,
-        JSON.stringify(clearContacts(fetchedContacts, geo)),
-        'utf8',
-      );
-      resolve(fetchedContacts);
+      const contacts = clearContacts(fetchedContacts, geo);
+      RNFS.writeFile(contactsPath, JSON.stringify(contacts), 'utf8');
+      resolve(contacts);
     });
   });
 }
@@ -142,9 +139,20 @@ export function getPhoneContacts(geo) {
   return new Promise(async (resolve, reject) => {
     const exists = await RNFS.exists(contactsPath);
     if (exists) {
-      const contacts = await RNFS.readFile(contactsPath, 'utf8');
-      getPhoneContactsFromDevice(geo);
-      resolve(JSON.parse(contacts));
+      try {
+        const contacts = await RNFS.readFile(contactsPath, 'utf8');
+        const parsedContacts = JSON.parse(contacts);
+        if (parsedContacts.length) {
+          getPhoneContactsFromDevice(geo);
+          resolve(parsedContacts);
+        } else {
+          const contacts = await getPhoneContactsFromDevice(geo);
+          resolve(contacts);
+        }
+      } catch (error) {
+        const contacts = await getPhoneContactsFromDevice(geo);
+        resolve(contacts);
+      }
     } else {
       const contacts = await getPhoneContactsFromDevice(geo);
       resolve(contacts);
