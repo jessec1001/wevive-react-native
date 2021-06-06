@@ -44,7 +44,7 @@ export default class AuthView extends Component {
     });
 
     if (Platform.OS === 'android') {
-      changeNavigationBarColor('#082136', false, false);
+      changeNavigationBarColor('#ffffff', true, false);
     }
     Linking.addEventListener('url', (event) => {
       this.handleOpenURL(event.url);

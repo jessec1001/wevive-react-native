@@ -7,3 +7,6 @@
 
 -keep class net.sqlcipher.** { *; }
 -dontwarn net.sqlcipher.**
+-keepclassmembers class com.android.installreferrer.api.** {
+  *;
+}

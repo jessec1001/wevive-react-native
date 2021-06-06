@@ -142,7 +142,7 @@
 
   // --- Retrieve information from your voip push payload
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
-  NSString *callerName = [NSString stringWithFormat:@"%@ ", payload.dictionaryPayload[@"callerName"]];
+  NSString *callerName = [NSString stringWithFormat:@"%@", payload.dictionaryPayload[@"callerName"]];
   NSString *handle = payload.dictionaryPayload[@"handle"];
 
   // --- this is optional, only required if you want to call `completion()` on the js side

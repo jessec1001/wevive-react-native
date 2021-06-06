@@ -36,12 +36,18 @@ export default class AppBootstrap extends Component {
 
   _bootstrapAsync = async ($this) => {
     const userToken = await AsyncStorage.getItem('userToken');
-    AsyncStorage.multiGet(['userToken', 'bioAccessToken']).then((items) => {
-      const k = {};
-      items.map((i) => (k[i[0]] = i[1]));
-      $this.setState({isReady: true});
-      $this.props.navigation.navigate(k.userToken && !k.bioAccessToken ? 'App' : 'Auth');
-    });
+    AsyncStorage.multiGet(['userToken', 'bioAccessToken', 'TFA']).then(
+      (items) => {
+        const k = {};
+        items.map((i) => (k[i[0]] = i[1]));
+        $this.setState({isReady: true});
+        $this.props.navigation.navigate(
+          k.userToken && !k.bioAccessToken && k.TFA !== 'enabled'
+            ? 'App'
+            : 'Auth',
+        );
+      },
+    );
   };
 
   render() {

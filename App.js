@@ -1,6 +1,15 @@
 //import CodePush from 'react-native-code-push';
 import React, {Component} from 'react';
-import {BackHandler, UIManager, Platform, Dimensions} from 'react-native';
+import {
+  BackHandler,
+  UIManager,
+  Platform,
+  Dimensions,
+  PermissionsAndroid,
+} from 'react-native';
+
+import './react/features/app/middlewares';
+import './react/features/app/reducers';
 
 UIManager.setLayoutAnimationEnabledExperimental &&
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -19,7 +28,8 @@ import RootStack from './src/navigation/RootStack';
 import {BioID} from './src/utils/BioAuth';
 import {ClientContext} from './src/context/ClientContext';
 import APIService from './src/service/APIService';
-import { AppLoadingIndicator } from './src/components/AppLoadingIndicator';
+import {AppLoadingIndicator} from './src/components/AppLoadingIndicator';
+import {getPhoneContacts} from './src/utils/helpers';
 
 NetInfo.fetch().then((state) => {
   global.isInternetReachable = state.isInternetReachable;
@@ -28,7 +38,6 @@ NetInfo.fetch().then((state) => {
 const netinfo_unsubscribe = NetInfo.addEventListener((state) => {
   global.isInternetReachable = state.isInternetReachable;
 });
-
 
 class AppContainer extends Component {
   setDimensionsIos = (dim) => {
@@ -50,11 +59,24 @@ class AppContainer extends Component {
   componentDidMount() {
     bootstrap();
     APIService('users/geoip/', null, 60 * 24 * 365).then((geo) => {
+      if (Platform.OS === 'android') {
+        PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+          {
+            title: 'Contacts',
+            message: 'This app would like to sync your contacts.',
+            buttonPositive: 'Allow',
+          },
+        ).then((status) => {
+          if (status === 'granted') {
+            getPhoneContacts(geo);
+          }
+        });
+      } else {
+        getPhoneContacts(geo);
+      }
       this.setState({geo, ready: true});
     });
-    if (Platform.OS === 'android') {
-      changeNavigationBarColor('#000000', false, false);
-    }
     if (Platform.OS === 'android') {
       //FIXME
       BackHandler.addEventListener('hardwareBackPress', () => {

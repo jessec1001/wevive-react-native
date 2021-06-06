@@ -1,4 +1,39 @@
 import phoneCodes from '../../phones.json';
+export const getContactName = (c, reverse) => {
+  let n = "";
+  let columns = ['givenName','familyName'];
+  if (reverse) columns.reverse();
+  if (c[columns[0]]) {
+    n += c[columns[0]];
+  }
+  if (c[columns[1]]) {
+    if (n != "") n += " ";
+    n += c[columns[1]];
+  }
+  return n;
+}
+
+export const clearContacts = (contacts, geo) => {
+  return contacts
+    .filter((r) => r.givenName?.length || r.familyName?.length)
+    .filter((r) => r.phoneNumbers.length > 0 && r.phoneNumbers[0].number.length)
+    .map((r, i) => ({
+      givenName: r.givenName,
+      familyName: r.familyName,
+      key: i,
+      humanValue: getContactName(r),
+      value: getContactName(r, true),
+      labels: r.phoneNumbers.map((p) =>
+        clearPhoneNumber(geo.country_code, p.number),
+      ),
+      label: r.phoneNumbers[0].number,
+      clearLabel: clearPhoneNumber(geo.country_code, r.phoneNumbers[0].number),
+    }))
+    .sort((a, b) => {
+      return a.familyName[0] < b.familyName[0];
+    });
+};
+
 export const clearPhoneNumber = (country, number) => {
   if (number) {
     let cleanNumber = number.replace(/[^0-9+]+/g, '');

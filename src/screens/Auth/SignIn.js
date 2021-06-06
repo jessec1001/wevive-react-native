@@ -78,6 +78,20 @@ export default class SignIn extends Component {
       }),
     );
   };
+  navigateToPIN = async (token) => {
+    const user = await APIService('users/me/', null, 0, token);
+    this.props.navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'PINVerificationScreen',
+            params: {user}
+          },
+        ],
+      }),
+    );
+  };
 
   navigateToApp = (countryCode, phoneNumber, sessionToken) => {
     this.props.navigation.dispatch(
@@ -98,13 +112,22 @@ export default class SignIn extends Component {
       'phoneNumber',
       'sessionToken',
       'bioAccessToken',
+      'userToken',
+      'TFA',
     ]).then((items) => {
       const k = {};
       items.map((i) => (k[i[0]] = i[1]));
-      if (k.countryCode && k.phoneNumber && k.sessionToken && !k.bioAccessToken) {
+      if (
+        k.countryCode &&
+        k.phoneNumber &&
+        k.sessionToken &&
+        !k.bioAccessToken
+      ) {
         this.navigateSuccess(k.countryCode, k.phoneNumber, k.sessionToken);
       } else if (k.bioAccessToken) {
         this.setState({bioAccessToken: k.bioAccessToken});
+      } else if (k.TFA && k.userToken) {
+        this.navigateToPIN(k.userToken);
       }
     });
   }
@@ -112,10 +135,14 @@ export default class SignIn extends Component {
     if (result.success) {
       const access_token = await AsyncStorage.getItem('bioAccessToken');
       const refresh_token = await AsyncStorage.getItem('bioRefreshToken');
-
-      await AsyncStorage.setItem('userToken', access_token);
-      await AsyncStorage.setItem('refreshToken', refresh_token);
-      this.navigateToApp();
+      const TFA = await AsyncStorage.getItem('TFA');
+      if (TFA !== 'enabled') {
+        await AsyncStorage.setItem('userToken', access_token);
+        await AsyncStorage.setItem('refreshToken', refresh_token);
+        this.navigateToApp();
+      } else {
+        this.navigateToPIN(access_token);
+      }
     } else if (!result.hideError) {
       Alert.alert('Error', 'No biometric data found');
     }

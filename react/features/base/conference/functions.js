@@ -204,15 +204,15 @@ export function updateConferenceDuration(
           [callUUID],
         )
         .then(([results]) => {
-            if (results.rows.length) {
-                const call_id = results.rows.item(0).id;
-                if (call_id) {
-                    database.executeSql(
-                    'UPDATE calls SET duration=? WHERE id=?',
-                    [Math.round(duration), call_id],
-                    );
-                }
+          if (results.rows.length) {
+            const call_id = results.rows.item(0).id;
+            if (call_id) {
+              database.executeSql('UPDATE calls SET duration=? WHERE id=?', [
+                Math.round(duration),
+                call_id,
+              ]);
             }
+          }
         });
     });
   };

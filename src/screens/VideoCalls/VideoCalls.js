@@ -1,13 +1,21 @@
 import React, {Component} from 'react';
 import {App} from '../../../react/features/app/components';
-import { UserContext } from '../../context/UserContext';
-import { useRoute } from '@react-navigation/native';
-import { ChatContext } from 'react-native-chat-plugin/ChatContext';
+import {UserContext} from '../../context/UserContext';
+import {useRoute} from '@react-navigation/native';
+import {ChatContext} from 'react-native-chat-plugin/ChatContext';
 export default function VideoCalls() {
-  const {authData, avatarUrl} = React.useContext(UserContext);
+  const {authData} = React.useContext(UserContext);
   const r = useRoute();
   const ctx = React.useContext(ChatContext);
   const displayName = ctx.getCallname(r.params.callId);
+  const conversation = ctx.getConversationById(r.params.callId);
+  const userId = ctx.getUserId();
+  const others = conversation.participants
+    .map((p) => p.id)
+    .filter((p) => String(p) !== String(userId));
+  const isGroupChat = () => {
+    return others.length > 1 || conversation.name;
+  }
   return (
     <>
       <App
@@ -15,8 +23,9 @@ export default function VideoCalls() {
           room: r.params.callId,
           'ios.recording.enabled': 0,
           'pip.enabled': 0,
-          resolution: 360,
+          resolution: 480,
           'welcomepage.enabled': 1,
+          playDialingTone: !isGroupChat(),
           subject: displayName,
           callHandle: displayName,
           callUUID: r.params.callId,

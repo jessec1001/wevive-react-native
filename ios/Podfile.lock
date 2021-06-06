@@ -360,7 +360,7 @@ PODS:
     - React
   - react-native-view-shot (3.1.2):
     - React
-  - react-native-webrtc (1.89.2):
+  - react-native-webrtc (1.87.3):
     - React-Core
   - react-native-webview (11.4.2):
     - React-Core
@@ -870,7 +870,7 @@ SPEC CHECKSUMS:
   react-native-sqlite-storage: cd80d46253cfb38a31eb83c67681502d4c4295df
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
   react-native-view-shot: 4475fde003fe8a210053d1f98fb9e06c1d834e1c
-  react-native-webrtc: 5caa6a5061584aceab6a2f2087661e0ed63452b9
+  react-native-webrtc: dc1208bdca2c4d091f7b57859e69332bff6f1986
   react-native-webview: 4c85a3e5de574ee8c2c0985b4bebbdd240f49304
   React-perflogger: 9c547d8f06b9bf00cb447f2b75e8d7f19b7e02af
   React-RCTActionSheet: 3080b6e12e0e1a5b313c8c0050699b5c794a1b11

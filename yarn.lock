@@ -9625,6 +9625,11 @@ react-native-inappbrowser-reborn@^3.5.1:
     invariant "^2.2.4"
     opencollective-postinstall "^2.0.2"
 
+react-native-incoming-call@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-incoming-call/-/react-native-incoming-call-2.0.3.tgz#c786a2868498477b8e8027729cb72a9813c0d2a2"
+  integrity sha512-G1HyoQcXwqQQQPdenOyJkcN4D9jbHosRKaQPfdG/6oIrkHThy3iWywIJHCCyqKvJwhF0Qz1WhEMFckzH1kvGhw==
+
 react-native-infinite-scrolling@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/react-native-infinite-scrolling/-/react-native-infinite-scrolling-2.0.0.tgz#e355fe3d171f6ef6b619b45a5c02aaec17e00a14"
@@ -9711,10 +9716,10 @@ react-native-orientation-locker@^1.2.0:
   resolved "https://registry.yarnpkg.com/react-native-orientation-locker/-/react-native-orientation-locker-1.2.0.tgz#9fa51b3aade9b847e63066b6fd60509371940a7e"
   integrity sha512-lnwp9Jbt1m/0Gfw9a5Mrwj/APNSuYkVdJEgBKRyQgOshDrKRv5dxpD0P786AgIEjnEbjyrNOS6GQvBdqPYSxsg==
 
-react-native-permissions@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/react-native-permissions/-/react-native-permissions-3.0.2.tgz#df3abb6b71f20bc3c12f7ed95c61187562798d2b"
-  integrity sha512-Uvye5evur8prriN/OxPyYOVoY1DaIh9980OgF9vXTPflQwvmpdygDHBOOmeFMUuMPAc+kNdi++BkV2PJCGvSSQ==
+react-native-permissions@^3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/react-native-permissions/-/react-native-permissions-3.0.4.tgz#7771d28899d7d2b75fd2a70cd3f86d44c90397ec"
+  integrity sha512-GMd0l0TA/qupidGFfKAVNaboewQkJSW+l3ndwv1cu+tBGI+TRfJdMjg8Q714wn9roZlXsZ3z407qT2xPdQmGdg==
 
 react-native-picker-select@^8.0.4:
   version "8.0.4"
@@ -9918,10 +9923,10 @@ react-native-webp-format@^1.1.2:
   resolved "https://registry.yarnpkg.com/react-native-webp-format/-/react-native-webp-format-1.1.2.tgz#22b14f544191e9a5411c920b9874e532a6ea6c89"
   integrity sha512-qs0oyLZOjoLdlTM9781Vr8WBwvtdkcwQuSJpCtA5KxspGl+YDDDZrW+tpwRQI0PSlB84O+IoK3bfmgHu1zqejQ==
 
-react-native-webrtc@^1.89.2:
-  version "1.89.2"
-  resolved "https://registry.yarnpkg.com/react-native-webrtc/-/react-native-webrtc-1.89.2.tgz#15fad9f4212b4f1b1cf018c3ec4b7fd5d07e295b"
-  integrity sha512-i+a8aPVa/M18Vb5zuQ/uX0GRjxVmOG8Ja0dgd4ZgzFnhPwkf/ZSl7u45qjtD2XTbZuhsl3fJvTXiBQB2eNnjgw==
+react-native-webrtc@1.87.3:
+  version "1.87.3"
+  resolved "https://registry.yarnpkg.com/react-native-webrtc/-/react-native-webrtc-1.87.3.tgz#5bcd7f019f315b7364f5b58fc0843f2c09b02ba4"
+  integrity sha512-fWnaEHFCFD7YnPR95aaUqLQ5b4dY4av0qHjmwHXeLHGvGrVeWF1je9PNhet7PDHUIJa4GIYKB/8+co51SXm5dA==
   dependencies:
     base64-js "^1.1.2"
     cross-os "^1.3.0"
@@ -10423,6 +10428,11 @@ rimraf@~2.6.2:
   integrity sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==
   dependencies:
     glob "^7.1.3"
+
+rn-android-overlay-permission@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/rn-android-overlay-permission/-/rn-android-overlay-permission-1.0.5.tgz#d93e189245b610f1488fbb79fb3a12312f3f098c"
+  integrity sha512-hTwAd9Yhem4OCLCT1wVZAWLkiJm3y7hqWkbNiaq8MWJMoR05C2T+P/m12pEQ1bbI2SME1LVlyKbbV1V+iABtxg==
 
 rn-host-detect@1.2.0:
   version "1.2.0"
