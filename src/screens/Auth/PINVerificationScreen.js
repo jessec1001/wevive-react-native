@@ -77,6 +77,8 @@ export default function PINVerificationScreen({navigation, route}) {
               cellStyle={styles.cellStyle}
               cellStyleFocused={styles.cellStyleFocused}
               value={values.pin}
+              password={true}
+              restrictToNumbers={true}
               onTextChange={handleChange('pin')}
               inputProps={{textContentType: 'none', keyboardType: 'numeric'}}
             />

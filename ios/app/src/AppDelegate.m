@@ -137,6 +137,7 @@
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void (^)(void))completion {
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
   NSString *message = payload.dictionaryPayload[@"message"];
+  BOOL *video = payload.dictionaryPayload[@"video"];
   if (message == @"hangup") { 
     [RNCallKeep endCallWithUUID: uuid reason:6];
   } else {
@@ -151,7 +152,7 @@
     [RNCallKeep reportNewIncomingCall: uuid
                             handle: handle
                         handleType: @"number"
-                          hasVideo: false
+                          hasVideo: video
                 localizedCallerName: nil
                     supportsHolding: false
                       supportsDTMF: false

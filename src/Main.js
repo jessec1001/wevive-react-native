@@ -52,9 +52,6 @@ const stopSound = () => {
   }
 };
 export default function Main({navigation, route}) {
-  global.showCallPopup = (data) => {
-    console.log('showCallPopup', data);
-  };
   global.mainNavigation = navigation;
   const themeSettings = React.useContext(AppThemeContext);
   const {authData, updateMe} = React.useContext(UserContext);
@@ -62,15 +59,15 @@ export default function Main({navigation, route}) {
   const appState = React.useRef(AppState.currentState);
 
   const _handleAppStateChange = (nextAppState) => {
-    console.log('IncomingCall _handleAppStateChange');
-    CacheStore.get('callUUID').then((uuid) => {
+    CacheStore.get('callUUID').then(async (uuid) => {
       if (uuid) {
+        video = await CacheStore.get(uuid) == "1";
         global.incomingCallID = uuid;
-        console.log('IncomingCall incomingUUID redirecting from main _handleAppStateChange to call');
+       // console.log('IncomingCall incomingUUID redirecting from main _handleAppStateChange to call');
         CacheStore.remove('callUUID');
         navigation.navigate('VideoCalls', {
           callId: uuid,
-          video: false,
+          video,
         });
       }
     });
@@ -82,39 +79,6 @@ export default function Main({navigation, route}) {
       AppState.removeEventListener("change", _handleAppStateChange);
     };
   }, []);
-
-
-  React.useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      console.log('IncomingCall checking callUUID main');
-      AsyncStorage.getItem('incomingUUID').then((uuid) => {
-        if (uuid && route.name !== 'Main') {
-          global.incomingCallID = uuid;
-          console.log('IncomingCall AsyncStorage incomingUUID redirecting from main to call', uuid, route);
-          //CacheStore.remove('callUUID');
-          navigation.navigate('VideoCalls', {
-            callId: uuid,
-            video: false,
-          });
-        }
-      });
-      CacheStore.get('incomingUUID').then((uuid) => {
-        if (uuid) {
-          global.incomingCallID = uuid;
-          console.log('IncomingCall incomingUUID redirecting from main to call');
-          //CacheStore.remove('callUUID');
-          navigation.navigate('VideoCalls', {
-            callId: uuid,
-            video: false,
-          });
-        }
-      });
-    });
-
-    // Return the function to unsubscribe from the event so it gets removed on unmount
-    return unsubscribe;
-  }, [navigation]);
-  // Listen to cancel and answer call events
   React.useEffect(() => {
     //Alert.alert('getting incoming call');
     if (Platform.OS === 'android') {

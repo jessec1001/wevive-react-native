@@ -4,13 +4,17 @@ import {DeviceEventEmitter} from 'react-native';
 import CacheStore from 'react-native-cache-store';
 import APIService from './src/service/APIService'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+let videoCalls = [];
 export const backgroundJobs = () =>
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     //console.error('background message =', remoteMessage);
     const data = remoteMessage?.data;
     console.warn('IncomingCall data', data, remoteMessage);
     if (data && data.callUUID) {
-      //AsyncStorage.setItem('incomingUUID', data.callUUID);
+      if (data.video) {
+        CacheStore.set(data.callUUID, "1", 0.5);
+      }
+      AsyncStorage.setItem('incomingUUID', data.callUUID);
       //TODO: Store participants
       //CacheStore.set('callParticipants', payload.participants, 0.5);
       IncomingCall.display(
