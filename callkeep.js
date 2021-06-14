@@ -3,6 +3,7 @@ import CacheStore from 'react-native-cache-store';
 import RNCallKeep from 'react-native-callkeep';
 import APIService from './src/service/APIService';
 import VoipPushNotification from 'react-native-voip-push-notification';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const setupCallKeep = () => {
   if (Platform.OS === 'ios') {
@@ -28,28 +29,61 @@ export const setupCallKeep = () => {
         },
       },
     };
-    VoipPushNotification.addEventListener('notification', async (payload) => {
-      if (payload.caller && payload.message !== 'hangup') {
-        CacheStore.set('activeCall', payload.uuid);
+    const processCallKitNotification = (payload) => {
+      console.error('processCallKitNotification', payload);
+      if (payload.caller && payload.type !== 'hangup') {
+        AsyncStorage.setItem('incomingCaller', payload.caller);
+        AsyncStorage.setItem('incomingUUID', payload.callUUID);
+        CacheStore.set('activeCall', payload.callUUID);
         CacheStore.set('activeCallOthers', JSON.stringify([payload.caller]));
+      } else if (payload.type === 'hangup') {
+        console.error('hanging up from CallKit', payload);
+        global.navigation.goBack();
+      }
+    }
+    VoipPushNotification.addEventListener('notification', async (payload) => {
+      processCallKitNotification(payload);
+    });
+    VoipPushNotification.addEventListener('didLoadWithEvents', (events) => {
+      if (!events || !Array.isArray(events) || events.length < 1) {
+        return;
+      }
+      for (let voipPushEvent of events) {
+        let {name, data} = voipPushEvent;
+        if (
+          name ===
+          VoipPushNotification.RNVoipPushRemoteNotificationReceivedEvent
+        ) {
+          processCallKitNotification(data);
+        }
       }
     });
-    RNCallKeep.addEventListener('endCall', async ({callUUID}) => {
+    RNCallKeep.addEventListener('didDisplayIncomingCall', async (data) => {
+      console.log('didDisplayIncomingCall', data);
+    });
+
+    RNCallKeep.addEventListener('endCall', async (opts) => {
+      const uuid = await AsyncStorage.getItem('incomingUUID');
+      const caller = await AsyncStorage.getItem('incomingCaller');
+
       const callId = await CacheStore.get('activeCall');
       const othersJSON = await CacheStore.get('activeCallOthers');
       const others = JSON.parse(othersJSON);
+      console.log('RNCallKeep endCall', opts, uuid, caller, callId, others);
+      RNCallKeep.endCall(opts.callUUID);
       APIService('users/pushmessage/', {
         users: others,
         message: 'Hangup',
         extra: {
-          hangupUUID: callId,
+          type: 'hangup',
+          callUUID: opts.callUUID,
         },
       });
-      APIService('users/voipcall/', {
+      /*APIService('users/voipcall/', {
         users: others,
         callUUID: callId,
         message: 'hangup',
-      });
+      });*/
     });
     RNCallKeep.setup(options).then((accepted) => {});
   }

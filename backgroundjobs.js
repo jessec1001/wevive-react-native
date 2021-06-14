@@ -3,19 +3,15 @@ import IncomingCall from 'react-native-incoming-call';
 import {DeviceEventEmitter} from 'react-native';
 import CacheStore from 'react-native-cache-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import APIService from './src/service/APIService';
 export const backgroundJobs = () =>
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     const data = remoteMessage?.data;
-    if (
-      data &&
-      data.callUUID &&
-      remoteMessage &&
-      remoteMessage.notification &&
-      remoteMessage.notification.title.indexOf('Call from') !== -1
-    ) {
+    if (data && data.callUUID && data.type === 'call') {
       if (data.video) {
         CacheStore.set(data.callUUID, '1', 0.5);
       }
+      AsyncStorage.setItem('incomingCaller', data.caller);
       AsyncStorage.setItem('incomingUUID', data.callUUID);
       //TODO: Store participants
       //CacheStore.set('callParticipants', payload.participants, 0.5);
@@ -26,6 +22,13 @@ export const backgroundJobs = () =>
         'Wevive Call', // Info text
         60000, // Timeout for end call after 60s
       );
+      APIService('users/pushmessage/', {
+        users: [data.caller],
+        extra: {
+          type: 'call_received',
+          callUUID: data.callUUID,
+        },
+      });
     } else if (data && data.type === 'hangup') {
       const uuid = await AsyncStorage.getItem('incomingUUID');
       if (uuid === data.callUUID) {
@@ -36,17 +39,15 @@ export const backgroundJobs = () =>
 
     // Listen to headless action events
     DeviceEventEmitter.addListener('endCall', async (payload) => {
-      //TODO: Hangup caller
-      //const users = await CacheStore.get('callParticipants');
-      //const callUUID = await CacheStore.get('incomingUUID');
-      CacheStore.remove('callUUID');
-      CacheStore.remove('incomingUUID');
-      //console.log('endCall', callUUID);
-      //callUUID = CacheStore.get('incomingUUID');
-      //APIService("users/pushmessage/",{
-      // callUUID,
-      // users,
-      //});
+      const uuid = await AsyncStorage.getItem('incomingUUID');
+      const caller = await AsyncStorage.getItem('incomingCaller');
+      APIService('users/pushmessage/', {
+        users: [caller],
+        extra: {
+          type: 'hangup',
+          callUUID: uuid,
+        },
+      });
     });
     DeviceEventEmitter.addListener('answerCall', (payload) => {
       CacheStore.set('callUUID', payload.uuid, 1);

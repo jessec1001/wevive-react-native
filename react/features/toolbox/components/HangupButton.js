@@ -55,11 +55,11 @@ class HangupButton extends AbstractHangupButton<Props, *> {
             callUUID: callId,
           },
         });
-        APIService('users/voipcall/', {
+        /*APIService('users/voipcall/', {
           users: others,
           callUUID: callId,
           message: 'hangup',
-        });
+        });*/
       } catch (error) {}
       if (global.stopRingingTone) {
         global.stopRingingTone();

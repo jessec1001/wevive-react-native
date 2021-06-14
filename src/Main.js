@@ -25,6 +25,7 @@ import OverlayPermissionModule from 'rn-android-overlay-permission';
 import CacheStore from 'react-native-cache-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Sound from 'react-native-sound';
+import APIService from './service/APIService';
 if (Platform.OS === 'android') {
   OverlayPermissionModule.requestOverlayPermission();
 }
@@ -61,9 +62,9 @@ export default function Main({navigation, route}) {
   const _handleAppStateChange = (nextAppState) => {
     CacheStore.get('callUUID').then(async (uuid) => {
       if (uuid) {
-        video = await CacheStore.get(uuid) == "1";
+        video = (await CacheStore.get(uuid)) == '1';
         global.incomingCallID = uuid;
-       // console.log('IncomingCall incomingUUID redirecting from main _handleAppStateChange to call');
+        // console.log('IncomingCall incomingUUID redirecting from main _handleAppStateChange to call');
         CacheStore.remove('callUUID');
         navigation.navigate('VideoCalls', {
           callId: uuid,
@@ -73,16 +74,15 @@ export default function Main({navigation, route}) {
     });
   };
   React.useEffect(() => {
-    AppState.addEventListener("change", _handleAppStateChange);
+    AppState.addEventListener('change', _handleAppStateChange);
 
     return () => {
-      AppState.removeEventListener("change", _handleAppStateChange);
+      AppState.removeEventListener('change', _handleAppStateChange);
     };
   }, []);
   React.useEffect(() => {
     //Alert.alert('getting incoming call');
     if (Platform.OS === 'android') {
-
       /**
        * App in foreground / background: listen to call events and determine what to do next
        */
@@ -91,6 +91,14 @@ export default function Main({navigation, route}) {
         (payload) => {
           console.log('IncomingCall endCallListener', payload);
           // End call action here
+          APIService('users/pushmessage/', {
+            users: [payload.caller],
+            extra: {
+              type: 'hangup',
+              callUUID: payload.uuid,
+              caller: authData ? authData.id : 0,
+            },
+          });
         },
       );
       const answerCallListener = DeviceEventEmitter.addListener(
@@ -133,6 +141,25 @@ export default function Main({navigation, route}) {
           navigation.navigate('ChatScreen', {
             conversation: a.data.conversationId,
           });
+        }
+        if (a.data.type && a.data.type == 'call' && (route.name == 'VideoCalls' || route.name == 'Main')) {
+          console.log('[FCMService] Sending busy signal');
+          APIService('users/pushmessage',{
+            users: [data.caller],
+            extra: {
+              type: 'hangup',
+              caller: authData.id,
+              callUUID: a.data.callUUID,
+            }
+          })
+        }
+        if (a.data.type && a.data.type == 'hangup' && (route.name == 'VideoCalls' || route.name == 'Main')) {
+          console.log('[FCMService] Cancelling the call');
+          //TODO: check callUUID
+          global.navigation.goBack();
+        }
+        if (a.data.type && a.data.type == 'call_received' && (route.name == 'VideoCalls' || route.name == 'Main')) {
+          console.log('[FCMService] Call is in progress..', a);
         }
       }, //onNotification
       (b) => {
