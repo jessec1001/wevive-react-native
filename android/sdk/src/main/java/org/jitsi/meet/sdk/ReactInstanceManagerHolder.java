@@ -211,6 +211,8 @@ class ReactInstanceManagerHolder {
                 new com.kevinresol.react_native_default_preference.RNDefaultPreferencePackage(),
                 // react-native-device-info
                 new com.learnium.RNDeviceInfo.RNDeviceInfo(),
+                // react-native-fast-image
+                new com.dylanvann.fastimage.FastImageViewPackage(),
                 // react-native-fs
                 new com.rnfs.RNFSPackage(),
                 // react-native-fast-image
@@ -246,7 +248,7 @@ class ReactInstanceManagerHolder {
                 // react-native-push-notification
                 new com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage(),
                 // react-native-reanimated
-                new com.swmansion.reanimated.ReanimatedPackage(),
+                //new com.swmansion.reanimated.ReanimatedPackage(),
                 // react-native-safe-area-context
                 new com.th3rdwave.safeareacontext.SafeAreaContextPackage(),
                 // react-native-screens
@@ -267,6 +269,8 @@ class ReactInstanceManagerHolder {
                 new com.apsl.versionnumber.RNVersionNumberPackage(),
                 // react-native-view-shot
                 new fr.greweb.reactnativeviewshot.RNViewShotPackage(),
+                // react-native-image-picker
+                new com.imagepicker.ImagePickerPackage(),
                 // react-native-webrtc
                 //new com.oney.WebRTCModule.WebRTCModulePackage(),
                 // react-native-webview

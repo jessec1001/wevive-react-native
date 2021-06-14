@@ -10,3 +10,4 @@
 -keepclassmembers class com.android.installreferrer.api.** {
   *;
 }
+-keep class com.facebook.react.turbomodule.** { *; }

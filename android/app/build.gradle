@@ -12,7 +12,7 @@ def vcode = (int) (((new Date().getTime() / 1000) - 1609459200) / 60)
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
-
+    ndkVersion = "22.1.7171670"
     packagingOptions {
         exclude 'lib/*/libhermes*.so'
         pickFirst 'lib/armeabi-v7a/libsodium.so'

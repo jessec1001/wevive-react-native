@@ -84,6 +84,9 @@ function _addConferenceListeners(conference, dispatch) {
     stopSound();
   };
   const playSound = () => {
+    if (whoosh !== false) {
+      return;
+    }
     whoosh = new Sound('ringingtone.mp3', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('failed to load the sound', error);
@@ -113,15 +116,24 @@ function _addConferenceListeners(conference, dispatch) {
   conference.on(JitsiConferenceEvents.CONFERENCE_LEFT, (...args) => {
     stopSound();
   });
-
-  conference.on(JitsiConferenceEvents.CONFERENCE_JOINED, (...args) =>
-    playSound(),
-  );
+  conference.on(JitsiConferenceEvents.CONFERENCE_WILL_JOIN, (...args) => {
+    playSound();
+  });
+  conference.on(JitsiConferenceEvents.CONFERENCE_JOINED, (...args) => {
+    playSound();
+    if (conference.getParticipantCount() > 1) {
+      stopSound();
+    }
+  });
   conference.on(JitsiConferenceEvents.CONFERENCE_FAILED, (...args) =>
     stopSound(),
   );
 
-  conference.on(JitsiConferenceEvents.USER_JOINED, (id, user) => stopSound());
+  conference.on(JitsiConferenceEvents.USER_JOINED, (id, user) => {
+    if (conference.getParticipantCount() > 1) {
+      stopSound();
+    }
+  });
   conference.on(JitsiConferenceEvents.USER_LEFT, (id, user) => stopSound());
 
   conference.on(JitsiConferenceEvents.CONFERENCE_FAILED, (...args) =>

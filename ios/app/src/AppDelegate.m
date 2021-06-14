@@ -137,11 +137,10 @@
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void (^)(void))completion {
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
   NSString *message = payload.dictionaryPayload[@"message"];
-  BOOL *video = payload.dictionaryPayload[@"video"];
-  if (message == @"hangup") { 
+  NSString *video = payload.dictionaryPayload[@"video"];
+  if ([message  isEqual: @"hangup"]) {
     [RNCallKeep endCallWithUUID: uuid reason:6];
   } else {
-    NSString *callerName = [NSString stringWithFormat:@"%@", payload.dictionaryPayload[@"callerName"]];
     NSString *handle = payload.dictionaryPayload[@"handle"];
 
     // --- this is optional, only required if you want to call `completion()` on the js side
