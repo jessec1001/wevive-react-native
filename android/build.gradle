@@ -18,6 +18,7 @@ buildscript {
 
 ext {
     ndkVersion = "22.1.7171670"
+    kotlinVersion = "1.4.32"
     buildToolsVersion = "30.0.3"
     compileSdkVersion = 30
     minSdkVersion    = 23

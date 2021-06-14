@@ -49,9 +49,10 @@ class HangupButton extends AbstractHangupButton<Props, *> {
         const others = JSON.parse(othersJSON);
         APIService('users/pushmessage/', {
           users: others,
-          message: 'Missed call',
+          //message: 'Missed call',
           extra: {
-            missedUUID: callId,
+            type: 'hangup',
+            callUUID: callId,
           },
         });
         APIService('users/voipcall/', {

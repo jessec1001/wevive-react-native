@@ -2,17 +2,19 @@ import messaging from '@react-native-firebase/messaging';
 import IncomingCall from 'react-native-incoming-call';
 import {DeviceEventEmitter} from 'react-native';
 import CacheStore from 'react-native-cache-store';
-import APIService from './src/service/APIService'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-let videoCalls = [];
 export const backgroundJobs = () =>
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-    //console.error('background message =', remoteMessage);
     const data = remoteMessage?.data;
-    console.warn('IncomingCall data', data, remoteMessage);
-    if (data && data.callUUID) {
+    if (
+      data &&
+      data.callUUID &&
+      remoteMessage &&
+      remoteMessage.notification &&
+      remoteMessage.notification.title.indexOf('Call from') !== -1
+    ) {
       if (data.video) {
-        CacheStore.set(data.callUUID, "1", 0.5);
+        CacheStore.set(data.callUUID, '1', 0.5);
       }
       AsyncStorage.setItem('incomingUUID', data.callUUID);
       //TODO: Store participants
@@ -24,12 +26,11 @@ export const backgroundJobs = () =>
         'Wevive Call', // Info text
         60000, // Timeout for end call after 60s
       );
-    } else if (remoteMessage?.notification?.title === 'Missed Call') {
-      AsyncStorage.removeItem('incomingUUID');
+    } else if (data && data.type === 'hangup') {
       const uuid = await AsyncStorage.getItem('incomingUUID');
-      if (uuid == data.callUUID) {
-        // Terminate incoming activity. Should be called when call expired.
+      if (uuid === data.callUUID) {
         IncomingCall.dismiss();
+        AsyncStorage.removeItem('incomingUUID');
       }
     }
 
@@ -48,7 +49,6 @@ export const backgroundJobs = () =>
       //});
     });
     DeviceEventEmitter.addListener('answerCall', (payload) => {
-      console.log('IncomingCall answerCall', payload);
       CacheStore.set('callUUID', payload.uuid, 1);
       if (payload.isHeadless) {
         // Called from killed state

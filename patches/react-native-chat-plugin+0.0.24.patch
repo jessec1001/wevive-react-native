@@ -1132,10 +1132,17 @@ index 7752e79..2894b1a 100644
      },
      [state]
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 2d8eeea..4bdd775 100644
+index 2d8eeea..bee690e 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-@@ -11,8 +11,11 @@ import {launchCamera, launchImageLibrary} from "react-native-image-picker";
+@@ -1,5 +1,5 @@
+ import React from "react";
+-import { View, TextInput, StyleSheet, TouchableOpacity, Image, Keyboard, Alert } from "react-native";
++import { View, TextInput, StyleSheet, TouchableOpacity, Image, Keyboard, Alert, Platform } from "react-native";
+ import PropTypes from "prop-types";
+ 
+ import { getSocket } from "../utils/SocketIOClient";
+@@ -11,8 +11,12 @@ import {launchCamera, launchImageLibrary} from "react-native-image-picker";
  
  import WebView from "react-native-webview";
  import uuid from 'uuid';
@@ -1144,11 +1151,12 @@ index 2d8eeea..4bdd775 100644
 +import { UserContext } from "../../../src/context/UserContext";
  //import Recording from "react-native-recording";
 -
++import {requestMultiple, PERMISSIONS} from 'react-native-permissions';
 +import Icon from '../../../src/components/Icon';
  const sendButton = require("../images/sendbtn.png");
  const styles = StyleSheet.create({
    container: {
-@@ -35,7 +38,7 @@ const styles = StyleSheet.create({
+@@ -35,7 +39,7 @@ const styles = StyleSheet.create({
      paddingTop:13,
      margin: 10,
      marginLeft: 25,
@@ -1157,7 +1165,7 @@ index 2d8eeea..4bdd775 100644
      borderRadius: 8,
      paddingLeft: 40,
    },
-@@ -47,7 +50,7 @@ const styles = StyleSheet.create({
+@@ -47,7 +51,7 @@ const styles = StyleSheet.create({
      paddingRight: 10,
      height: "50%",
      margin: 10,
@@ -1166,7 +1174,7 @@ index 2d8eeea..4bdd775 100644
    },
    btnText: {
      textAlign: "center",
-@@ -56,18 +59,21 @@ const styles = StyleSheet.create({
+@@ -56,18 +60,21 @@ const styles = StyleSheet.create({
    btnImage: {
      alignContent: "center",
      justifyContent: "center",
@@ -1192,7 +1200,7 @@ index 2d8eeea..4bdd775 100644
      backgroundColor: "rgb(228,140,58)",
      width: 40,
      height: 40,
-@@ -126,18 +132,21 @@ const styles = StyleSheet.create({
+@@ -126,18 +133,21 @@ const styles = StyleSheet.create({
  const maxRetries = 3;
  let i = 0;
  const messageIcon = require("../images/message_icon.png");
@@ -1219,7 +1227,7 @@ index 2d8eeea..4bdd775 100644
    const onChangeText = React.useCallback((text) => {
      setMessage(text);
      const socket = getSocket();
-@@ -157,9 +166,9 @@ export default function ChatForm({ conversation }) {
+@@ -157,9 +167,9 @@ export default function ChatForm({ conversation }) {
    }
    const sendMessage = React.useCallback(async (contents) => {
      const socket = getSocket();
@@ -1230,7 +1238,7 @@ index 2d8eeea..4bdd775 100644
      const localMsg = await ctx.saveMessageToDB(conversation.id, contents, user.id, "MESSAGE", uuidv4(), 0, false);
      const newMessage = {
        id: String(localMsg),
-@@ -170,29 +179,40 @@ export default function ChatForm({ conversation }) {
+@@ -170,29 +180,40 @@ export default function ChatForm({ conversation }) {
        time: +Date.now(), 
        text: contents,
        is_delivered: false,
@@ -1268,7 +1276,7 @@ index 2d8eeea..4bdd775 100644
 +        const others = conversation.participants.map(p => p.id).filter(p => String(p) !== String(socket.chat_user_id));
 +        APIService('users/pushmessage/',{
 +          users: others,
-+          message: contents,
++          message: authData.userName + ": " + contents,
 +          extra: {
 +            conversationId: conversation.id,
 +            author: user.id,
@@ -1288,7 +1296,7 @@ index 2d8eeea..4bdd775 100644
        ctx.getDB().then((db)=> {
          db.executeSql(
            "SELECT * FROM conversations WHERE group_id = ?",
-@@ -212,18 +232,78 @@ export default function ChatForm({ conversation }) {
+@@ -212,19 +233,91 @@ export default function ChatForm({ conversation }) {
        }).catch((e)=>{
          console.warn(e);
        });
@@ -1354,8 +1362,8 @@ index 2d8eeea..4bdd775 100644
 +  const openImageGallery = () => {
 +    launchImageLibrary({
 +      selectionLimit: 1,
-+      maxWidth: 3840,
-+      maxHeight: 3840,
++      //maxWidth: 3840,
++      //maxHeight: 3840,
 +    }, (image)=>{
 +      fileUpload(image);
      });
@@ -1363,16 +1371,30 @@ index 2d8eeea..4bdd775 100644
    const openCamera = () => {
 -    launchCamera({}, (image)=>{
 -
-+    launchCamera({
-+      selectionLimit: 1,
-+      maxWidth: 3840,
-+      maxHeight: 3840,
-+    }, (image)=>{
-+      fileUpload(image);
-     });
+-    });
++    if (Platform.OS == 'android') {
++      requestMultiple([PERMISSIONS.ANDROID.CAMERA]).then((statuses) => {
++        launchCamera({
++          selectionLimit: 1,
++          //maxWidth: 3840,
++          //maxHeight: 3840,
++        }, (image)=>{
++          fileUpload(image);
++        });
++      });
++    } else {
++      launchCamera({
++        selectionLimit: 1,
++        maxWidth: 3840,
++        maxHeight: 3840,
++      }, (image)=>{
++        fileUpload(image);
++      });
++    }
    };
    //Recording.stop();
-@@ -265,20 +345,21 @@ export default function ChatForm({ conversation }) {
+ 
+@@ -265,20 +358,21 @@ export default function ChatForm({ conversation }) {
    /*const microphoneIcon = <TouchableOpacity onPress={recordAudio} style={styles.micBtn}>
      <Icon name="microphone" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
    </TouchableOpacity>;*/

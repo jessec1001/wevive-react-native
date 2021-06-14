@@ -138,13 +138,26 @@
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
   NSString *message = payload.dictionaryPayload[@"message"];
   NSString *video = payload.dictionaryPayload[@"video"];
+  NSString *handle = payload.dictionaryPayload[@"handle"];
   if ([message  isEqual: @"hangup"]) {
+    [RNCallKeep reportNewIncomingCall: uuid
+                            handle: handle
+                        handleType: @"number"
+                          hasVideo: video
+                localizedCallerName: nil
+                    supportsHolding: false
+                      supportsDTMF: false
+                  supportsGrouping: false
+                supportsUngrouping: false
+                        fromPushKit: YES
+                            payload: nil
+              withCompletionHandler: nil];
     [RNCallKeep endCallWithUUID: uuid reason:6];
+    completion();
   } else {
-    NSString *handle = payload.dictionaryPayload[@"handle"];
 
     // --- this is optional, only required if you want to call `completion()` on the js side
-    [RNVoipPushNotificationManager addCompletionHandler:uuid completionHandler:completion];
+    //[RNVoipPushNotificationManager addCompletionHandler:uuid completionHandler:completion];
 
     // --- Process the received push
     [RNVoipPushNotificationManager didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];

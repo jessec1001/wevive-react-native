@@ -117,7 +117,7 @@ class FCM_Service {
     this.messageListener = messaging().onMessage(async (remoteMessage) => {
       console.log('[FCMService] A new FCM message arrived!', remoteMessage);
       if (remoteMessage) {
-        if (remoteMessage.data.callUUID) {
+        if (remoteMessage.data.callUUID && remoteMessage.data.type === 'call') {
           console.log('Calling IncomingCall');
           if (remoteMessage.data.video) {
             CacheStore.set(remoteMessage.data.callUUID, 1, 0.5);
@@ -129,8 +129,11 @@ class FCM_Service {
             'Wevive Call', // Info text
             30000, // Timeout for end call after 30s
           );
-        } else {
-          console.log('[FCMService] no callUUID');
+        } else if (
+          remoteMessage.data.callUUID &&
+          remoteMessage.data.type === 'hangup'
+        ) {
+          IncomingCall.dismiss();
         }
         let notification = null;
         notification = remoteMessage.notification;
