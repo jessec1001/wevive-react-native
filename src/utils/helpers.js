@@ -124,12 +124,46 @@ export function getISODate(value) {
   );
 }
 
-const contactsPath = RNFS.DocumentDirectoryPath + '/contacts.json';
+const escapeContact = (field) => {
+  const replacer = (key, value) => (value === null ? '' : value);
+  return JSON.stringify(field, replacer);
+};
+
+const unescapeContact = (data) => {
+  return JSON.parse(data);
+};
+
+const prepareContactsForFile = (contacts) => {
+  const items = contacts;
+  const header = Object.keys(items[0]);
+  const csv = [
+    header.join(','), // header row first
+    ...items.map((row) =>
+      header.map((fieldName) => escapeContact(row[fieldName])).join(','),
+    ),
+  ].join('\r\n');
+  return csv;
+};
+const parseContactsFromFile = (file) => {
+  const contactsCSV = file.split('\r\n');
+  const keys = contactsCSV.shift().split(',');
+  const contacts = contactsCSV.map((contactCSV) => {
+    const values = contactCSV.split(',');
+    const contact = {};
+    keys.map((k, i) => {
+      contact[k] = unescapeContact(values[i]);
+    });
+    return contact;
+  });
+  return contacts;
+};
+
+const contactsPath = RNFS.DocumentDirectoryPath + '/contacts.csv';
 export function getPhoneContactsFromDevice(geo) {
   return new Promise(async (resolve, reject) => {
     Contacts.getAllWithoutPhotos().then((fetchedContacts) => {
       const contacts = clearContacts(fetchedContacts, geo);
-      RNFS.writeFile(contactsPath, JSON.stringify(contacts), 'utf8');
+      RNFS.writeFile(contactsPath, prepareContactsForFile(contacts), 'utf8');
       resolve(contacts);
     });
   });
@@ -141,13 +175,12 @@ export function getPhoneContacts(geo) {
     if (exists) {
       try {
         const contacts = await RNFS.readFile(contactsPath, 'utf8');
-        const parsedContacts = JSON.parse(contacts);
+        const parsedContacts = parseContactsFromFile(contacts);
         if (parsedContacts.length) {
           getPhoneContactsFromDevice(geo);
           resolve(parsedContacts);
         } else {
-          const contacts = await getPhoneContactsFromDevice(geo);
-          resolve(contacts);
+          resolve(await getPhoneContactsFromDevice(geo));
         }
       } catch (error) {
         const contacts = await getPhoneContactsFromDevice(geo);

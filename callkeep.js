@@ -30,8 +30,9 @@ export const setupCallKeep = () => {
       },
     };
     const processCallKitNotification = (payload) => {
-      if (payload.uuid &&  payload.caller && payload.type !== 'hangup') {
-        AsyncStorage.setItem('incomingCaller', payload.caller);
+      //console.error('CallKit payload', payload);
+      if (payload.uuid && payload.caller && payload.type !== 'hangup') {
+        AsyncStorage.setItem('incomingCaller', String(payload.caller));
         AsyncStorage.setItem('incomingUUID', payload.uuid);
         CacheStore.set('activeCall', payload.uuid);
         CacheStore.set('activeCallOthers', JSON.stringify([payload.caller]));

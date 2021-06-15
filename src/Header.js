@@ -193,7 +193,7 @@ export default function Header({route, themeSettings}) {
   if (userIdx !== -1) {
     avatarUrl = users[userIdx].avatar;
   } else {
-    avatarUrl = ctx.avatarUrl || ctx.authData.avatar;
+    avatarUrl = ctx.avatarUrl || (ctx.authData ? ctx.authData.avatar : "");
   }
   const nextOrProfile = getNextOrProfile(navigate, name, params, avatarUrl);
   return (
