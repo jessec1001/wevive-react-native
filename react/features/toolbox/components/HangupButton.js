@@ -11,6 +11,7 @@ import {AbstractHangupButton} from '../../base/toolbox/components';
 import type {AbstractButtonProps} from '../../base/toolbox/components';
 import APIService from '../../../../src/service/APIService';
 import CacheStore from 'react-native-cache-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * The type of the React {@code Component} props of {@link HangupButton}.
@@ -44,7 +45,8 @@ class HangupButton extends AbstractHangupButton<Props, *> {
     super(props);
     this._hangup = async () => {
       try {
-        const callId = await CacheStore.get('activeCall');
+        const callId = await AsyncStorage.getItem('activeCallUUID');
+        AsyncStorage.removeItem('activeCallUUID');
         const othersJSON = await CacheStore.get('activeCallOthers');
         const others = JSON.parse(othersJSON);
         APIService('users/pushmessage/', {
@@ -66,6 +68,9 @@ class HangupButton extends AbstractHangupButton<Props, *> {
         global.stopRingingTone = false;
       }
       this.props.dispatch(appNavigate('disconnect'));
+    };
+    global.hangup = () => {
+      this._hangup();
     };
   }
 

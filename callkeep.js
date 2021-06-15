@@ -30,15 +30,13 @@ export const setupCallKeep = () => {
       },
     };
     const processCallKitNotification = (payload) => {
-      console.error('processCallKitNotification', payload);
-      if (payload.caller && payload.type !== 'hangup') {
+      if (payload.uuid &&  payload.caller && payload.type !== 'hangup') {
         AsyncStorage.setItem('incomingCaller', payload.caller);
-        AsyncStorage.setItem('incomingUUID', payload.callUUID);
-        CacheStore.set('activeCall', payload.callUUID);
+        AsyncStorage.setItem('incomingUUID', payload.uuid);
+        CacheStore.set('activeCall', payload.uuid);
         CacheStore.set('activeCallOthers', JSON.stringify([payload.caller]));
       } else if (payload.type === 'hangup') {
-        console.error('hanging up from CallKit', payload);
-        global.navigation.goBack();
+        global.hangup && global.hangup();
       }
     }
     VoipPushNotification.addEventListener('notification', async (payload) => {

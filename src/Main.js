@@ -7,7 +7,7 @@ import {
   AppState,
   DeviceEventEmitter,
 } from 'react-native';
-
+import {CommonActions} from '@react-navigation/native';
 import {AppThemeContext, UserContext} from './context/UserContext';
 import Header from './Header';
 import FooterTabs from './FooterTabs';
@@ -31,26 +31,19 @@ if (Platform.OS === 'android') {
 }
 const chat_url = 'https://chat.wevive.com/';
 //const chat_url = 'http://192.168.0.180:3001/';
-let whoosh;
-const playSound = () => {
-  whoosh = new Sound('ringingtone.mp3', Sound.MAIN_BUNDLE, (error) => {
+const playBusySound = () => {
+  var whoosh = new Sound('busy.mp3', Sound.MAIN_BUNDLE, (error) => {
     if (error) {
       console.log('failed to load the sound', error);
       return;
     }
     whoosh.setNumberOfLoops(-1);
     if (!global.incomingCallID) {
-      whoosh.play((success) => {});
+      whoosh.play((success) => {
+        whoosh.release();
+      });
     }
   });
-  //whoosh.release();
-};
-const stopSound = () => {
-  if (whoosh !== false) {
-    whoosh.stop();
-    whoosh.release();
-    whoosh = false;
-  }
 };
 export default function Main({navigation, route}) {
   global.mainNavigation = navigation;
@@ -62,7 +55,7 @@ export default function Main({navigation, route}) {
   const _handleAppStateChange = (nextAppState) => {
     CacheStore.get('callUUID').then(async (uuid) => {
       if (uuid) {
-        video = (await CacheStore.get(uuid)) == '1';
+        const video = (await CacheStore.get(uuid)) == '1';
         global.incomingCallID = uuid;
         // console.log('IncomingCall incomingUUID redirecting from main _handleAppStateChange to call');
         CacheStore.remove('callUUID');
@@ -88,14 +81,15 @@ export default function Main({navigation, route}) {
        */
       const endCallListener = DeviceEventEmitter.addListener(
         'endCall',
-        (payload) => {
-          console.log('IncomingCall endCallListener', payload);
+        async (payload) => {
+          const uuid = await AsyncStorage.getItem('incomingUUID');
+          const caller = await AsyncStorage.getItem('incomingCaller');
           // End call action here
           APIService('users/pushmessage/', {
-            users: [payload.caller],
+            users: [caller],
             extra: {
               type: 'hangup',
-              callUUID: payload.uuid,
+              callUUID: uuid,
               caller: authData ? authData.id : 0,
             },
           });
@@ -135,30 +129,41 @@ export default function Main({navigation, route}) {
   });
   React.useEffect(() => {
     registerPushNotifications(
-      (a) => {
+      async (a) => {
         console.log('[FCMService] onNotification', a);
         if (a.data.conversationId) {
           navigation.navigate('ChatScreen', {
             conversation: a.data.conversationId,
           });
         }
-        if (a.data.type && a.data.type == 'call' && (route.name == 'VideoCalls' || route.name == 'Main')) {
-          console.log('[FCMService] Sending busy signal');
-          APIService('users/pushmessage',{
-            users: [data.caller],
-            extra: {
-              type: 'hangup',
-              caller: authData.id,
-              callUUID: a.data.callUUID,
-            }
-          })
+
+        const activeCall = await AsyncStorage.getItem('activeCallUUID');
+        if (a.data.type && a.data.type === 'call') {
+          if (activeCall && activeCall !== a.data.callUUID) {
+            console.log('[FCMService] Sending busy signal');
+            APIService('users/pushmessage/', {
+              users: [a.data.caller],
+              extra: {
+                type: 'hangup',
+                caller: authData.id,
+                callUUID: a.data.callUUID,
+              },
+            });
+          }
         }
-        if (a.data.type && a.data.type == 'hangup' && (route.name == 'VideoCalls' || route.name == 'Main')) {
-          console.log('[FCMService] Cancelling the call');
-          //TODO: check callUUID
-          global.navigation.goBack();
+        if (a.data.type && a.data.type === 'hangup') {
+          //console.error('HAAANGON', route,);
+          //console.error('Trying to hangup..', a.data, activeCall);
+          if (activeCall == a.data.callUUID) {
+            playBusySound();
+            global.hangup();
+          }
         }
-        if (a.data.type && a.data.type == 'call_received' && (route.name == 'VideoCalls' || route.name == 'Main')) {
+        if (
+          a.data.type &&
+          a.data.type == 'call_received' &&
+          (route.name == 'VideoCalls' || route.name == 'Main')
+        ) {
           console.log('[FCMService] Call is in progress..', a);
         }
       }, //onNotification

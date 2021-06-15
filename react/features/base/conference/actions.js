@@ -88,14 +88,18 @@ function _addConferenceListeners(conference, dispatch) {
       return;
     }
     whoosh = new Sound('ringingtone.mp3', Sound.MAIN_BUNDLE, (error) => {
-      if (error) {
+      if (error || !whoosh) {
         console.log('failed to load the sound', error);
         return;
       }
-      whoosh.setNumberOfLoops(-1);
-      if (!global.incomingCallID) {
-        whoosh.play((success) => {});
-      }
+      whoosh.getSystemVolume((volume) => {
+        //console.error('volume is set to', volume);
+        //whoosh.setVolume(volume);
+        whoosh.setNumberOfLoops(-1);
+        if (!global.incomingCallID) {
+          whoosh.play((success) => {});
+        }
+      });
     });
     //whoosh.release();
   };

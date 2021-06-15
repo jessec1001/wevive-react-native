@@ -22,12 +22,13 @@ export default function VideoCalls() {
     return others.length > 1 || (conversation && conversation.name);
   };
   React.useEffect(() => {
+    AsyncStorage.setItem('activeCallUUID', r.params.callId);
     setTimeout(() => {
       AsyncStorage.removeItem('incomingUUID');
       CacheStore.remove('incomingUUID');
       CacheStore.remove('callUUID');
     }, 1000);
-  }, []);
+  }, [r]);
   return (
     <>
       <App

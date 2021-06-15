@@ -26,6 +26,7 @@ export default class AppBootstrap extends Component {
   }
 
   _bootstrapAsync = async ($this) => {
+    AsyncStorage.removeItem('activeCallUUID');
     AsyncStorage.multiGet(['userToken', 'bioAccessToken', 'TFA']).then(
       (items) => {
         const k = {};

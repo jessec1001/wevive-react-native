@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import {Platform} from 'react-native';
 import CacheStore from 'react-native-cache-store';
@@ -122,22 +123,25 @@ class FCM_Service {
           if (remoteMessage.data.video) {
             CacheStore.set(remoteMessage.data.callUUID, 1, 0.5);
           }
-          IncomingCall.display(
-            remoteMessage.data.callUUID, // Call UUID v4
-            remoteMessage.data.username, // Username
-            remoteMessage.data.avatarURL,
-            'Wevive Call', // Info text
-            30000, // Timeout for end call after 30s
-          );
+          const activeCall = await AsyncStorage.getItem('activeCallUUID');
+          if (!activeCall || activeCall !== remoteMessage.data.callUUID) {
+            IncomingCall.display(
+              remoteMessage.data.callUUID, // Call UUID v4
+              remoteMessage.data.username, // Username
+              remoteMessage.data.avatarURL,
+              'Wevive Call', // Info text
+              30000, // Timeout for end call after 30s
+            );
+          }
         } else if (
           remoteMessage.data.callUUID &&
           remoteMessage.data.type === 'hangup'
         ) {
-          IncomingCall.dismiss();
+          if (Platform.OS == 'android') {
+            IncomingCall.dismiss();
+          }
         }
-        let notification = null;
-        notification = remoteMessage.notification;
-        onNotification(notification);
+        onNotification(remoteMessage);
       } else {
         console.log('[FCMService] message is false');
       }
