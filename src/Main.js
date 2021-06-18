@@ -154,9 +154,17 @@ export default function Main({navigation, route}) {
         if (a.data.type && a.data.type === 'hangup') {
           //console.error('HAAANGON', route,);
           //console.error('Trying to hangup..', a.data, activeCall);
+          
           if (activeCall == a.data.callUUID) {
             playBusySound();
-            global.hangup();
+            global.hangup && global.hangup();
+          } else if (Platform.OS == 'ios') {
+            const uuid = await AsyncStorage.getItem('incomingUUID');
+            if (uuid == a.data.callUUID) {
+              RNCallKeep.reportEndCallWithUUID(uuid, 6);
+              RNCallKeep.endCall(uuid);
+              AsyncStorage.removeItem('incomingUUID');
+            }
           }
         }
         if (

@@ -30,16 +30,16 @@ export const setupCallKeep = () => {
       },
     };
     const processCallKitNotification = (payload) => {
-      //console.error('CallKit payload', payload);
-      if (payload.uuid && payload.caller && payload.type !== 'hangup') {
+      console.warn('CallKit payload', payload);
+      if (payload.uuid && payload.caller && payload.type === 'call') {
         AsyncStorage.setItem('incomingCaller', String(payload.caller));
-        AsyncStorage.setItem('incomingUUID', payload.uuid);
-        CacheStore.set('activeCall', payload.uuid);
+        AsyncStorage.setItem('incomingUUID', String(payload.uuid));
+        CacheStore.set('activeCall', String(payload.uuid));
         CacheStore.set('activeCallOthers', JSON.stringify([payload.caller]));
       } else if (payload.type === 'hangup') {
         global.hangup && global.hangup();
       }
-    }
+    };
     VoipPushNotification.addEventListener('notification', async (payload) => {
       processCallKitNotification(payload);
     });
@@ -69,7 +69,6 @@ export const setupCallKeep = () => {
       const othersJSON = await CacheStore.get('activeCallOthers');
       const others = JSON.parse(othersJSON);
       console.log('RNCallKeep endCall', opts, uuid, caller, callId, others);
-      RNCallKeep.endCall(opts.callUUID);
       APIService('users/pushmessage/', {
         users: others,
         message: 'Hangup',
@@ -78,6 +77,7 @@ export const setupCallKeep = () => {
           callUUID: opts.callUUID,
         },
       });
+      RNCallKeep.endCall(opts.callUUID);
       /*APIService('users/voipcall/', {
         users: others,
         callUUID: callId,

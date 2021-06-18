@@ -4,6 +4,7 @@ import {DeviceEventEmitter, Platform} from 'react-native';
 import CacheStore from 'react-native-cache-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from './src/service/APIService';
+import RNCallKeep from 'react-native-callkeep';
 export const backgroundJobs = () =>
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     if (Platform.OS === 'android') {
@@ -61,5 +62,15 @@ export const backgroundJobs = () =>
           IncomingCall.backToForeground(payload.uuid);
         }
       });
+    } else {
+      const data = remoteMessage?.data;
+      if (data && data.type === 'hangup') {
+        const uuid = await AsyncStorage.getItem('incomingUUID');
+        if (uuid === data.callUUID) {
+          RNCallKeep.reportEndCallWithUUID(uuid, 6);
+          RNCallKeep.endCall(uuid);
+          AsyncStorage.removeItem('incomingUUID');
+        }
+      }
     }
   });
