@@ -1,3 +1,6 @@
+project.ext.react = [
+    enableHermes: true,  // clean and rebuild if changing
+]
 apply plugin: 'com.android.application'
 
 // Crashlytics integration is done as part of Firebase now, so it gets
@@ -5,7 +8,7 @@ apply plugin: 'com.android.application'
 if (googleServicesEnabled) {
     apply plugin: 'com.google.firebase.crashlytics'
 }
-
+apply from: "../../node_modules/react-native/react.gradle"
 // Use the number of seconds/60 since Jan 1 2021 as the versionCode.
 def vcode = (int) (((new Date().getTime() / 1000) - 1609459200) / 60)
 
@@ -14,7 +17,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     ndkVersion = "22.1.7171670"
     packagingOptions {
-        exclude 'lib/*/libhermes*.so'
+        //exclude "**/libjsc*.so"
+        //exclude '**/libhermes-inspector.so'
+        //exclude '**/libhermes-executor-debug.so'
+        //exclude '**/libhermes-executor-common-debug.so'
+        //pickFirst '**/libc++_shared.so'
+
+        //exclude 'lib/*/libhermes*.so'
         pickFirst 'lib/armeabi-v7a/libsodium.so'
         pickFirst 'lib/*/libsqlcipher.so'
     }
@@ -84,9 +93,9 @@ dependencies {
     implementation project(':react-native-fs')
     implementation project(':react-native-localize')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
     if (!rootProject.ext.libreBuild) {
         implementation 'com.google.android.gms:play-services-auth:16.0.1'
@@ -100,6 +109,9 @@ dependencies {
     }
 
     implementation project(':sdk')
+    def hermesPath = "../../node_modules/hermes-engine/android/";
+    //debugImplementation files(hermesPath + "hermes-debug.aar")
+    releaseImplementation files(hermesPath + "hermes-release.aar")
 }
 
 gradle.projectsEvaluated {

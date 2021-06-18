@@ -177,7 +177,9 @@ export function getPhoneContacts(geo) {
         const contacts = await RNFS.readFile(contactsPath, 'utf8');
         const parsedContacts = parseContactsFromFile(contacts);
         if (parsedContacts.length) {
-          getPhoneContactsFromDevice(geo);
+          setTimeout(() => {
+            getPhoneContactsFromDevice(geo);
+          }, 60000);
           resolve(parsedContacts);
         } else {
           resolve(await getPhoneContactsFromDevice(geo));

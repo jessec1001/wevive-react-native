@@ -119,25 +119,27 @@ class FCM_Service {
       console.log('[FCMService] A new FCM message arrived!', remoteMessage);
       if (remoteMessage) {
         if (remoteMessage.data.callUUID && remoteMessage.data.type === 'call') {
-          console.log('Calling IncomingCall');
           if (remoteMessage.data.video) {
             CacheStore.set(remoteMessage.data.callUUID, 1, 0.5);
           }
           const activeCall = await AsyncStorage.getItem('activeCallUUID');
           if (!activeCall || activeCall !== remoteMessage.data.callUUID) {
-            IncomingCall.display(
-              remoteMessage.data.callUUID, // Call UUID v4
-              remoteMessage.data.username, // Username
-              remoteMessage.data.avatarURL,
-              'Wevive Call', // Info text
-              30000, // Timeout for end call after 30s
-            );
+            if (Platform.OS === 'android') {
+              console.log('Calling IncomingCall');
+              IncomingCall.display(
+                remoteMessage.data.callUUID, // Call UUID v4
+                remoteMessage.data.username, // Username
+                remoteMessage.data.avatarURL,
+                'Wevive Call', // Info text
+                30000, // Timeout for end call after 30s
+              );
+            }
           }
         } else if (
           remoteMessage.data.callUUID &&
           remoteMessage.data.type === 'hangup'
         ) {
-          if (Platform.OS == 'android') {
+          if (Platform.OS === 'android') {
             IncomingCall.dismiss();
           }
         }

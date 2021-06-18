@@ -42,7 +42,7 @@
     "deep-equal": "^2.0.5",
     "focus-visible": "5.2.0",
     "formik": "^2.2.9",
-    "hermes-engine": "^0.8.0",
+    "hermes-engine": "^0.7.2",
     "i18n-iso-countries": "6.7.0",
     "i18n-js": "^3.8.0",
     "i18next": "17.0.6",

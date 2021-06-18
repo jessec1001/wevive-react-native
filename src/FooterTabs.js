@@ -73,15 +73,9 @@ export default function FooterTabs() {
   const createConversation = (index) => {
     switch (index) {
       case 0:
-        navigate('SearchContactsScreen', {type: 'nearby'});
-        break;
-      case 1:
         navigate('SearchContactsScreen', {type: 'private'});
         break;
-      case 2:
-        navigate('SearchContactsScreen', {type: 'public'});
-        break;
-      case 3:
+      case 1:
         navigate('SearchContactsScreen', {type: 'oneToOne'});
         break;
       default:
@@ -89,9 +83,7 @@ export default function FooterTabs() {
     }
   };
   const actionSheet = [
-    <ActionSheetElement text="Nearby contact" icon="mapmarker" />,
     <ActionSheetElement text="Private group" icon="lock" />,
-    <ActionSheetElement text="Public group" icon="lock" />,
     <ActionSheetElement text="1-to-1 Chat" icon="lock" />,
     'Cancel',
   ];
