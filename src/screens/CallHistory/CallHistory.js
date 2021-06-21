@@ -11,13 +11,17 @@ import {
 import {MenuItem, MenuDivider} from '../../components/Menu';
 import {ChatContext} from '../../../node_modules/react-native-chat-plugin/ChatContext';
 import CallHistoryItem from '../../components/CallHistoryItem';
+import CacheStore from 'react-native-cache-store';
+import APIService from '../../service/APIService';
+import {UserContext} from '../../context/UserContext';
 const chatWallpaper = require('../../../node_modules/react-native-chat-plugin/images/chat_background.png');
 export default function CallHistory({navigation, route}) {
   //const calls = [];
   const keyExtractor = (item) => String(item.id);
   const ctx = React.useContext(ChatContext);
   const calls = ctx.getCalls();
-  const users = ctx.getUsers();
+  //const users = ctx.getUsers();
+  const {authData} = React.useContext(UserContext);
   React.useEffect(() => {
     async function getCalls() {
       const calls_db = await ctx.getCallsFromDB();
@@ -29,11 +33,43 @@ export default function CallHistory({navigation, route}) {
   }, []);
   const swiper = React.useRef();
   const onPress = (conversation) => {
+    voipCall(conversation);
     navigation.navigate('VideoCalls', {
       callId: conversation.group_id,
       video: false,
     });
   };
+  const voipCall = React.useCallback(
+    (conversation) => {
+      const others =
+        conversation &&
+        conversation.participants
+          .map((p) => p.id)
+          .filter((p) => String(p) !== String(authData.id));
+      if (others) {
+        CacheStore.set('activeCall', conversation.id);
+        CacheStore.set('activeCallOthers', JSON.stringify(others));
+        APIService('users/voipcall/', {
+          users: others,
+          callUUID: conversation.id,
+          message: 'Wevive Call',
+        });
+        APIService('users/pushmessage/', {
+          users: others,
+          message: 'Call from ' + authData.userName,
+          extra: {
+            type: 'call',
+            callUUID: conversation.id,
+            caller: authData.id,
+            username: authData.userName,
+            avatarURL: authData.avatarHosted,
+            timestamp: +Date.now(),
+          },
+        });
+      }
+    },
+    [authData],
+  );
   const renderHiddenItem = ({item}) => {
     const Icon = ctx.icon;
     return (

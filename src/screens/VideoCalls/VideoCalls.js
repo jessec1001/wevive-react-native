@@ -47,7 +47,7 @@ export default function VideoCalls() {
         }}
         serverURL={'https://webrtc.wevive.com'}
         settings={{
-          startAudioOnly: !r.params.video,
+          startAudioOnly: false,
           startWithVideoMuted: !r.params.video,
           serverURL: 'https://webrtc.wevive.com',
           disableCallIntegration: false,
