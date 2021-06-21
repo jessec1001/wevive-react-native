@@ -1132,7 +1132,7 @@ index 7752e79..2894b1a 100644
      },
      [state]
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 2d8eeea..55953bc 100644
+index 2d8eeea..2b15253 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -1,5 +1,5 @@
@@ -1206,7 +1206,21 @@ index 2d8eeea..55953bc 100644
      backgroundColor: "rgb(228,140,58)",
      width: 40,
      height: 40,
-@@ -121,23 +133,43 @@ const styles = StyleSheet.create({
+@@ -102,6 +114,13 @@ const styles = StyleSheet.create({
+     color: "#777"
+     //paddingHorizontal: 10,
+   },
++  shareContactBtn: {
++    top: 12,
++    right: responsiveWidth(25),
++    position: "absolute",
++    paddingHorizontal: 10,
++    paddingVertical: 10,
++  },
+   micBtn: {
+     top: 12,
+     right: 142,
+@@ -121,23 +140,43 @@ const styles = StyleSheet.create({
    audioWave: {
      flex: 1,
      backgroundColor: "transparent",
@@ -1256,7 +1270,7 @@ index 2d8eeea..55953bc 100644
    const onChangeText = React.useCallback((text) => {
      setMessage(text);
      const socket = getSocket();
-@@ -157,9 +189,9 @@ export default function ChatForm({ conversation }) {
+@@ -157,9 +196,9 @@ export default function ChatForm({ conversation }) {
    }
    const sendMessage = React.useCallback(async (contents) => {
      const socket = getSocket();
@@ -1267,7 +1281,7 @@ index 2d8eeea..55953bc 100644
      const localMsg = await ctx.saveMessageToDB(conversation.id, contents, user.id, "MESSAGE", uuidv4(), 0, false);
      const newMessage = {
        id: String(localMsg),
-@@ -170,29 +202,40 @@ export default function ChatForm({ conversation }) {
+@@ -170,29 +209,40 @@ export default function ChatForm({ conversation }) {
        time: +Date.now(), 
        text: contents,
        is_delivered: false,
@@ -1325,7 +1339,7 @@ index 2d8eeea..55953bc 100644
        ctx.getDB().then((db)=> {
          db.executeSql(
            "SELECT * FROM conversations WHERE group_id = ?",
-@@ -212,27 +255,126 @@ export default function ChatForm({ conversation }) {
+@@ -212,27 +262,126 @@ export default function ChatForm({ conversation }) {
        }).catch((e)=>{
          console.warn(e);
        });
@@ -1460,7 +1474,7 @@ index 2d8eeea..55953bc 100644
    const recordAudio = () => {
      if (audioRecording) {
        setAudioRecording(false);
-@@ -265,20 +407,24 @@ export default function ChatForm({ conversation }) {
+@@ -265,20 +414,30 @@ export default function ChatForm({ conversation }) {
    /*const microphoneIcon = <TouchableOpacity onPress={recordAudio} style={styles.micBtn}>
      <Icon name="microphone" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
    </TouchableOpacity>;*/
@@ -1478,8 +1492,14 @@ index 2d8eeea..55953bc 100644
 +      <Icon name="camera" style={styles.btnIconStyles} />
 +    </TouchableOpacity>
 +  </>;
++  const shareContact = () => {
++
++  }
    const microphoneIcon = null;
 -  const galleryButtons = null;
++  const shareContactBtn = <TouchableOpacity onPress={shareContact} style={styles.shareContactBtn}>
++    <Icon name="add" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
++  </TouchableOpacity>;
    return (
      <View style={styles.container}>
 +      <ActionSheet
@@ -1494,8 +1514,16 @@ index 2d8eeea..55953bc 100644
          textAlignVertical={"top"}
          numberOfLines={5}
          multiline={false}
+@@ -290,6 +449,7 @@ export default function ChatForm({ conversation }) {
+         blurOnSubmit={true}
+         onChangeText={onChangeText} />
+       {microphoneIcon}
++      {shareContactBtn}
+       <TouchableOpacity style={styles.btnImage} onPress={submit}>
+         <Image source={sendButton} style={styles.btnImageStyles} />
+       </TouchableOpacity>
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index 2419a3d..8786a0b 100644
+index 2419a3d..08b3da4 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,6 +1,7 @@
@@ -1807,7 +1835,7 @@ index 2419a3d..8786a0b 100644
 +    //onPress
 +  }
 +  const isGroupChat = () => {
-+    return others.length > 1 || conversation.name;
++    return others.length > 1 || conversation.name || conversation.avatar;
 +  }
 +  const kickContact = () => {
 +    Alert.prompt("Confirm action", "Would you like to kick "+selectedUser.username+"?", [
@@ -2029,10 +2057,10 @@ index 2419a3d..8786a0b 100644
    }),
  };
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-index 845ad14..5924ec4 100644
+index 845ad14..ee6998c 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-@@ -1,15 +1,16 @@
+@@ -1,15 +1,18 @@
  import React from "react";
 -import { Text, StyleSheet, View, Image, TouchableHighlight, TouchableOpacity, TouchableWithoutFeedback, Pressable, Alert } from "react-native";
 +import { Text, StyleSheet, View, Image, TouchableHighlight, TouchableOpacity, TouchableWithoutFeedback, Pressable, Alert, ImageBackground, Linking } from "react-native";
@@ -2050,10 +2078,12 @@ index 845ad14..5924ec4 100644
 +import { responsiveWidth } from "react-native-responsive-dimensions";
 +import ImageView from "react-native-image-viewing";
 +import FastImage from 'react-native-fast-image';
++import { formatDate, formatDateForHumans } from "../../../src/utils/helpers";
++import formatISODuration from "date-fns/esm/fp/formatISODuration/index.js";
  
  const chatSelf = require("../images/chat_gray.png");
  const chatOther = require("../images/chat_orange.png");
-@@ -65,6 +66,10 @@ const styles = StyleSheet.create({
+@@ -65,6 +68,10 @@ const styles = StyleSheet.create({
    body: {
      marginTop: 5,
    },
@@ -2064,11 +2094,12 @@ index 845ad14..5924ec4 100644
    avatar: {
      width:25,
      height:25,
-@@ -146,10 +151,12 @@ const styles = StyleSheet.create({
+@@ -146,10 +153,13 @@ const styles = StyleSheet.create({
    }
  });
  
 -function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent, Icon }) {
++
 +function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent, Icon, conversation }) {
    const viewRef = React.useRef();
    const [likes, setLikes] = React.useState(0);
@@ -2078,7 +2109,7 @@ index 845ad14..5924ec4 100644
    const options = {
      enableVibrateFallback: true,
      ignoreAndroidSystemSettings: false
-@@ -181,6 +188,25 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
+@@ -181,6 +191,29 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
    },[]);
    const authorUrl = event.avatar || getAvatar(author);
    const contactName = event.contactName || (!isOwn ? ctx.getContactName(ctx.getUsernameByUserId(author)) : "Me");
@@ -2101,10 +2132,14 @@ index 845ad14..5924ec4 100644
 +    }
 +    return <Autolink style={styles.body} text={text} truncate={44} truncateChars="..."/>
 +  }
++
++  const date = new Date(time);
++  let formattedTime = formatDateForHumans(date);
++  //{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}
    return (
      <>
        <TouchableHighlight ref={viewRef} underlayColor={"#bbb"} style={isOwn ? styles.selfMessage : styles.message} delayLongPress={500} onPress={(evt) => {
-@@ -194,8 +220,7 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
+@@ -194,16 +227,15 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
              <Text style={styles.author}>{contactName}</Text>
            </View>
            <View style={styles.textBox}>
@@ -2114,7 +2149,8 @@ index 845ad14..5924ec4 100644
            </View>
            {encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
            <View style={styles.timeBox}>
-@@ -203,7 +228,7 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
+-            <Text style={styles.time}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
++            <Text style={styles.time}>{formattedTime}</Text>
              {isOwn && (
                <>
                  <Text style={styles.readIndicator}>
@@ -2123,7 +2159,7 @@ index 845ad14..5924ec4 100644
                  </Text>
                  <Text style={styles.deliveryIndicator}>
                    <Icon name="ticks" color={event?.is_delivered ? "rgb(228,140,58)" : "rgb(100,100,100)"} size={8}/>
-@@ -226,7 +251,8 @@ Message.propTypes = {
+@@ -226,7 +258,8 @@ Message.propTypes = {
    setShowMenu: PropTypes.func,
  };
  
@@ -2133,7 +2169,7 @@ index 845ad14..5924ec4 100644
    const ctx = React.useContext(ChatContext);
    const username = ctx.getUserId();
    const isMessage = event?.type === "MESSAGE";
-@@ -234,7 +260,7 @@ export default function MessageItem ({ event, menu, setSelectedEvent }) {
+@@ -234,7 +267,7 @@ export default function MessageItem ({ event, menu, setSelectedEvent }) {
    const isOwn = !author || author == username;
    if (isMessage) {
      if (event?.hidden) return null;
@@ -2143,10 +2179,16 @@ index 845ad14..5924ec4 100644
      return (<Text style={styles.notification}>{event?.text}</Text>);
    }
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessagesList.js b/node_modules/react-native-chat-plugin/ChatScreen/MessagesList.js
-index 2fbc6d2..85a0bf2 100644
+index 2fbc6d2..457f728 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessagesList.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessagesList.js
-@@ -6,8 +6,8 @@ import MessageItem from "./MessageItem";
+@@ -1,13 +1,16 @@
+ import React from "react";
+-import { FlatList, View, TouchableOpacity, Text } from "react-native";
++import { FlatList, SectionList, View, TouchableOpacity, Text } from "react-native";
+ import PropTypes from "prop-types";
+ 
+ import MessageItem from "./MessageItem";
  import { EventPropType } from "../PropTypes";
  import {StyleSheet} from 'react-native';
  
@@ -2154,27 +2196,118 @@ index 2fbc6d2..85a0bf2 100644
 -  return (<MessageItem event={item} setSelectedEvent={setSelectedEvent} />);
 +function renderItem({ item, setSelectedEvent, conversation }) {
 +  return (<MessageItem event={item} setSelectedEvent={setSelectedEvent} conversation={conversation} />);
++}
++function renderSectionHeader({section}) {
++  return <View style={styles.dateHeaderBox}><Text style={styles.dateHeader}>{section.title}</Text></View>
  }
  renderItem.propTypes = {
    item: EventPropType,
-@@ -20,7 +20,7 @@ const renderCell = ({index, style, ...props}) => {
+@@ -19,18 +22,58 @@ const renderCell = ({index, style, ...props}) => {
+ }
  
  
++const getHumanDate = (date) => {
  
 -export default function MessageList({ events, onEndReached, setSelectedEvent }) {
++}
 +export default function MessageList({ conversation, events, onEndReached, setSelectedEvent }) {
    const flatlistRef = React.useRef();
    const [goToBottom, setGoToBottom] = React.useState(false);
    const scrollToEnd = React.useCallback(() => {
-@@ -44,7 +44,7 @@ export default function MessageList({ events, onEndReached, setSelectedEvent })
+-    flatlistRef.current.scrollToIndex({index:0});
++    flatlistRef.current.scrollToLocation({
++      sectionIndex: 0,
++      itemIndex: 0,
++      animated: true,
++    })
+   }, [flatlistRef])
+   const ctx = React.useContext(ChatContext);
+   const Icon = ctx.icon;
++  const monthNames = ["January", "February", "March", "April", "May", "June",
++    "July", "August", "September", "October", "November", "December"
++  ];
++  const getData = React.useCallback(() => {
++    const DATA = [...events].reverse().reduce((op, event) => {
++      const today = new Date();
++      const todayDate = today.toJSON().substr(0,10);
++      const yesterday = new Date();
++      yesterday.setDate(today.getDate() - 1);
++      const yesterdayDate = yesterday.toJSON().substr(0,10);
++      
++      const date = new Date(event ? event.time : 0);
++      const eventDate = date.toJSON().substr(0,10);
++      let title;
++      if (todayDate == eventDate) {
++        title = "Today";
++      } else if (yesterdayDate == eventDate) {
++        title = "Yesterday";
++      } else {
++        title = monthNames[date.getMonth()] + " " + date.getDate(); 
++      }
++      const { result, index } = op;
++      if (index.hasOwnProperty(title)) {
++          result[index[title]].data.push(event);
++      } else {
++          index[title] = result.length;
++          result.push({ title: title, data: [event] });
++      }
++      return op;
++    }, { result: [], index: {} }).result;
++    return DATA;
++  }, [events])
++  
++
+   return (
+     <>
+-      <FlatList
++      <SectionList
+         ref={flatlistRef}
+         scrollEventThrottle={200}
+         onScroll={(event) => {
+@@ -43,11 +86,15 @@ export default function MessageList({ events, onEndReached, setSelectedEvent })
+         }}
          contentContainerStyle={{ paddingBottom: 20 }}
          inverted
-         data={[...events].reverse()}
+-        data={[...events].reverse()}
 -        renderItem={({item}) => renderItem({item, setSelectedEvent})}
++        //invertStickyHeaders={true}
++        sections={getData()}
 +        renderItem={({item}) => renderItem({item, setSelectedEvent, conversation})}
++        renderSectionFooter={renderSectionHeader}
          onEndReached={onEndReached}
          onEndReachedThreshold={0.5}
          removeClippedSubviews={false}
++        showsVerticalScrollIndicator={true}
++        stickySectionHeadersEnabled={false}
+       />
+       {goToBottom && <TouchableOpacity style={styles.goToBottom} onPress={scrollToEnd}>
+           <View style={styles.goToBottomIconContainer}>
+@@ -67,6 +114,25 @@ import {
+ } from 'react-native-responsive-dimensions';
+ import { ChatContext } from "react-native-chat-plugin/ChatContext";
+ const styles = StyleSheet.create({
++  dateHeader: {
++    fontSize: responsiveFontSize(1.7),
++    overflow: "hidden",
++    textAlign: "center",
++    fontWeight: "300",
++    color: "#eee",
++    alignSelf: "center",
++
++    borderRadius: responsiveWidth(3.5),
++    backgroundColor: "#444",
++    padding: responsiveWidth(1.5),
++    paddingHorizontal: responsiveWidth(4),
++  },
++  dateHeaderBox: {
++    alignItems: "center",
++    justifyContent: "center",
++    marginTop: responsiveWidth(3),
++    
++  },
+   goToBottom: {
+       position: "absolute",
+       right: 0,
 diff --git a/node_modules/react-native-chat-plugin/Components/Header.js b/node_modules/react-native-chat-plugin/Components/Header.js
 index 738ea59..ba39223 100644
 --- a/node_modules/react-native-chat-plugin/Components/Header.js
@@ -2343,14 +2476,15 @@ index 3658991..3b3f1d2 100644
  });
  
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
-index e1f4aab..8ab4ebd 100644
+index e1f4aab..c8b3133 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
-@@ -9,10 +9,13 @@ import { ChatContext } from "../ChatContext";
+@@ -9,10 +9,14 @@ import { ChatContext } from "../ChatContext";
  import LinearGradient from "react-native-linear-gradient";
  import { responsiveFontSize } from "react-native-responsive-dimensions";
  import TypingIndicator from "react-native-chat-plugin/ChatScreen/TypingIndicator";
 +import Icon from "../../../src/components/Icon";
++import { formatDateForHumans } from "../../../src/utils/helpers";
  const styles = StyleSheet.create(
    {
      container: {
@@ -2361,7 +2495,7 @@ index e1f4aab..8ab4ebd 100644
        flexDirection: "row",
        padding: 20,
      },
-@@ -49,6 +52,21 @@ const styles = StyleSheet.create(
+@@ -49,6 +53,21 @@ const styles = StyleSheet.create(
        marginRight:80,
        fontFamily: Fonts.Light,
      },
@@ -2383,7 +2517,21 @@ index e1f4aab..8ab4ebd 100644
      unreadCount: {
        marginLeft: "auto",
        alignSelf: "center",
-@@ -114,13 +132,19 @@ function getPreviewDate(conversation, user, Icon) {
+@@ -102,6 +121,7 @@ function getPreviewDate(conversation, user, Icon) {
+   }
+   const time = (typeof event?.time === "string") ? event.time : conversation.time;
+   const isOwn = event && event.owner && event.owner.id == user.id;
++  const formattedDate = formatDateForHumans(new Date(time));
+   return <>
+     {isOwn &&
+     <View style={styles.isOwn}>
+@@ -109,18 +129,24 @@ function getPreviewDate(conversation, user, Icon) {
+       <Icon style={styles.isOwnTicks} name='ticks' color={event.is_delivered ? "rgb(228,140,58)" : "rgb(100,100,100)"} />
+     </View>
+     }
+-    <Text style={styles.date}>{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}</Text>
++    <Text style={styles.date}>{formattedDate}</Text>
+   </>;
  }
  function getPreview(conversation) {
    let event = conversation.lastEvent;
@@ -2406,7 +2554,7 @@ index e1f4aab..8ab4ebd 100644
    const unreadCount = conversation.unreadCount ? parseInt(conversation.unreadCount) : 0;
    const ctx = useContext(ChatContext);
    const user = ctx.getUser();
-@@ -134,8 +158,9 @@ export default function ContactComponent({ conversation, onPress }) {
+@@ -134,8 +160,9 @@ export default function ContactComponent({ conversation, onPress }) {
    return (
      <TouchableHighlight
        onPress={() => (onPress && onPress(conversation))}
@@ -2417,7 +2565,7 @@ index e1f4aab..8ab4ebd 100644
          <ProfilePreview text={chatName} contacts={participants} conversation={conversation} />
          
          <View>
-@@ -158,7 +183,7 @@ export default function ContactComponent({ conversation, onPress }) {
+@@ -158,7 +185,7 @@ export default function ContactComponent({ conversation, onPress }) {
              <Text style={styles.unreadCountText}>{unreadCount}</Text>
            </View>
          ) : null }
@@ -2664,34 +2812,33 @@ index a73d2b3..2b7d17c 100644
      </View>
    );
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 389e406..ecab6f0 100644
+index 389e406..1c4c049 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-@@ -1,18 +1,20 @@
+@@ -1,18 +1,16 @@
  import React from "react";
 -import { View, StyleSheet, Text, TouchableOpacity, FlatList } from "react-native";
-+import { View, StyleSheet, Text, TouchableOpacity, FlatList, SectionList, Switch, Pressable } from "react-native";
++import { View, StyleSheet, Text, TouchableOpacity, Pressable } from "react-native";
  
 -//import AlphabetList from "react-native-flatlist-alphabet";
 +import AlphabetList from "react-native-flatlist-alphabet";
  import { ChatContext } from "../ChatContext";
  import { NavigationPropType } from "../PropTypes";
- import LinearGradient from "react-native-linear-gradient";
+-import LinearGradient from "react-native-linear-gradient";
  
  import SendSMS from 'react-native-sms'
 -import { responsiveFontSize } from "react-native-responsive-dimensions";
 +import { responsiveFontSize, responsiveWidth } from "react-native-responsive-dimensions";
  import APIService from "../../../src/service/APIService";
- import {ClientContext} from '../../../src/context/ClientContext';
- import { clearPhoneNumber } from "../../../src/utils/phonehelpers";
+-import {ClientContext} from '../../../src/context/ClientContext';
+-import { clearPhoneNumber } from "../../../src/utils/phonehelpers";
  import trans from "../../../src/utils/trans";
  import Icon from "../../../src/components/Icon";
-+import getSectionData from "react-native-flatlist-alphabet/dist/utilities/getSectionData";
 +import TextInput from "react-native-chat-plugin/Components/TextInput";
  
  
  const styles = StyleSheet.create({
-@@ -83,6 +85,9 @@ const styles = StyleSheet.create({
+@@ -83,6 +81,9 @@ const styles = StyleSheet.create({
      flexDirection: "row",
      justifyContent: "space-between",
      paddingRight: 50,
@@ -2701,7 +2848,7 @@ index 389e406..ecab6f0 100644
    },
    sectionHeaderContainer: {
      backgroundColor: "rgb(125,125,125)",
-@@ -102,8 +107,8 @@ const styles = StyleSheet.create({
+@@ -102,8 +103,8 @@ const styles = StyleSheet.create({
    },
    letterItemStyle: {
      //padding: 10,
@@ -2712,7 +2859,7 @@ index 389e406..ecab6f0 100644
    },
    contactToggle: {
      backgroundColor: "transparent",
-@@ -123,13 +128,39 @@ const styles = StyleSheet.create({
+@@ -123,13 +124,39 @@ const styles = StyleSheet.create({
      justifyContent: "center",
    },
    headerStyle: {
@@ -2755,10 +2902,26 @@ index 389e406..ecab6f0 100644
    },
    markTick: {
      color: "white",
-@@ -150,6 +181,35 @@ const styles = StyleSheet.create({
+@@ -138,18 +165,47 @@ const styles = StyleSheet.create({
+     alignSelf: "center",
+   },
+   alreadyExists: {
+-    fontSize: responsiveFontSize(1.1),
++    fontSize: responsiveFontSize(1.4),
+     alignSelf: "center",
      position: "absolute",
      left: 20,
-     bottom: 10,
+-    bottom: 10,
++    bottom: 6,
+   },
+   numberOfFriends: {
+-    fontSize: responsiveFontSize(1.1),
++    fontSize: responsiveFontSize(1.4),
+     alignSelf: "center",
+     position: "absolute",
+     left: 20,
+-    bottom: 10,
++    bottom: 6,
 +  },
 +  toggleStyle: {
 +    transform: [
@@ -2791,7 +2954,7 @@ index 389e406..ecab6f0 100644
    }
  });
  
-@@ -162,7 +222,7 @@ const onShare = async (numbers, navigation) => {
+@@ -162,7 +218,7 @@ const onShare = async (numbers, navigation) => {
      allowAndroidSendWithoutReadPermission: true,
    }, (completed, cancelled, error) => {
      if (completed) {
@@ -2800,7 +2963,7 @@ index 389e406..ecab6f0 100644
      }
      //console.warn('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
    });
-@@ -170,7 +230,6 @@ const onShare = async (numbers, navigation) => {
+@@ -170,7 +226,6 @@ const onShare = async (numbers, navigation) => {
  
  
  const renderSectionHeader = (section) => {
@@ -2808,7 +2971,7 @@ index 389e406..ecab6f0 100644
    return (
      <View style={styles.sectionHeaderContainer}>
        <Text style={styles.sectionHeaderLabel}>{section.title}</Text>
-@@ -178,21 +237,46 @@ const renderSectionHeader = (section) => {
+@@ -178,58 +233,111 @@ const renderSectionHeader = (section) => {
    );
  };
  
@@ -2834,6 +2997,8 @@ index 389e406..ecab6f0 100644
 -    </TouchableOpacity>
 -  );
 -};
+-
+-export default function PhoneContactsScreen({ navigation }) {
 +        const oneToOne = conversations
 +        .filter(c =>
 +          c.participants.findIndex(p => p.username == clearLabel) !== -1 
@@ -2867,25 +3032,17 @@ index 389e406..ecab6f0 100644
 +  }
 +}
  
- export default function PhoneContactsScreen({ navigation }) {
-   
-@@ -200,36 +284,74 @@ export default function PhoneContactsScreen({ navigation }) {
-   const clientctx = React.useContext(ClientContext);
++export default function PhoneContactsScreen({ navigation, exceptIds, onPress }) {
+   const ctx = React.useContext(ChatContext);
+-  const clientctx = React.useContext(ClientContext);
    const [selectedContacts, setSelectedContacts] = React.useState([]);
-   const [filter, setFilter] = React.useState(false)
+-  const [filter, setFilter] = React.useState(false)
 -  const [existingUsers, setExistingUsers] = React.useState({existing:[],contacts:[],friendCounts: []});
 +  const [usersOnly, setUsersOnly] = React.useState(true);
 +  const [existingUsers, setExistingUsers] = React.useState({existing:[], contacts:[], friendCounts: [], init:true});
    const contacts = ctx.getPhoneContacts();
 +  const conversations = ctx.getConversations();
 +  const [query, setQuery] = React.useState("");
-+  function searchAsyncForContacts(ctx, query) {
-+    searchForMessages(ctx, query).then((resultsFromDB) => {
-+      if (JSON.stringify(resultsFromDB) != JSON.stringify(results)) {
-+        setResults(resultsFromDB);
-+      }
-+    });
-+  }
 +  const displayContacts = React.useMemo(() => {
 +    if (query && query.length > 0) {
 +      const searchRegex = new RegExp(`${query}`, 'g');
@@ -2956,7 +3113,7 @@ index 389e406..ecab6f0 100644
      });
    },[]);
    const toggleSelected = (label, marked) => {
-@@ -246,42 +368,67 @@ export default function PhoneContactsScreen({ navigation }) {
+@@ -246,42 +354,65 @@ export default function PhoneContactsScreen({ navigation }) {
    const goNext = () => {
      onShare(selectedContacts, navigation);
    }
@@ -2983,10 +3140,8 @@ index 389e406..ecab6f0 100644
 +  //sections = getSectionData(displayContacts || contacts || []);
 +  return contacts && existingUsers.init && (
      <>
-+
        <View style={styles.headerStyle}>
 -        <TouchableOpacity onPress={goBack}>
-+
 +        <View style={styles.headerHeadline}>
 +          <Icon name="add" style={styles.headerIcon} />
 +          <Text style={styles.headerHeadlineText}>Contacts</Text>
@@ -3177,9 +3332,6 @@ index aab586e..5aae42c 100644
        }
      </TouchableOpacity>
    );
-diff --git a/node_modules/react-native-chat-plugin/android/build/.transforms/7738af8f35df7a98a127dbe16183327a/results.bin b/node_modules/react-native-chat-plugin/android/build/.transforms/7738af8f35df7a98a127dbe16183327a/results.bin
-new file mode 100644
-index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/.transforms/d992c50367f55b75e21f3c1565d3ed55/results.bin b/node_modules/react-native-chat-plugin/android/build/.transforms/d992c50367f55b75e21f3c1565d3ed55/results.bin
 new file mode 100644
 index 0000000..e69de29
@@ -5075,11 +5227,11 @@ index 0000000..4c0b515
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/mergeReleaseResources/compile-file-map.properties b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/mergeReleaseResources/compile-file-map.properties
 new file mode 100644
-index 0000000..5d15dde
+index 0000000..8f3bf29
 --- /dev/null
 +++ b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/mergeReleaseResources/compile-file-map.properties
 @@ -0,0 +1,378 @@
-+#Thu Jun 17 17:50:40 MSK 2021
++#Fri Jun 18 09:44:56 MSK 2021
 +/Users/michailstrokin/.gradle/caches/transforms-3/514bc37de2dc3fab94e5a7c215e7089e/transformed/core-1.0.1/res/layout-v21/notification_action_tombstone.xml=/Users/michailstrokin/Misha/_Wevive/wevive-react-native/node_modules/react-native-chat-plugin/android/build/intermediates/res/merged/release/layout-v21/notification_action_tombstone.xml
 +/Users/michailstrokin/.gradle/caches/transforms-3/d8f0aee43685d5cf605a4c80195956b9/transformed/appcompat-1.0.2/res/drawable-hdpi-v4/abc_list_longpressed_holo.9.png=/Users/michailstrokin/Misha/_Wevive/wevive-react-native/node_modules/react-native-chat-plugin/android/build/intermediates/res/merged/release/drawable-hdpi-v4/abc_list_longpressed_holo.9.png
 +/Users/michailstrokin/.gradle/caches/transforms-3/d8f0aee43685d5cf605a4c80195956b9/transformed/appcompat-1.0.2/res/drawable-v21/abc_dialog_material_background.xml=/Users/michailstrokin/Misha/_Wevive/wevive-react-native/node_modules/react-native-chat-plugin/android/build/intermediates/res/merged/release/drawable-v21/abc_dialog_material_background.xml
@@ -17324,11 +17476,11 @@ index 0000000..1a9a574
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/compile-file-map.properties b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/compile-file-map.properties
 new file mode 100644
-index 0000000..4a37987
+index 0000000..8e72cb9
 --- /dev/null
 +++ b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/compile-file-map.properties
 @@ -0,0 +1 @@
-+#Thu Jun 17 17:48:29 MSK 2021
++#Fri Jun 18 09:44:01 MSK 2021
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/merger.xml b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/merger.xml
 new file mode 100644
 index 0000000..78b4bae
@@ -43479,7 +43631,7 @@ index 0000000..8039f9f
 +com/ourengineroom/rnchatplugin/BuildConfig.java
 + com.ourengineroom.rnchatplugin.BuildConfig
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index c508376..f902df2 100644
+index c508376..b3a5783 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
 @@ -4,7 +4,7 @@ import PropTypes from "prop-types";
@@ -43516,7 +43668,7 @@ index c508376..f902df2 100644
 +let lastSync = false;
 +export default function ChatModule({ socketIoUrl, options, children }) {
 +  const icon = Icon;
-+  const [contactsAllowed, setContactsAllowed] = React.useState(Platform.OS == 'android' ? false : true);
++  const [contactsAllowed, setContactsAllowed] = React.useState(Platform.OS == 'android' ? true : true);
    const [contacts, setContacts] = React.useState([]);
    initSocket(socketIoUrl);
    const getDB = async () => {
@@ -43564,7 +43716,7 @@ index c508376..f902df2 100644
      if (Platform.OS == 'android') {
        PermissionsAndroid.request(
          PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
-@@ -91,36 +64,24 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
+@@ -91,36 +64,26 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
            'buttonPositive': 'Allow'
          }
        )
@@ -43576,11 +43728,13 @@ index c508376..f902df2 100644
 -          saveContactsToDB(newContacts);
 -        });
 +      .then((status)=> {
-+        if (status == 'granted') {  
++        if (status == 'granted') {
 +          setContactsAllowed(true);
 +          getPhoneContacts(geo).then(fetchedContacts => {
 +            setContacts(fetchedContacts || []);
 +          });
++        } else {
++          setContactsAllowed(false);
 +        }
        }
        );
@@ -43611,7 +43765,7 @@ index c508376..f902df2 100644
        const dbContactsArray = [];
        const [dbContacts] = await db.executeSql("SELECT * FROM contacts ORDER BY familyName ASC LIMIT 10000");
        for (let i=0;i<dbContacts.rows.length;i++) {
-@@ -132,31 +93,47 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
+@@ -132,31 +95,47 @@ export default function ChatModule({ socketIoUrl, options, icon, children }) {
          });
        }
        if (false && dbContactsArray.length) {
@@ -43629,7 +43783,7 @@ index c508376..f902df2 100644
    },[geo]);
    React.useEffect(() => {
 -    if (!contacts.length || typeof geo.geo == 'undefined') {
-+    if (!contacts || !contacts.length || typeof geo == 'undefined') {
++    if (typeof geo == 'undefined') {
        global.appIsLoading("Loading, please wait..");
      } else {
        global.appIsNotLoading();
@@ -43642,8 +43796,8 @@ index c508376..f902df2 100644
 -      </ChatContainer>
 -    </ChatContextProvider>
 -  );
-+  },[contacts, geo]);
-+  if (!contacts || typeof geo == 'undefined') return null;
++  },[geo]);
++  if (typeof geo == 'undefined') return null;
 +  if (contactsAllowed) {
 +    return (
 +      <ChatContextProvider options={options} socketIoUrl={socketIoUrl} getDB={getDB} icon={icon}>

@@ -194,3 +194,50 @@ export function getPhoneContacts(geo) {
     }
   });
 }
+
+export function formatDateForHumans(date) {
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  const isToday = (date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isYesterday = (date) => {
+    const today = new Date();
+    today.setDate(today.getDate() - 1);
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+  if (isToday(date)) {
+    return date.toLocaleTimeString().substr(0, 5);
+  } else if (isYesterday(date)) {
+    return 'Yesterday, ' + date.toLocaleTimeString().substr(0, 5);
+  } else {
+    return monthNames[date.getMonth()] +
+      ' ' +
+      date.getDate() +
+      ', ' +
+      date.toLocaleTimeString().substr(0, 5);
+  }
+}
