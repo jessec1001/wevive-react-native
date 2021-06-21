@@ -6,6 +6,8 @@ import {
   getStateFromPath,
 } from '@react-navigation/native';
 
+import analytics from '@react-native-firebase/analytics';
+
 import AppBootstrap from './AppBootstrap';
 import AppStack from './AppStack';
 import AuthStack from './AuthStack';
@@ -99,6 +101,10 @@ const RootStack = ({initialProps}) => {
     if (!sameTheme) {
       setThemeSettings(changedTheme);
     }
+    analytics().logScreenView({
+      screen_name: routeName,
+      screen_class: routeName,
+    });
     return true;
   };
 

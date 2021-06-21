@@ -17,7 +17,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     ndkVersion = "22.1.7171670"
     packagingOptions {
-        //exclude "**/libjsc*.so"
+        exclude "**/libjsc*.so"
         //exclude '**/libhermes-inspector.so'
         //exclude '**/libhermes-executor-debug.so'
         //exclude '**/libhermes-executor-common-debug.so'
