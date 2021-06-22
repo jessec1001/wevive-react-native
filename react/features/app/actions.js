@@ -87,7 +87,8 @@ export function appNavigate(uri: ?string) {
             if (disconnected) {
                 setTimeout(() => {
                     dispatch(setVideoMuted(true));
-                    global.navigation.dispatch(StackActions.pop());
+                    global.navigateTo("VideoCalls",{callId: false});
+                    //global.navigation.dispatch(StackActions.pop());
                 }, 100);
             }
         }

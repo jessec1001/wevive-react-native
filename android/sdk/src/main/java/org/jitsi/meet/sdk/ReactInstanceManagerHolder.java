@@ -187,6 +187,8 @@ class ReactInstanceManagerHolder {
                 new com.reactnativecommunity.netinfo.NetInfoPackage(),
                 // @react-native-community/picker
                 new com.reactnativecommunity.picker.RNCPickerPackage(),
+                // @react-native-firebase/analytics
+                new io.invertase.firebase.analytics.ReactNativeFirebaseAnalyticsPackage(),
                 // @react-native-firebase/app
                 new io.invertase.firebase.app.ReactNativeFirebaseAppPackage(),
                 // @react-native-firebase/messaging

@@ -55,14 +55,8 @@ export function parse_str(querystring) {
 }
 
 //import { useNavigation, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
-import {formatDistanceToNow, format, parse, parseISO} from 'date-fns';
+//import { format, parse, parseISO} from 'date-fns';
 
-export function getRemaining(end_date) {
-  const endDate = parseISO(end_date);
-  const remaining = formatDistanceToNow(endDate, {includeSeconds: true});
-  const remainingWord = endDate > Date.now() ? 'remaining' : 'ago';
-  return `${remaining} ${remainingWord}`;
-}
 
 import equal from 'deep-equal';
 import moment from 'moment';

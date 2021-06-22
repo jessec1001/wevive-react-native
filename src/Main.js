@@ -26,6 +26,8 @@ import CacheStore from 'react-native-cache-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Sound from 'react-native-sound';
 import APIService from './service/APIService';
+
+import VideoCalls from './screens/VideoCalls/VideoCalls';
 if (Platform.OS === 'android') {
   OverlayPermissionModule.requestOverlayPermission();
 }
@@ -48,10 +50,10 @@ const playBusySound = () => {
 export default function Main({navigation, route}) {
   global.mainNavigation = navigation;
   const themeSettings = React.useContext(AppThemeContext);
-  const {authData, updateMe} = React.useContext(UserContext);
+  const {authData, updateMe, setThemeSettings} = React.useContext(UserContext);
 
   const appState = React.useRef(AppState.currentState);
-
+  const [callUUID, setCallUUID] = React.useState(false);
   const _handleAppStateChange = (nextAppState) => {
     CacheStore.get('callUUID').then(async (uuid) => {
       if (uuid) {
@@ -59,7 +61,7 @@ export default function Main({navigation, route}) {
         global.incomingCallID = uuid;
         // console.log('IncomingCall incomingUUID redirecting from main _handleAppStateChange to call');
         CacheStore.remove('callUUID');
-        navigation.navigate('VideoCalls', {
+        global.navigateTo('VideoCalls', {
           callId: uuid,
           video,
         });
@@ -106,11 +108,11 @@ export default function Main({navigation, route}) {
             global.incomingCallID = payload.uuid;
             setTimeout(() => {
               //Alert.alert('Navigating');
-              navigation.navigate('VideoCalls', {
+              global.navigateTo('VideoCalls', {
                 callId: payload.uuid,
                 video: false,
               });
-            }, 1000);
+            }, 100);
           }
         },
       );
@@ -122,7 +124,7 @@ export default function Main({navigation, route}) {
   }, [navigation, authData]);
   RNCallKeep.addEventListener('answerCall', ({callUUID}) => {
     global.incomingCallID = callUUID;
-    navigation.navigate('VideoCalls', {
+    global.navigateTo('VideoCalls', {
       callId: callUUID,
       video: false,
     });
@@ -152,9 +154,6 @@ export default function Main({navigation, route}) {
           }
         }
         if (a.data.type && a.data.type === 'hangup') {
-          //console.error('HAAANGON', route,);
-          //console.error('Trying to hangup..', a.data, activeCall);
-          
           if (activeCall == a.data.callUUID) {
             playBusySound();
             global.hangup && global.hangup();
@@ -193,6 +192,17 @@ export default function Main({navigation, route}) {
       updateMe();
     }
   }, [authData]);
+  global.navigateTo = (route, params) => {
+    if (route == 'VideoCalls') {
+      if (params.callId) {
+        setCallUUID(params.callId);
+        setThemeSettings({...themeSettings, hiddenHeader: true, hiddenFooter: true});
+      } else {
+        setCallUUID(false);
+        setThemeSettings({...themeSettings, hiddenHeader: false, hiddenFooter: false});
+      } 
+    }
+  }
   return (
     <ChatModule options={authData} socketIoUrl={chat_url}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />
@@ -201,6 +211,9 @@ export default function Main({navigation, route}) {
       )}
       <AppNavigator />
       {!themeSettings.hiddenFooter && <FooterTabs />}
+      {callUUID !== false && (
+        <VideoCalls params={{callId: callUUID, video: false}} />
+      )}
     </ChatModule>
   );
 }

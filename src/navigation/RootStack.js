@@ -63,7 +63,7 @@ let i = 0;
 const RootStack = ({initialProps}) => {
   React.useEffect(() => {
     if (navigationRef.current && initialProps?.url?.room) {
-      navigationRef.current.navigate('VideoCalls', {
+      global.navigateTo('VideoCalls', {
         callId: initialProps.url.room,
         video: true,
       });
@@ -186,7 +186,7 @@ const RootStack = ({initialProps}) => {
       }
     });
   }
-  const appUserContextValue = {authData, setAuthData: updateAuthData, updateMe};
+  const appUserContextValue = {authData, setAuthData: updateAuthData, updateMe, setThemeSettings};
   return (
     <AppUserContext.Provider value={appUserContextValue}>
       <AppThemeContext.Provider value={themeSettings}>
