@@ -112,7 +112,7 @@ export default function FooterTabs() {
       />
       <View style={styles.footer}>
         <FooterButton
-          text="Contacts"
+          text="Invites"
           onPress={navigateToPhoneContacts}
           icon="wetalk"
           active={routeName === 'PhoneContactsScreen'}
