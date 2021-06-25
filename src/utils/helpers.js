@@ -168,7 +168,8 @@ export function getPhoneContacts(geo) {
     const exists = await RNFS.exists(contactsPath);
     if (exists) {
       try {
-        const contacts = await RNFS.readFile(contactsPath, 'utf8');
+        resolve(await getPhoneContactsFromDevice(geo));
+        /*const contacts = await RNFS.readFile(contactsPath, 'utf8');
         const parsedContacts = parseContactsFromFile(contacts);
         if (parsedContacts.length) {
           setTimeout(() => {
@@ -177,7 +178,7 @@ export function getPhoneContacts(geo) {
           resolve(parsedContacts);
         } else {
           resolve(await getPhoneContactsFromDevice(geo));
-        }
+        }*/
       } catch (error) {
         const contacts = await getPhoneContactsFromDevice(geo);
         resolve(contacts);

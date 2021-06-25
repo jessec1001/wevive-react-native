@@ -127,6 +127,7 @@
     "react-native-sqlite-storage": "git+ssh://git@gitlab.com/wevive/react-native-sqlite-storage#master",
     "react-native-svg": "^12.1.1",
     "react-native-svg-transformer": "0.14.3",
+    "react-native-swipe-gestures": "^1.0.5",
     "react-native-swiper": "^1.6.0",
     "react-native-tab-view": "^3.0.1",
     "react-native-url-polyfill": "1.3.0",
