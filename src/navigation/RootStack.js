@@ -65,7 +65,7 @@ const RootStack = ({initialProps}) => {
     if (navigationRef.current && initialProps?.url?.room) {
       global.navigateTo('VideoCalls', {
         callId: initialProps.url.room,
-        video: true,
+        video: !!initialProps?.video,
       });
     }
   }, [navigationRef, initialProps]);

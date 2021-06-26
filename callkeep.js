@@ -34,6 +34,7 @@ export const setupCallKeep = () => {
       if (payload.uuid && payload.caller && payload.type === 'call') {
         AsyncStorage.setItem('incomingCaller', String(payload.caller));
         AsyncStorage.setItem('incomingUUID', String(payload.uuid));
+        AsyncStorage.setItem('incomingHasVideo', !!payload.video);
         CacheStore.set('activeCall', String(payload.uuid));
         CacheStore.set('activeCallOthers', JSON.stringify([payload.caller]));
       } else if (payload.type === 'hangup') {
@@ -57,8 +58,8 @@ export const setupCallKeep = () => {
         }
       }
     });
-    RNCallKeep.addEventListener('didDisplayIncomingCall', async (data) => {
-      console.log('didDisplayIncomingCall', data);
+    RNCallKeep.addEventListener('didDisplayIncomingCall', async ({payload}) => {
+      console.log('didDisplayIncomingCall payload', payload);
     });
 
     RNCallKeep.addEventListener('endCall', async (opts) => {

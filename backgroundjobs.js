@@ -14,6 +14,7 @@ export const backgroundJobs = () =>
           CacheStore.set(data.callUUID, '1', 0.5);
         }
         AsyncStorage.setItem('incomingCaller', data.caller);
+        AsyncStorage.setItem('incomingHasVideo', !!data.video);
         AsyncStorage.setItem('incomingUUID', data.callUUID);
         //TODO: Store participants
         //CacheStore.set('callParticipants', payload.participants, 0.5);

@@ -36,13 +36,13 @@ export default function CallHistory({navigation, route}) {
     voipCall(conversation);
     global.navigateTo('VideoCalls', {
       callId: conversation.group_id,
-      video: false,
+      video: !!conversation.video,
     });
   };
   const voipCall = React.useCallback(
     (conversation) => {
       const others =
-        conversation &&
+        conversation && conversation.participants && 
         conversation.participants
           .map((p) => p.id)
           .filter((p) => String(p) !== String(authData.id));
@@ -53,12 +53,15 @@ export default function CallHistory({navigation, route}) {
           users: others,
           callUUID: conversation.id,
           message: 'Wevive Call',
+          type: 'call',
+          video: !!conversation.video
         });
         APIService('users/pushmessage/', {
           users: others,
           message: 'Call from ' + authData.userName,
           extra: {
             type: 'call',
+            video: !!conversation.video,
             callUUID: conversation.id,
             caller: authData.id,
             username: authData.userName,

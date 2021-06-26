@@ -137,9 +137,10 @@
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void (^)(void))completion {
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
   NSString *message = payload.dictionaryPayload[@"message"];
-  NSString *video = payload.dictionaryPayload[@"video"];
+  NSString *call_type = payload.dictionaryPayload[@"type"];
+  BOOL video = [payload.dictionaryPayload[@"video"] isEqual: @"true"];
   NSString *handle = payload.dictionaryPayload[@"handle"];
-  if ([message  isEqual: @"hangup"]) {
+  if ([type  isEqual: @"hangup"]) {
     [RNCallKeep reportNewIncomingCall: uuid
                             handle: handle
                         handleType: @"number"

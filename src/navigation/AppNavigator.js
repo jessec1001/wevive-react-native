@@ -114,7 +114,6 @@ const AppNavigator = () => {
         name="VideoCalls"
         component={VideoCalls}
         options={defaultConfig}
-        initialParams={{type: 'all', status: 'live'}}
       />
       <Stack.Screen name="About" component={About} options={defaultConfig} />
       <Stack.Screen name="Terms" component={Terms} options={defaultConfig} />

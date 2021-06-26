@@ -104,16 +104,6 @@ export default function PhoneUsernameSettings(props) {
       default: false,
     });
   };
-  const onAboutChange = (contents) => {
-    APIService('users/me/', {
-      about: contents,
-    });
-  };
-  const onWebsiteChange = (contents) => {
-    APIService('users/me/', {
-      website: contents,
-    });
-  };
   return (
     <ScrollView style={{backgroundColor: "white"}}>
       <View style={styles.avatarBox}>
@@ -156,18 +146,12 @@ export default function PhoneUsernameSettings(props) {
       <MenuDivider blank />
       <MenuDivider text="About" />
       <MenuItem
-        type={'textinput'}
-        onChange={onAboutChange}
-        placeholder={authData.userName}>
-        Website
-      </MenuItem>
-      <MenuDivider blank />
-      <MenuDivider text="Website" />
-      <MenuItem
-        type={'textinput'}
-        onChange={onWebsiteChange}
-        placeholder={authData.userName}>
-        User Name
+        type={'info'}
+        info={authData.status || 'None'}
+        onPress={() => {
+          props.navigation.navigate('SocialStatusSettings');
+        }}>
+        Status
       </MenuItem>
     </ScrollView>
   );

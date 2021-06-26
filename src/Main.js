@@ -28,6 +28,7 @@ import Sound from 'react-native-sound';
 import APIService from './service/APIService';
 
 import VideoCalls from './screens/VideoCalls/VideoCalls';
+import ContactsModal from './ContactsModal';
 if (Platform.OS === 'android') {
   OverlayPermissionModule.requestOverlayPermission();
 }
@@ -54,13 +55,14 @@ export default function Main({navigation, route}) {
 
   const appState = React.useRef(AppState.currentState);
   const [callUUID, setCallUUID] = React.useState(false);
+  const [isVideo, setIsVideo] = React.useState(false);
   const _handleAppStateChange = (nextAppState) => {
     CacheStore.get('callUUID').then(async (uuid) => {
       if (uuid) {
-        const video = (await CacheStore.get(uuid)) == '1';
         global.incomingCallID = uuid;
         // console.log('IncomingCall incomingUUID redirecting from main _handleAppStateChange to call');
         CacheStore.remove('callUUID');
+        const video = await AsyncStorage.getItem('incomingHasVideo');
         global.navigateTo('VideoCalls', {
           callId: uuid,
           video,
@@ -106,11 +108,11 @@ export default function Main({navigation, route}) {
             CacheStore.set('callUUID', payload.uuid, 1);
             IncomingCall.backToForeground(payload.uuid);
             global.incomingCallID = payload.uuid;
-            setTimeout(() => {
-              //Alert.alert('Navigating');
+            setTimeout(async () => {
+              const video = await AsyncStorage.getItem('incomingHasVideo');
               global.navigateTo('VideoCalls', {
                 callId: payload.uuid,
-                video: false,
+                video: video,
               });
             }, 100);
           }
@@ -122,11 +124,12 @@ export default function Main({navigation, route}) {
       };
     }
   }, [navigation, authData]);
-  RNCallKeep.addEventListener('answerCall', ({callUUID}) => {
+  RNCallKeep.addEventListener('answerCall', async ({callUUID}) => {
+    const video = await AsyncStorage.getItem('incomingHasVideo');
     global.incomingCallID = callUUID;
     global.navigateTo('VideoCalls', {
       callId: callUUID,
-      video: false,
+      video,
     });
   });
   React.useEffect(() => {
@@ -196,9 +199,11 @@ export default function Main({navigation, route}) {
     if (route == 'VideoCalls') {
       if (params.callId) {
         setCallUUID(params.callId);
+        setIsVideo(!!params.video);
         setThemeSettings({...themeSettings, hiddenHeader: true, hiddenFooter: true});
       } else {
         setCallUUID(false);
+        setIsVideo(false);
         setThemeSettings({...themeSettings, hiddenHeader: false, hiddenFooter: false});
       } 
     }
@@ -211,8 +216,9 @@ export default function Main({navigation, route}) {
       )}
       <AppNavigator />
       {!themeSettings.hiddenFooter && <FooterTabs />}
+      <ContactsModal />
       {callUUID !== false && (
-        <VideoCalls params={{callId: callUUID, video: false}} />
+        <VideoCalls params={{callId: callUUID, video: isVideo}} />
       )}
     </ChatModule>
   );

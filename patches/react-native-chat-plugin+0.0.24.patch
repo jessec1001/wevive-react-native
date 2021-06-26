@@ -1132,7 +1132,7 @@ index 7752e79..2894b1a 100644
      },
      [state]
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 2d8eeea..e9b2b12 100644
+index 2d8eeea..592a7aa 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -1,5 +1,5 @@
@@ -1162,7 +1162,7 @@ index 2d8eeea..e9b2b12 100644
  const sendButton = require("../images/sendbtn.png");
  const styles = StyleSheet.create({
    container: {
-@@ -35,7 +44,7 @@ const styles = StyleSheet.create({
+@@ -35,9 +44,10 @@ const styles = StyleSheet.create({
      paddingTop:13,
      margin: 10,
      marginLeft: 25,
@@ -1170,8 +1170,11 @@ index 2d8eeea..e9b2b12 100644
 +    marginRight: 10,
      borderRadius: 8,
      paddingLeft: 40,
++    paddingRight: 40,
    },
-@@ -47,7 +56,7 @@ const styles = StyleSheet.create({
+   btn: {
+     backgroundColor: Colors.FOREGROUND,
+@@ -47,7 +57,7 @@ const styles = StyleSheet.create({
      paddingRight: 10,
      height: "50%",
      margin: 10,
@@ -1180,7 +1183,7 @@ index 2d8eeea..e9b2b12 100644
    },
    btnText: {
      textAlign: "center",
-@@ -56,18 +65,21 @@ const styles = StyleSheet.create({
+@@ -56,18 +66,21 @@ const styles = StyleSheet.create({
    btnImage: {
      alignContent: "center",
      justifyContent: "center",
@@ -1191,9 +1194,9 @@ index 2d8eeea..e9b2b12 100644
 -    width: 38,
 -    height: 38,
 -    right: 15,
-+    width: 40,
-+    height: 40,
-+    //right: 15,
++    width: 43,
++    height: 43,
++    right: 6,
      top:-12,
    },
    btnIcon: {
@@ -1206,7 +1209,7 @@ index 2d8eeea..e9b2b12 100644
      backgroundColor: "rgb(228,140,58)",
      width: 40,
      height: 40,
-@@ -102,6 +114,13 @@ const styles = StyleSheet.create({
+@@ -102,6 +115,13 @@ const styles = StyleSheet.create({
      color: "#777"
      //paddingHorizontal: 10,
    },
@@ -1220,7 +1223,7 @@ index 2d8eeea..e9b2b12 100644
    micBtn: {
      top: 12,
      right: 142,
-@@ -121,23 +140,42 @@ const styles = StyleSheet.create({
+@@ -121,23 +141,42 @@ const styles = StyleSheet.create({
    audioWave: {
      flex: 1,
      backgroundColor: "transparent",
@@ -1270,7 +1273,7 @@ index 2d8eeea..e9b2b12 100644
    const onChangeText = React.useCallback((text) => {
      setMessage(text);
      const socket = getSocket();
-@@ -157,9 +195,9 @@ export default function ChatForm({ conversation }) {
+@@ -157,9 +196,9 @@ export default function ChatForm({ conversation }) {
    }
    const sendMessage = React.useCallback(async (contents) => {
      const socket = getSocket();
@@ -1281,7 +1284,7 @@ index 2d8eeea..e9b2b12 100644
      const localMsg = await ctx.saveMessageToDB(conversation.id, contents, user.id, "MESSAGE", uuidv4(), 0, false);
      const newMessage = {
        id: String(localMsg),
-@@ -170,29 +208,40 @@ export default function ChatForm({ conversation }) {
+@@ -170,29 +209,40 @@ export default function ChatForm({ conversation }) {
        time: +Date.now(), 
        text: contents,
        is_delivered: false,
@@ -1339,7 +1342,7 @@ index 2d8eeea..e9b2b12 100644
        ctx.getDB().then((db)=> {
          db.executeSql(
            "SELECT * FROM conversations WHERE group_id = ?",
-@@ -212,27 +261,126 @@ export default function ChatForm({ conversation }) {
+@@ -212,27 +262,126 @@ export default function ChatForm({ conversation }) {
        }).catch((e)=>{
          console.warn(e);
        });
@@ -1474,7 +1477,7 @@ index 2d8eeea..e9b2b12 100644
    const recordAudio = () => {
      if (audioRecording) {
        setAudioRecording(false);
-@@ -265,20 +413,30 @@ export default function ChatForm({ conversation }) {
+@@ -265,20 +414,35 @@ export default function ChatForm({ conversation }) {
    /*const microphoneIcon = <TouchableOpacity onPress={recordAudio} style={styles.micBtn}>
      <Icon name="microphone" style={audioRecording ? styles.activeMicIcon : styles.micIcon} />
    </TouchableOpacity>;*/
@@ -1493,7 +1496,12 @@ index 2d8eeea..e9b2b12 100644
 +    </TouchableOpacity>
 +  </>;
 +  const shareContact = () => {
-+
++    global.showContacts((contacts) => {
++      if (contacts && Object.keys(contacts).length) {
++        sendMessage('tel:'+ "|"+JSON.stringify(contacts)); 
++      }
++      global.hideContacts();
++    })
 +  }
    const microphoneIcon = null;
 -  const galleryButtons = null;
@@ -1514,7 +1522,7 @@ index 2d8eeea..e9b2b12 100644
          textAlignVertical={"top"}
          numberOfLines={5}
          multiline={false}
-@@ -290,6 +448,7 @@ export default function ChatForm({ conversation }) {
+@@ -290,6 +454,7 @@ export default function ChatForm({ conversation }) {
          blurOnSubmit={true}
          onChangeText={onChangeText} />
        {microphoneIcon}
@@ -1523,7 +1531,7 @@ index 2d8eeea..e9b2b12 100644
          <Image source={sendButton} style={styles.btnImageStyles} />
        </TouchableOpacity>
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index 2419a3d..2678b6d 100644
+index 2419a3d..2446f1d 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,6 +1,7 @@
@@ -1674,7 +1682,7 @@ index 2419a3d..2678b6d 100644
    }
  });
  
-@@ -127,21 +245,59 @@ const shareImage = async (viewRef) => {
+@@ -127,21 +245,61 @@ const shareImage = async (viewRef) => {
  };
  
  
@@ -1699,7 +1707,7 @@ index 2419a3d..2678b6d 100644
 +
 +  moment.locale('en')
 +  const lastOnlineHumanized = moment(lastOnline).fromNow();
-+  const voipCall = React.useCallback((conversation) => {
++  const voipCall = React.useCallback((conversation, video) => {
 +    if (others) {
 +      CacheStore.set('activeCall', conversation.id);
 +      CacheStore.set('activeCallOthers',JSON.stringify(others));
@@ -1707,12 +1715,14 @@ index 2419a3d..2678b6d 100644
 +        users: others,
 +        callUUID: conversation.id,
 +        message: "Wevive Call",
++        video,
 +      });
 +      APIService('users/pushmessage/', {
 +        users: others,
 +        message: "Call from " + authData.userName,
 +        extra: {
 +          'type': 'call',
++           video,
 +          'callUUID': conversation.id,
 +          'caller': authData.id,
 +          'username': authData.userName,
@@ -1739,7 +1749,7 @@ index 2419a3d..2678b6d 100644
    const settings = ctx.getSettings();
    const events = conversation.events || ctx.getEvents(conversation.id);
    const parseEvents = React.useCallback((events)=> {
-@@ -167,6 +323,13 @@ export default function ChatScreen({ navigation, route }) {
+@@ -167,6 +325,13 @@ export default function ChatScreen({ navigation, route }) {
          if (text === "Forward") {
            navigation.navigate('ContactsScreen', {event});
          }
@@ -1753,7 +1763,7 @@ index 2419a3d..2678b6d 100644
          if (text === "Save") {
            setTimeout(() => {
              shareImage(viewRef);
-@@ -184,13 +347,22 @@ export default function ChatScreen({ navigation, route }) {
+@@ -184,13 +349,22 @@ export default function ChatScreen({ navigation, route }) {
      const username = ctx.getUserId();
      const author = event?.owner?.id;
      const isOwn = author == username;
@@ -1778,7 +1788,7 @@ index 2419a3d..2678b6d 100644
        </View>
      );
    }
-@@ -202,6 +374,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -202,6 +376,7 @@ export default function ChatScreen({ navigation, route }) {
        socket.emit("events:fetch", { conversationId: conversation.id, skip: 0 }, async function ({ events }) {
          const decryptedEvents = await decryptEventsBasic(conversation.id, events, socket.chat_private_key, ctx);
          const parsedEvents = await parseEvents(decryptedEvents);
@@ -1786,7 +1796,7 @@ index 2419a3d..2678b6d 100644
          ctx.setEvents({ conversationId: conversation.id, events: parsedEvents });
          parsedEvents.map(e => {
            ctx.saveMessageToDB(conversation.id, e.text, e.owner.id, e.type, e.id, e.time)
-@@ -235,7 +408,7 @@ export default function ChatScreen({ navigation, route }) {
+@@ -235,7 +410,7 @@ export default function ChatScreen({ navigation, route }) {
    }, []);
    function fetchMoreMessages() {
      if (lastpage) return;
@@ -1795,7 +1805,7 @@ index 2419a3d..2678b6d 100644
      socket.emit("events:fetch", { conversationId: conversation.id, skip: events.length }, async function (update) {
        if (!update.events.length) setLastPage(true);
        const decryptedEvents = await decryptEventsBasic(conversation.id, update.events, socket.chat_private_key, ctx);
-@@ -246,34 +419,185 @@ export default function ChatScreen({ navigation, route }) {
+@@ -246,34 +421,185 @@ export default function ChatScreen({ navigation, route }) {
        })
      });
    }
@@ -1804,7 +1814,7 @@ index 2419a3d..2678b6d 100644
    const buttons = !conversation.group ? <View style={styles.buttons}>
      <Pressable style={styles.button} onPress={()=>{
 -      navigation.navigate("VideoCalls",{callId:conversation.id, video:false});
-+      voipCall(conversation);
++      voipCall(conversation, false);
 +      global.incomingCallID = false;
 +      global.navigateTo("VideoCalls",{callId:conversation.id, video:false});
      }}>
@@ -1812,7 +1822,7 @@ index 2419a3d..2678b6d 100644
      </Pressable>
      <Pressable style={styles.button} onPress={()=>{
 -      navigation.navigate("VideoCalls",{callId:conversation.id, video:true});
-+      voipCall(conversation);
++      voipCall(conversation, true);
 +      global.incomingCallID = false;
 +      global.navigateTo("VideoCalls",{callId:conversation.id, video:true});
      }}>
@@ -1986,7 +1996,7 @@ index 2419a3d..2678b6d 100644
                  if (events.length >= 20) {
                    fetchMoreMessages();
                  }
-@@ -287,6 +611,63 @@ export default function ChatScreen({ navigation, route }) {
+@@ -287,6 +613,63 @@ export default function ChatScreen({ navigation, route }) {
              </ImageBackground>
            </View>
          </View>
@@ -2050,7 +2060,7 @@ index 2419a3d..2678b6d 100644
          {selectedEvent && Menu({event: selectedEvent.event, Icon, setSelectedEvent, tapEvent: selectedEvent.tapEvent, viewRef: selectedEvent.viewRef})}
        </View>
      </>
-@@ -297,7 +678,7 @@ ChatScreen.propTypes = {
+@@ -297,7 +680,7 @@ ChatScreen.propTypes = {
    navigation: NavigationPropType,
    route: PropTypes.shape({
      params: PropTypes.shape({
@@ -2060,10 +2070,10 @@ index 2419a3d..2678b6d 100644
    }),
  };
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-index 845ad14..085cfda 100644
+index 845ad14..43e6436 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-@@ -1,18 +1,18 @@
+@@ -1,25 +1,28 @@
  import React from "react";
 -import { Text, StyleSheet, View, Image, TouchableHighlight, TouchableOpacity, TouchableWithoutFeedback, Pressable, Alert } from "react-native";
 +import { Text, StyleSheet, View, Image, TouchableHighlight, TouchableOpacity, TouchableWithoutFeedback, Pressable, Alert, ImageBackground, Linking } from "react-native";
@@ -2078,20 +2088,53 @@ index 845ad14..085cfda 100644
  import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 -import { ClientContext } from "../../../src/context/ClientContext";
 -
-+import { responsiveWidth } from "react-native-responsive-dimensions";
++import { responsiveFontSize, responsiveWidth } from "react-native-responsive-dimensions";
 +import ImageView from "react-native-image-viewing";
 +import FastImage from 'react-native-fast-image';
 +import { formatDateForHumans } from "../../../src/utils/helpers";
++import { getContactsByPhoneNumber } from "react-native-contacts";
++import { updateContact } from "react-native-contacts";
++import { addContact } from "react-native-contacts";
  
 -const chatSelf = require("../images/chat_gray.png");
 -const chatOther = require("../images/chat_orange.png");
  const lockIcon = require("../images/lock_icon.png");
  const weviveLogo = require("../../../src/images/PNG/wewelogo.png");
  
-@@ -65,6 +65,10 @@ const styles = StyleSheet.create({
+ const styles = StyleSheet.create({
+   message: {
+     borderRadius: 15,
+-    backgroundColor: "rgb(223,223,223)",
++    backgroundColor: "rgb(255,255,255)",
+     padding: 15,
+     paddingHorizontal: 25,
+     marginLeft: 25,
+@@ -36,7 +39,7 @@ const styles = StyleSheet.create({
+   },
+   selfMessage: {
+     borderRadius: 25,
+-    backgroundColor: "rgb(233,233,233)",
++    backgroundColor: "rgb(236,202,175)",
+     padding: 15,
+     paddingHorizontal: 25,
+     marginRight: 25,
+@@ -65,6 +68,23 @@ const styles = StyleSheet.create({
    body: {
      marginTop: 5,
    },
++  sharedContactNameBox: {
++    flex: 1,
++  },
++  sharedContactNote: {
++    fontSize: responsiveFontSize(1.5),
++    paddingVertical: 3,
++  },
++  sharedContactName: {
++    color: "rgb(15,120,220))",
++    fontSize: responsiveFontSize(2),
++    textDecorationLine:"underline",
++    paddingVertical: 5,
++  },
 +  bodyImage: {
 +    width: '100%',
 +    height: responsiveWidth(60),
@@ -2099,7 +2142,7 @@ index 845ad14..085cfda 100644
    avatar: {
      width:25,
      height:25,
-@@ -146,10 +150,13 @@ const styles = StyleSheet.create({
+@@ -146,10 +166,15 @@ const styles = StyleSheet.create({
    }
  });
  
@@ -2108,13 +2151,15 @@ index 845ad14..085cfda 100644
 +function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent, Icon, conversation }) {
    const viewRef = React.useRef();
    const [likes, setLikes] = React.useState(0);
++  const [processed, setProcessed] = React.useState(isOwn);
 +  const [visible, setIsVisible] = React.useState(false);
    const ctx = React.useContext(ChatContext);
 +  const alone = conversation.participants.length == 1;
++  const isGroupChat = conversation.name || conversation.participants.length > 2; 
    const options = {
      enableVibrateFallback: true,
      ignoreAndroidSystemSettings: false
-@@ -181,6 +188,29 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
+@@ -181,6 +206,76 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
    },[]);
    const authorUrl = event.avatar || getAvatar(author);
    const contactName = event.contactName || (!isOwn ? ctx.getContactName(ctx.getUsernameByUserId(author)) : "Me");
@@ -2135,6 +2180,53 @@ index 845ad14..085cfda 100644
 +              </TouchableOpacity>
 +            </>
 +    }
++    if (text && text.indexOf('tel:') === 0 && text.indexOf('|') !== -1) {
++      const [tel, json] = text.split('|');
++      const contact = JSON.parse(json);
++      const addToContacts = () => {
++        if (processed) return;
++        Object.keys(contact).map(
++          (i) => {
++            const exists = false;
++            const newNumbers = contact[i].labels;
++            newNumbers.map(async (l) => {
++              if (!exists) {
++                exists = await getContactsByPhoneNumber(l);
++              }
++            });
++            if (exists) {
++              const existingNumbers = exists.phoneNumbers.map(n => n.number);
++              newNumbers.filter(number => existingNumbers.indexOf(number) === -1).map(number => {
++                exists.phoneNumbers.push({
++                  label: "mobile",
++                  number,
++                })
++              });
++              updateContact(exists);
++            } else {
++              const newContact = {
++                phoneNumbers: newNumbers.map(number => ({
++                  label: "mobile",
++                  number,
++                })),
++                givenName: contact[i].humanValue
++              };
++              addContact(newContact);
++              
++            }
++          }
++        );
++        setProcessed(true);
++        Alert.alert('Contacts saved');
++      }
++      //const contacts = contact.map(() =>)
++      return <Pressable style={styles.sharedContactNameBox} onPress={addToContacts}>
++                {Object.keys(contact).map((i)=>{
++                  return <Text style={styles.sharedContactName}>{contact[i].humanValue}</Text>
++                })} 
++                {!processed && <Text style={styles.sharedContactNote}>Tap to add to your contact list</Text>}
++      </Pressable>
++    }
 +    return <Autolink style={styles.body} text={text} truncate={44} truncateChars="..."/>
 +  }
 +
@@ -2144,7 +2236,12 @@ index 845ad14..085cfda 100644
    return (
      <>
        <TouchableHighlight ref={viewRef} underlayColor={"#bbb"} style={isOwn ? styles.selfMessage : styles.message} delayLongPress={500} onPress={(evt) => {
-@@ -194,16 +224,15 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
+@@ -190,20 +285,19 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
+       }}>
+         <>
+           <View style={styles.authorBox}>
+-            <Image source={authorUrl == 'default' ? weviveLogo : {uri: authorUrl}} style={styles.avatar} />
++            {isGroupChat && <Image source={authorUrl == 'default' ? weviveLogo : {uri: authorUrl}} style={styles.avatar} />}
              <Text style={styles.author}>{contactName}</Text>
            </View>
            <View style={styles.textBox}>
@@ -2164,7 +2261,7 @@ index 845ad14..085cfda 100644
                  </Text>
                  <Text style={styles.deliveryIndicator}>
                    <Icon name="ticks" color={event?.is_delivered ? "rgb(228,140,58)" : "rgb(100,100,100)"} size={8}/>
-@@ -226,7 +255,8 @@ Message.propTypes = {
+@@ -226,7 +320,8 @@ Message.propTypes = {
    setShowMenu: PropTypes.func,
  };
  
@@ -2174,7 +2271,7 @@ index 845ad14..085cfda 100644
    const ctx = React.useContext(ChatContext);
    const username = ctx.getUserId();
    const isMessage = event?.type === "MESSAGE";
-@@ -234,7 +264,7 @@ export default function MessageItem ({ event, menu, setSelectedEvent }) {
+@@ -234,7 +329,7 @@ export default function MessageItem ({ event, menu, setSelectedEvent }) {
    const isOwn = !author || author == username;
    if (isMessage) {
      if (event?.hidden) return null;
@@ -2481,7 +2578,7 @@ index 3658991..3b3f1d2 100644
  });
  
 diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
-index e1f4aab..c8b3133 100644
+index e1f4aab..27d23e6 100644
 --- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
 +++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
 @@ -9,10 +9,14 @@ import { ChatContext } from "../ChatContext";
@@ -2530,7 +2627,7 @@ index e1f4aab..c8b3133 100644
    return <>
      {isOwn &&
      <View style={styles.isOwn}>
-@@ -109,18 +129,24 @@ function getPreviewDate(conversation, user, Icon) {
+@@ -109,18 +129,30 @@ function getPreviewDate(conversation, user, Icon) {
        <Icon style={styles.isOwnTicks} name='ticks' color={event.is_delivered ? "rgb(228,140,58)" : "rgb(100,100,100)"} />
      </View>
      }
@@ -2551,6 +2648,12 @@ index e1f4aab..c8b3133 100644
 +      <Text style={styles.previewAttachment}>Media</Text>
 +    </View>;
 +  }
++  if (preview.indexOf('tel:') === 0) {
++    return <View style={styles.previewAttachmentBox}>
++      <Icon name="add" style={styles.previewAttachmentIcon} />
++      <Text style={styles.previewAttachment}>Contacts</Text>
++    </View>;
++  }
 +  return <Text style={styles.preview}>{prefix}{preview}</Text>;
  }
  const lockIcon = require("../images/lock_icon.png");
@@ -2559,7 +2662,7 @@ index e1f4aab..c8b3133 100644
    const unreadCount = conversation.unreadCount ? parseInt(conversation.unreadCount) : 0;
    const ctx = useContext(ChatContext);
    const user = ctx.getUser();
-@@ -134,8 +160,9 @@ export default function ContactComponent({ conversation, onPress }) {
+@@ -134,8 +166,9 @@ export default function ContactComponent({ conversation, onPress }) {
    return (
      <TouchableHighlight
        onPress={() => (onPress && onPress(conversation))}
@@ -2570,7 +2673,7 @@ index e1f4aab..c8b3133 100644
          <ProfilePreview text={chatName} contacts={participants} conversation={conversation} />
          
          <View>
-@@ -158,7 +185,7 @@ export default function ContactComponent({ conversation, onPress }) {
+@@ -158,7 +191,7 @@ export default function ContactComponent({ conversation, onPress }) {
              <Text style={styles.unreadCountText}>{unreadCount}</Text>
            </View>
          ) : null }
@@ -2817,10 +2920,10 @@ index a73d2b3..2b7d17c 100644
      </View>
    );
 diff --git a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-index 389e406..1c4c049 100644
+index 389e406..dddf471 100644
 --- a/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
 +++ b/node_modules/react-native-chat-plugin/PhoneContactsScreen/PhoneContactsScreen.js
-@@ -1,18 +1,16 @@
+@@ -1,23 +1,22 @@
  import React from "react";
 -import { View, StyleSheet, Text, TouchableOpacity, FlatList } from "react-native";
 +import { View, StyleSheet, Text, TouchableOpacity, Pressable } from "react-native";
@@ -2843,7 +2946,13 @@ index 389e406..1c4c049 100644
  
  
  const styles = StyleSheet.create({
-@@ -83,6 +81,9 @@ const styles = StyleSheet.create({
+   container: {
+     flex: 1,
++    zIndex: 100,
+     backgroundColor: "rgb(240,240,240)",
+   },
+   buttonsContainer: {
+@@ -83,6 +82,9 @@ const styles = StyleSheet.create({
      flexDirection: "row",
      justifyContent: "space-between",
      paddingRight: 50,
@@ -2853,7 +2962,7 @@ index 389e406..1c4c049 100644
    },
    sectionHeaderContainer: {
      backgroundColor: "rgb(125,125,125)",
-@@ -102,8 +103,8 @@ const styles = StyleSheet.create({
+@@ -102,8 +104,8 @@ const styles = StyleSheet.create({
    },
    letterItemStyle: {
      //padding: 10,
@@ -2864,7 +2973,7 @@ index 389e406..1c4c049 100644
    },
    contactToggle: {
      backgroundColor: "transparent",
-@@ -123,13 +124,39 @@ const styles = StyleSheet.create({
+@@ -123,13 +125,39 @@ const styles = StyleSheet.create({
      justifyContent: "center",
    },
    headerStyle: {
@@ -2907,7 +3016,7 @@ index 389e406..1c4c049 100644
    },
    markTick: {
      color: "white",
-@@ -138,18 +165,47 @@ const styles = StyleSheet.create({
+@@ -138,18 +166,51 @@ const styles = StyleSheet.create({
      alignSelf: "center",
    },
    alreadyExists: {
@@ -2937,6 +3046,7 @@ index 389e406..1c4c049 100644
 +    top: responsiveWidth(5),
 +  },
 +  toggleTextBox: {
++    backgroundColor: "white",
 +    flexDirection: "row",
 +    marginBottom: responsiveWidth(2),
 +    marginHorizontal: responsiveWidth(7),
@@ -2956,10 +3066,13 @@ index 389e406..1c4c049 100644
 +    padding: responsiveWidth(3),
 +    padding: responsiveWidth(3),
 +    flex: 1, 
++  },
++  white: {
++    backgroundColor: "white",
    }
  });
  
-@@ -162,7 +218,7 @@ const onShare = async (numbers, navigation) => {
+@@ -162,7 +223,7 @@ const onShare = async (numbers, navigation) => {
      allowAndroidSendWithoutReadPermission: true,
    }, (completed, cancelled, error) => {
      if (completed) {
@@ -2968,7 +3081,7 @@ index 389e406..1c4c049 100644
      }
      //console.warn('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
    });
-@@ -170,7 +226,6 @@ const onShare = async (numbers, navigation) => {
+@@ -170,7 +231,6 @@ const onShare = async (numbers, navigation) => {
  
  
  const renderSectionHeader = (section) => {
@@ -2976,34 +3089,23 @@ index 389e406..1c4c049 100644
    return (
      <View style={styles.sectionHeaderContainer}>
        <Text style={styles.sectionHeaderLabel}>{section.title}</Text>
-@@ -178,58 +233,111 @@ const renderSectionHeader = (section) => {
+@@ -178,58 +238,117 @@ const renderSectionHeader = (section) => {
    );
  };
  
 +class Contact extends React.PureComponent {
 +  render() {
-+    const {label, humanValue, clearLabel, alreadyExists, numberOfFriends, marked, toggleSelected, navigation, conversations} = this.props;
-+    const onPress = () => {
++    const {labels, label, humanValue, clearLabel, alreadyExists, numberOfFriends, marked, toggleSelected, navigation, conversations, onPress} = this.props;
++    const onPressDefault = () => {
 +      if (!alreadyExists) {
 +        toggleSelected(label, marked)
 +      } else {
- 
--const Contact = ({label, humanValue, clearLabel, alreadyExists, numberOfFriends, marked, toggleSelected}) => {
--  return (
--    <TouchableOpacity onPress={()=>!alreadyExists && toggleSelected(label, marked)}>
--      <LinearGradient style={styles.listItemContainer} colors={['#fff','#f3f3f3']}>
--        <Text style={styles.listItemLabel}>{humanValue}</Text>
--        {alreadyExists && <Text style={styles.alreadyExists}>Wevive user</Text>}
--        {!alreadyExists && numberOfFriends > 0 && <Text style={styles.numberOfFriends}>{trans('chats.friend_of_',{count:numberOfFriends})}</Text>}
--        {!alreadyExists && <View style={!!marked ? styles.markedContactToggle : styles.contactToggle}>
--          {!!marked && <Icon name="ticks" style={styles.markTick}/>}
--        </View>}
--      </LinearGradient>
--    </TouchableOpacity>
--  );
--};
--
--export default function PhoneContactsScreen({ navigation }) {
++        if (onPress) {
++          return onPress([{
++            labels,
++            humanValue,
++          }]);
++        }
 +        const oneToOne = conversations
 +        .filter(c =>
 +          c.participants.findIndex(p => p.username == clearLabel) !== -1 
@@ -3023,7 +3125,7 @@ index 389e406..1c4c049 100644
 +      }
 +    }
 +    return (
-+      <TouchableOpacity onPress={onPress}>
++      <TouchableOpacity onPress={onPressDefault}>
 +        <View style={styles.listItemContainer} colors={['#fff','#f3f3f3']}>
 +          <Text style={styles.listItemLabel}>{humanValue}</Text>
 +          {alreadyExists && <Text style={styles.alreadyExists}>Wevive user</Text>}
@@ -3037,7 +3139,25 @@ index 389e406..1c4c049 100644
 +  }
 +}
  
-+export default function PhoneContactsScreen({ navigation, exceptIds, onPress }) {
+-const Contact = ({label, humanValue, clearLabel, alreadyExists, numberOfFriends, marked, toggleSelected}) => {
+-  return (
+-    <TouchableOpacity onPress={()=>!alreadyExists && toggleSelected(label, marked)}>
+-      <LinearGradient style={styles.listItemContainer} colors={['#fff','#f3f3f3']}>
+-        <Text style={styles.listItemLabel}>{humanValue}</Text>
+-        {alreadyExists && <Text style={styles.alreadyExists}>Wevive user</Text>}
+-        {!alreadyExists && numberOfFriends > 0 && <Text style={styles.numberOfFriends}>{trans('chats.friend_of_',{count:numberOfFriends})}</Text>}
+-        {!alreadyExists && <View style={!!marked ? styles.markedContactToggle : styles.contactToggle}>
+-          {!!marked && <Icon name="ticks" style={styles.markTick}/>}
+-        </View>}
+-      </LinearGradient>
+-    </TouchableOpacity>
+-  );
+-};
+-
+-export default function PhoneContactsScreen({ navigation }) {
+-  
++export default function PhoneContactsScreen({ navigation, exceptIds, onPress, name }) {
++  const title = name || "Contacts";
    const ctx = React.useContext(ChatContext);
 -  const clientctx = React.useContext(ClientContext);
    const [selectedContacts, setSelectedContacts] = React.useState([]);
@@ -3118,22 +3238,48 @@ index 389e406..1c4c049 100644
      });
    },[]);
    const toggleSelected = (label, marked) => {
-@@ -246,42 +354,65 @@ export default function PhoneContactsScreen({ navigation }) {
+@@ -241,47 +360,92 @@ export default function PhoneContactsScreen({ navigation }) {
+   };  
+   
+   const goBack = () => {
+-    navigation.goBack();
++    navigation ? navigation.goBack() : onPress([]);
+   };
    const goNext = () => {
-     onShare(selectedContacts, navigation);
+-    onShare(selectedContacts, navigation);
++    !onPress ? onShare(selectedContacts, navigation) : (
++      
++      onPress(selectedContacts.map((n)=>{
++        const contactIdx = contacts.findIndex(c => c.label == n);
++        return {
++          humanValue: contacts[contactIdx].humanValue,
++          labels: contacts[contactIdx].labels,
++        }
++      }))
++    );
    }
 -  const renderItem = ({item}) => 
 -    <Contact
 +  const renderItem = (item) => {
++    let alreadyExists = existingUsers.existing.indexOf(item.clearLabel) !== -1;
++    if (!alreadyExists) {
++      item.labels.map(l => {
++        if (existingUsers.existing.indexOf(l) !== -1) {
++          alreadyExists = true;
++        }
++      });
++    }
 +    return <Contact
 +      conversations={conversations}
 +      navigation={navigation}
        toggleSelected={toggleSelected}
 -      alreadyExists={existingUsers.existing.indexOf(item.clearNumber) !== -1}
-+      alreadyExists={existingUsers.existing.indexOf(item.clearLabel) !== -1}
++      alreadyExists={alreadyExists}
        label={item.label}
 -      key={item.value}
++      labels={item.labels}
 +      clearLabel={item.clearLabel}
++      onPress={onPress}
 +      //key={item.value}
        humanValue={item.humanValue}
        marked={selectedContacts.indexOf(item.label) !== -1}
@@ -3149,7 +3295,7 @@ index 389e406..1c4c049 100644
 -        <TouchableOpacity onPress={goBack}>
 +        <View style={styles.headerHeadline}>
 +          <Icon name="add" style={styles.headerIcon} />
-+          <Text style={styles.headerHeadlineText}>Contacts</Text>
++          <Text style={styles.headerHeadlineText}>{title}</Text>
 +        </View>
 +        <TouchableOpacity onPress={goBack} style={styles.headerCancel}>
            <Text style={styles.headerButtonStyle}>Cancel</Text>
@@ -3160,14 +3306,17 @@ index 389e406..1c4c049 100644
            <Text style={styles.headerButtonStyle}>Next</Text>
          </TouchableOpacity>}
        </View>
-+      <TextInput placeholder={"Search"} onChangeText={query => setQuery(query)} />
++      <View style={styles.white}>
++        <TextInput placeholder={"Search"} onChangeText={query => setQuery(query)} />
++      </View>
++      <View style={styles.white}>
 +      <Pressable onPress={()=>{
 +          setUsersOnly(!usersOnly);
 +        }} style={styles.toggleTextBox}>
 +          <Text style={!usersOnly ? styles.toggleTextStyle : styles.toggleTextStyleSelected}>Wevive users</Text>
 +          <Text style={usersOnly ? styles.toggleTextStyle : styles.toggleTextStyleSelected}>All contacts</Text>
 +      </Pressable>
-+      
++      </View>
        <View style={styles.container}>
 -        <FlatList
 -          data={contacts}
@@ -3452,8 +3601,7 @@ index 0000000..3a5af34
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/aar_main_jar/debug/classes.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/aar_main_jar/debug/classes.jar
 new file mode 100644
-index 0000000..7fdbaa6
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/aar_main_jar/debug/classes.jar differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/aar_main_jar/release/classes.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/aar_main_jar/release/classes.jar
 new file mode 100644
 index 0000000..caf8538
@@ -3498,16 +3646,14 @@ new file mode 100644
 index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/compile_library_classes_jar/debug/classes.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/compile_library_classes_jar/debug/classes.jar
 new file mode 100644
-index 0000000..f4a5130
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/compile_library_classes_jar/debug/classes.jar differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/compile_library_classes_jar/release/classes.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/compile_library_classes_jar/release/classes.jar
 new file mode 100644
 index 0000000..2208810
 Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/compile_library_classes_jar/release/classes.jar differ
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/compile_r_class_jar/debug/R.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/compile_r_class_jar/debug/R.jar
 new file mode 100644
-index 0000000..0c74675
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/compile_r_class_jar/debug/R.jar differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/compile_r_class_jar/release/R.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/compile_r_class_jar/release/R.jar
 new file mode 100644
 index 0000000..0c74675
@@ -7104,8 +7250,7 @@ index 0000000..a8801e1
 +int xml rn_dev_preferences 0x0
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/debug-mergeJavaRes/merge-state b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/debug-mergeJavaRes/merge-state
 new file mode 100644
-index 0000000..d5ff387
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/debug-mergeJavaRes/merge-state differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
 new file mode 100644
 index 0000000..85b5638
@@ -7135,11 +7280,11 @@ index 0000000..4c0b515
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/mergeReleaseResources/compile-file-map.properties b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/mergeReleaseResources/compile-file-map.properties
 new file mode 100644
-index 0000000..8f3bf29
+index 0000000..7a3597a
 --- /dev/null
 +++ b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/mergeReleaseResources/compile-file-map.properties
 @@ -0,0 +1,378 @@
-+#Fri Jun 18 09:44:56 MSK 2021
++#Fri Jun 25 20:55:37 MSK 2021
 +/Users/michailstrokin/.gradle/caches/transforms-3/514bc37de2dc3fab94e5a7c215e7089e/transformed/core-1.0.1/res/layout-v21/notification_action_tombstone.xml=/Users/michailstrokin/Misha/_Wevive/wevive-react-native/node_modules/react-native-chat-plugin/android/build/intermediates/res/merged/release/layout-v21/notification_action_tombstone.xml
 +/Users/michailstrokin/.gradle/caches/transforms-3/d8f0aee43685d5cf605a4c80195956b9/transformed/appcompat-1.0.2/res/drawable-hdpi-v4/abc_list_longpressed_holo.9.png=/Users/michailstrokin/Misha/_Wevive/wevive-react-native/node_modules/react-native-chat-plugin/android/build/intermediates/res/merged/release/drawable-hdpi-v4/abc_list_longpressed_holo.9.png
 +/Users/michailstrokin/.gradle/caches/transforms-3/d8f0aee43685d5cf605a4c80195956b9/transformed/appcompat-1.0.2/res/drawable-v21/abc_dialog_material_background.xml=/Users/michailstrokin/Misha/_Wevive/wevive-react-native/node_modules/react-native-chat-plugin/android/build/intermediates/res/merged/release/drawable-v21/abc_dialog_material_background.xml
@@ -19409,11 +19554,11 @@ index 0000000..1a9a574
 \ No newline at end of file
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/compile-file-map.properties b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/compile-file-map.properties
 new file mode 100644
-index 0000000..8e72cb9
+index 0000000..c56f1a0
 --- /dev/null
 +++ b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/compile-file-map.properties
 @@ -0,0 +1 @@
-+#Fri Jun 18 09:44:01 MSK 2021
++#Fri Jun 25 17:08:45 MSK 2021
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/merger.xml b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/packageReleaseResources/merger.xml
 new file mode 100644
 index 0000000..78b4bae
@@ -19429,16 +19574,13 @@ index 0000000..d5ff387
 Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/incremental/release-mergeJavaRes/merge-state differ
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/BuildConfig.class b/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/BuildConfig.class
 new file mode 100644
-index 0000000..6f97263
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/BuildConfig.class differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/ChatPluginModule.class b/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/ChatPluginModule.class
 new file mode 100644
-index 0000000..b33baea
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/ChatPluginModule.class differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/ChatPluginPackage.class b/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/ChatPluginPackage.class
 new file mode 100644
-index 0000000..de44332
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/javac/debug/classes/com/ourengineroom/rnchatplugin/ChatPluginPackage.class differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/javac/release/classes/com/ourengineroom/rnchatplugin/BuildConfig.class b/node_modules/react-native-chat-plugin/android/build/intermediates/javac/release/classes/com/ourengineroom/rnchatplugin/BuildConfig.class
 new file mode 100644
 index 0000000..44d5d3d
@@ -19503,8 +19645,7 @@ index 0000000..f476d8a
 +9</manifest>
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/merged_java_res/debug/out.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/merged_java_res/debug/out.jar
 new file mode 100644
-index 0000000..15cb0ec
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/merged_java_res/debug/out.jar differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/merged_java_res/release/out.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/merged_java_res/release/out.jar
 new file mode 100644
 index 0000000..15cb0ec
@@ -42345,8 +42486,7 @@ index 0000000..f057bff
 +</PreferenceScreen>
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/runtime_library_classes_jar/debug/classes.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/runtime_library_classes_jar/debug/classes.jar
 new file mode 100644
-index 0000000..3292efc
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/runtime_library_classes_jar/debug/classes.jar differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/intermediates/runtime_library_classes_jar/release/classes.jar b/node_modules/react-native-chat-plugin/android/build/intermediates/runtime_library_classes_jar/release/classes.jar
 new file mode 100644
 index 0000000..4ed7f12
@@ -46931,8 +47071,7 @@ index 0000000..4fe7b57
 Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/intermediates/verified_library_resources/release/xml_rn_dev_preferences.xml.flat differ
 diff --git a/node_modules/react-native-chat-plugin/android/build/outputs/aar/react-native-chat-plugin-debug.aar b/node_modules/react-native-chat-plugin/android/build/outputs/aar/react-native-chat-plugin-debug.aar
 new file mode 100644
-index 0000000..c557cb9
-Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/outputs/aar/react-native-chat-plugin-debug.aar differ
+index 0000000..e69de29
 diff --git a/node_modules/react-native-chat-plugin/android/build/outputs/aar/react-native-chat-plugin-release.aar b/node_modules/react-native-chat-plugin/android/build/outputs/aar/react-native-chat-plugin-release.aar
 new file mode 100644
 index 0000000..1ab0a14
