@@ -9,9 +9,12 @@ import {
 } from 'react-native-responsive-dimensions';
 export default function ContactsModal({navigation}) {
   const [show, setShow] = React.useState(false);
-  global.showContacts = (onPress) => {
+  global.showContacts = (onPress, title, hideContacts, usersOnly) => {
     setShow({
       onPress,
+      title,
+      hideContacts,
+      usersOnly,
     });
   };
   global.hideContacts = () => {
@@ -31,7 +34,9 @@ export default function ContactsModal({navigation}) {
         <PhoneContactsScreen
           navigation={navigation}
           onPress={show ? show.onPress : () => {}}
-          name="Share contacts"
+          name={show ? show.title : "Contacts"}
+          exceptIds={show ? show.hideContacts : []}
+          showUsersOnly={show ? show.usersOnly : false}
         />
       </View>
     )

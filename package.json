@@ -59,6 +59,7 @@
     "moment": "^2.29.1",
     "moment-duration-format": "2.3.2",
     "olm": "https://packages.matrix.org/npm/olm/olm-3.2.1.tgz",
+    "promise.allsettled": "^1.0.4",
     "punycode": "2.1.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",

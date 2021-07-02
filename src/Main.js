@@ -29,6 +29,8 @@ import APIService from './service/APIService';
 
 import VideoCalls from './screens/VideoCalls/VideoCalls';
 import ContactsModal from './ContactsModal';
+import {request, PERMISSIONS} from 'react-native-permissions';
+
 if (Platform.OS === 'android') {
   OverlayPermissionModule.requestOverlayPermission();
 }
@@ -56,13 +58,22 @@ export default function Main({navigation, route}) {
   const appState = React.useRef(AppState.currentState);
   const [callUUID, setCallUUID] = React.useState(false);
   const [isVideo, setIsVideo] = React.useState(false);
+  React.useEffect(() => {
+    request(
+      Platform.OS == 'IOS'
+        ? PERMISSIONS.IOS.MICROPHONE
+        : PERMISSIONS.ANDROID.MICROPHONE,
+    ).then((result) => {
+      // …
+    });
+  }, []);
   const _handleAppStateChange = (nextAppState) => {
     CacheStore.get('callUUID').then(async (uuid) => {
       if (uuid) {
         global.incomingCallID = uuid;
         // console.log('IncomingCall incomingUUID redirecting from main _handleAppStateChange to call');
         CacheStore.remove('callUUID');
-        const video = await AsyncStorage.getItem('incomingHasVideo');
+        const video = (await AsyncStorage.getItem('incomingHasVideo')) == '1';
         global.navigateTo('VideoCalls', {
           callId: uuid,
           video,
@@ -109,7 +120,8 @@ export default function Main({navigation, route}) {
             IncomingCall.backToForeground(payload.uuid);
             global.incomingCallID = payload.uuid;
             setTimeout(async () => {
-              const video = await AsyncStorage.getItem('incomingHasVideo');
+              const video =
+                (await AsyncStorage.getItem('incomingHasVideo')) == '1';
               global.navigateTo('VideoCalls', {
                 callId: payload.uuid,
                 video: video,
@@ -125,7 +137,7 @@ export default function Main({navigation, route}) {
     }
   }, [navigation, authData]);
   RNCallKeep.addEventListener('answerCall', async ({callUUID}) => {
-    const video = await AsyncStorage.getItem('incomingHasVideo');
+    const video = (await AsyncStorage.getItem('incomingHasVideo')) == '1';
     global.incomingCallID = callUUID;
     global.navigateTo('VideoCalls', {
       callId: callUUID,
@@ -135,14 +147,10 @@ export default function Main({navigation, route}) {
   React.useEffect(() => {
     registerPushNotifications(
       async (a) => {
-        console.log('[FCMService] onNotification', a);
-        if (a.data.conversationId) {
-          navigation.navigate('ChatScreen', {
-            conversation: a.data.conversationId,
-          });
-        }
-
         const activeCall = await AsyncStorage.getItem('activeCallUUID');
+        const activeCallOtherCount = Number(
+          (await CacheStore.get('activeCallOthersCount')) || '0',
+        );
         if (a.data.type && a.data.type === 'call') {
           if (activeCall && activeCall !== a.data.callUUID) {
             console.log('[FCMService] Sending busy signal');
@@ -157,12 +165,19 @@ export default function Main({navigation, route}) {
           }
         }
         if (a.data.type && a.data.type === 'hangup') {
-          if (activeCall == a.data.callUUID) {
-            playBusySound();
-            global.hangup && global.hangup();
+          //Hangup active call;
+          if (activeCall && activeCall === a.data.callUUID) {
+            if (activeCallOtherCount <= 1) {
+              playBusySound();
+              global.hangup && global.hangup();
+              if (Platform.OS === 'ios') {
+                RNCallKeep.reportEndCallWithUUID(activeCall, 6);
+                RNCallKeep.endCall(activeCall);
+              }
+            }
           } else if (Platform.OS == 'ios') {
             const uuid = await AsyncStorage.getItem('incomingUUID');
-            if (uuid == a.data.callUUID) {
+            if (uuid && uuid == a.data.callUUID) {
               RNCallKeep.reportEndCallWithUUID(uuid, 6);
               RNCallKeep.endCall(uuid);
               AsyncStorage.removeItem('incomingUUID');
@@ -196,18 +211,28 @@ export default function Main({navigation, route}) {
     }
   }, [authData]);
   global.navigateTo = (route, params) => {
-    if (route == 'VideoCalls') {
-      if (params.callId) {
-        setCallUUID(params.callId);
-        setIsVideo(!!params.video);
-        setThemeSettings({...themeSettings, hiddenHeader: true, hiddenFooter: true});
-      } else {
-        setCallUUID(false);
-        setIsVideo(false);
-        setThemeSettings({...themeSettings, hiddenHeader: false, hiddenFooter: false});
-      } 
-    }
-  }
+    setTimeout(() => {
+      if (route == 'VideoCalls') {
+        if (params.callId) {
+          setCallUUID(params.callId);
+          setIsVideo(!!params.video);
+          setThemeSettings({
+            ...themeSettings,
+            hiddenHeader: true,
+            hiddenFooter: true,
+          });
+        } else {
+          setCallUUID(false);
+          setIsVideo(false);
+          setThemeSettings({
+            ...themeSettings,
+            hiddenHeader: false,
+            hiddenFooter: false,
+          });
+        }
+      }
+    }, 200);
+  };
   return (
     <ChatModule options={authData} socketIoUrl={chat_url}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />

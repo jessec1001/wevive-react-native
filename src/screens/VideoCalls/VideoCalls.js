@@ -18,10 +18,12 @@ import {
 } from 'react-native-responsive-dimensions';
 import Icon from '../../components/Icon';
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
+import APIService from '../../service/APIService';
 
 export default function VideoCalls(r) {
   const themeSettings = React.useContext(AppThemeContext);
   const {authData, setThemeSettings} = React.useContext(UserContext);
+  const {getUserByPhone} = React.useContext(ChatContext);
   //const r = useRoute();
   //const [fullscreen, setFullscreen] = React.useState(true);
   const [videoStyle, setVideoStyle] = React.useState('fullscreenView');
@@ -45,10 +47,56 @@ export default function VideoCalls(r) {
       CacheStore.remove('callUUID');
     }, 1000);
   }, [r]);
+  const addUsersToCall = () => {
+    global.showContacts(
+      (contacts) => {
+        if (contacts) {
+          const contactUserIds = contacts
+            .map((c) => {
+              const user = getUserByPhone([...c.labels]);
+              return user ? user.id : null;
+            })
+            .filter((c) => c);
+          if (contactUserIds) {
+            APIService('users/voipcall/', {
+              users: contactUserIds,
+              callUUID: conversation.id,
+              message: 'Wevive Call',
+              video: r.params.video ? "true" : "0",
+            });
+            APIService('users/pushmessage/', {
+              users: contactUserIds,
+              message: 'Call from ' + authData.userName,
+              extra: {
+                type: 'call',
+                video: r.params.video,
+                callUUID: conversation.id,
+                caller: authData.id,
+                username: authData.userName,
+                avatarURL: authData.avatarHosted,
+                timestamp: +Date.now(),
+              },
+            });
+          }
+        }
+        global.hideContacts();
+      },
+      'Invite',
+      [],
+      true,
+    );
+  };
+  
+  
   const onSwipe = React.useCallback(
     (gestureName) => {
-      console.log(gestureName);
-      const {SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT, ON_PRESS} = swipeDirections;
+      const {
+        SWIPE_UP,
+        SWIPE_DOWN,
+        SWIPE_LEFT,
+        SWIPE_RIGHT,
+        ON_PRESS,
+      } = swipeDirections;
       switch (gestureName) {
         case SWIPE_UP:
           if (videoStyle === 'pipModeViewBottomLeft') {
@@ -117,13 +165,17 @@ export default function VideoCalls(r) {
             callUUID: r.params.callId,
             author: authData.id,
             conferenceId: r.params.callId,
+            displayName: String(authData.id),
+            avatarURL: authData.avatarHosted,
           }}
           serverURL={'https://webrtc.wevive.com'}
           settings={{
-            startAudioOnly: false,
+            startAudioOnly: !r.params.video,
             startWithVideoMuted: !r.params.video,
             serverURL: 'https://webrtc.wevive.com',
             disableCallIntegration: false,
+            displayName: String(authData.id),
+            avatarURL: authData.avatarHosted,
           }}
           url={{serverURL: 'https://webrtc.wevive.com', config: {}}}
           userInfo={{
@@ -133,18 +185,23 @@ export default function VideoCalls(r) {
         />
       </View>
       {videoStyle == 'fullscreenView' && (
-        <TouchableOpacity onPress={disableFullscreen} style={styles.backBtn}>
-          <Icon name="arrow" style={styles.backBtnText} />
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity onPress={disableFullscreen} style={styles.backBtn}>
+            <Icon name="arrow" style={styles.backBtnText} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={addUsersToCall} style={styles.addBtn}>
+            <Icon name="add" style={styles.addBtnText} />
+          </TouchableOpacity>
+        </>
       )}
       {videoStyle !== 'fullscreenView' && (
         <>
-        
-          <GestureRecognizer style={styles[videoStyle]} onSwipe={onSwipe} onPress={enableFullscreen}>
-          <TouchableOpacity style={{flex: 1}} onPress={enableFullscreen}>
-          </TouchableOpacity>
+          <GestureRecognizer
+            style={styles[videoStyle]}
+            onSwipe={onSwipe}
+            onPress={enableFullscreen}>
+            <TouchableOpacity style={{flex: 1}} onPress={enableFullscreen} />
           </GestureRecognizer>
-        
         </>
       )}
     </>
@@ -157,6 +214,16 @@ const styles = StyleSheet.create({
     zIndex: 15,
     padding: 15,
     transform: [{rotate: '90deg'}],
+  },
+  addBtn: {
+    position: 'absolute',
+    right: 0,
+    zIndex: 15,
+    padding: 15,
+  },
+  addBtnText: {
+    fontSize: 30,
+    color: 'white',
   },
   backBtnText: {
     fontSize: 20,

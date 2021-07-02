@@ -14,7 +14,7 @@ export const backgroundJobs = () =>
           CacheStore.set(data.callUUID, '1', 0.5);
         }
         AsyncStorage.setItem('incomingCaller', data.caller);
-        AsyncStorage.setItem('incomingHasVideo', !!data.video);
+        AsyncStorage.setItem('incomingHasVideo', data.video ? '1' : '0');
         AsyncStorage.setItem('incomingUUID', data.callUUID);
         //TODO: Store participants
         //CacheStore.set('callParticipants', payload.participants, 0.5);
@@ -67,7 +67,7 @@ export const backgroundJobs = () =>
       const data = remoteMessage?.data;
       if (data && data.type === 'hangup') {
         const uuid = await AsyncStorage.getItem('incomingUUID');
-        if (uuid === data.callUUID) {
+        if (uuid && uuid === data.callUUID) {
           RNCallKeep.reportEndCallWithUUID(uuid, 6);
           RNCallKeep.endCall(uuid);
           AsyncStorage.removeItem('incomingUUID');

@@ -1,6 +1,7 @@
 // @flow
 
 import Sound from 'react-native-sound';
+import CacheStore from 'react-native-cache-store';
 import type {Dispatch} from 'redux';
 
 import {
@@ -110,6 +111,12 @@ function _addConferenceListeners(conference, dispatch) {
       whoosh = false;
     }
   };
+  const updateUsersCount = () => {
+    CacheStore.set(
+      'activeCallOthersCount',
+      String(conference.getParticipantCount() - 1),
+    );
+  };
   // A simple logger for conference errors received through
   // the listener. These errors are not handled now, but logged.
   conference.on(JitsiConferenceEvents.CONFERENCE_ERROR, (error) => {
@@ -119,12 +126,15 @@ function _addConferenceListeners(conference, dispatch) {
 
   conference.on(JitsiConferenceEvents.CONFERENCE_LEFT, (...args) => {
     stopSound();
+    updateUsersCount();
   });
   conference.on(JitsiConferenceEvents.CONFERENCE_WILL_JOIN, (...args) => {
     playSound();
+    updateUsersCount();
   });
   conference.on(JitsiConferenceEvents.CONFERENCE_JOINED, (...args) => {
     playSound();
+    updateUsersCount();
     if (conference.getParticipantCount() > 1) {
       stopSound();
     }
@@ -134,11 +144,18 @@ function _addConferenceListeners(conference, dispatch) {
   );
 
   conference.on(JitsiConferenceEvents.USER_JOINED, (id, user) => {
+    updateUsersCount();
     if (conference.getParticipantCount() > 1) {
       stopSound();
     }
   });
-  conference.on(JitsiConferenceEvents.USER_LEFT, (id, user) => stopSound());
+  conference.on(JitsiConferenceEvents.USER_LEFT, (id, user) => {
+    updateUsersCount();
+    stopSound();
+  });
+  conference.on(JitsiConferenceEvents.PARTICIPANT_KICKED, () => {
+    updateUsersCount();
+  });
 
   conference.on(JitsiConferenceEvents.CONFERENCE_FAILED, (...args) =>
     dispatch(conferenceFailed(conference, ...args)),

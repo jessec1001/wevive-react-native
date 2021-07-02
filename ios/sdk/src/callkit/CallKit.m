@@ -318,7 +318,7 @@ RCT_EXPORT_METHOD(updateCall:(NSString *)callUUID
 
 - (void) providerDidActivateAudioSessionWithSession:(AVAudioSession *)session {
     DDLogInfo(@"[RNCallKit][CXProviderDelegate][provider:didActivateAudioSession:]");
-
+    NSLog(@"[RNCallKit][CXProviderDelegate][provider:didActivateAudioSession:]");
     [[RTCAudioSession sharedInstance] audioSessionDidActivate:session];
 }
 

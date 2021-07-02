@@ -37,6 +37,7 @@ export const clearContacts = (contacts, geo) => {
 export const clearPhoneNumber = (country, number) => {
   if (number) {
     let cleanNumber = number.replace(/[^0-9+]+/g, '');
+    cleanNumber = removeInternationalPrefix(cleanNumber);
     if (cleanNumber.indexOf('+') !== 0) {
       cleanNumber =
         getCountryPhoneCode(country) + removeTrunkPrefix(country, cleanNumber);
@@ -45,6 +46,17 @@ export const clearPhoneNumber = (country, number) => {
   }
   return number;
 };
+export const removeInternationalPrefix = (number) => {
+  //FIXME: more international prefixes;
+  let cleanedNumber = number;
+  let trunkPrefixes = ['00', '011'];
+  trunkPrefixes.map((p) => {
+    const trunkPrefixRegex = new RegExp(`^(${p})`, 'g');
+    cleanedNumber = cleanedNumber.replace(trunkPrefixRegex, '+');
+  });
+  return cleanedNumber;
+};
+
 export const removeTrunkPrefix = (country, number) => {
   const non_standard_prefixes = {
     AZ: '8',
@@ -68,7 +80,7 @@ export const removeTrunkPrefix = (country, number) => {
 
 export const getCountryPhoneCode = (country) => {
   if (!country || !phoneCodes[country]) {
-    return;
+    return "+44";
   }
   if (Array.isArray(phoneCodes[country])) {
     return `+${phoneCodes[country][0]}`;

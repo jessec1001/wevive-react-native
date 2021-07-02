@@ -34,7 +34,7 @@ export const setupCallKeep = () => {
       if (payload.uuid && payload.caller && payload.type === 'call') {
         AsyncStorage.setItem('incomingCaller', String(payload.caller));
         AsyncStorage.setItem('incomingUUID', String(payload.uuid));
-        AsyncStorage.setItem('incomingHasVideo', !!payload.video);
+        AsyncStorage.setItem('incomingHasVideo', payload.video ? "1" : "0");
         CacheStore.set('activeCall', String(payload.uuid));
         CacheStore.set('activeCallOthers', JSON.stringify([payload.caller]));
       } else if (payload.type === 'hangup') {
@@ -63,22 +63,26 @@ export const setupCallKeep = () => {
     });
 
     RNCallKeep.addEventListener('endCall', async (opts) => {
-      const uuid = await AsyncStorage.getItem('incomingUUID');
-      const caller = await AsyncStorage.getItem('incomingCaller');
+      if (global.hangup) {
+        global.hangup();
+      } else {
+        const uuid = await AsyncStorage.getItem('incomingUUID');
+        const caller = await AsyncStorage.getItem('incomingCaller');
 
-      const callId = await CacheStore.get('activeCall');
-      const othersJSON = await CacheStore.get('activeCallOthers');
-      const others = JSON.parse(othersJSON);
-      console.log('RNCallKeep endCall', opts, uuid, caller, callId, others);
-      APIService('users/pushmessage/', {
-        users: others,
-        message: 'Hangup',
-        extra: {
-          type: 'hangup',
-          callUUID: opts.callUUID,
-        },
-      });
-      RNCallKeep.endCall(opts.callUUID);
+        const callId = await CacheStore.get('activeCall');
+        const othersJSON = await CacheStore.get('activeCallOthers');
+        const others = JSON.parse(othersJSON);
+        console.log('RNCallKeep endCall', opts, uuid, caller, callId, others);
+        APIService('users/pushmessage/', {
+          users: others,
+          message: 'Hangup',
+          extra: {
+            type: 'hangup',
+            callUUID: opts.callUUID,
+          },
+        });
+        RNCallKeep.endCall(opts.callUUID);
+      }
       /*APIService('users/voipcall/', {
         users: others,
         callUUID: callId,

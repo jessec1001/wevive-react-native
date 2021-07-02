@@ -170,7 +170,7 @@ export function getParticipantDisplayName(
 
     if (participant) {
         if (participant.name) {
-            return participant.name;
+            return global.getUsernameByUserId(participant.name);
         }
 
         if (participant.local) {

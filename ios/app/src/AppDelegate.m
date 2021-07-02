@@ -138,9 +138,9 @@
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
   NSString *message = payload.dictionaryPayload[@"message"];
   NSString *call_type = payload.dictionaryPayload[@"type"];
-  BOOL video = [payload.dictionaryPayload[@"video"] isEqual: @"true"];
+  BOOL *video = [payload.dictionaryPayload[@"video"] isEqual: @"true"];
   NSString *handle = payload.dictionaryPayload[@"handle"];
-  if ([type  isEqual: @"hangup"]) {
+  if ([call_type  isEqual: @"hangup"]) {
     [RNCallKeep reportNewIncomingCall: uuid
                             handle: handle
                         handleType: @"number"
@@ -159,6 +159,17 @@
 
     // --- this is optional, only required if you want to call `completion()` on the js side
     //[RNVoipPushNotificationManager addCompletionHandler:uuid completionHandler:completion];
+    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionAllowBluetooth|AVAudioSessionCategoryOptionMixWithOthers|AVAudioSessionCategoryOptionAllowBluetoothA2DP | AVAudioSessionCategoryOptionAllowAirPlay error:nil];
+
+    [audioSession setMode:AVAudioSessionModeVoiceChat error:nil];
+
+    double sampleRate = 44100.0;
+    [audioSession setPreferredSampleRate:sampleRate error:nil];
+    [audioSession overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:nil];
+    NSTimeInterval bufferDuration = .005;
+    [audioSession setPreferredIOBufferDuration:bufferDuration error:nil];
+    [audioSession setActive:TRUE error:nil];
 
     // --- Process the received push
     [RNVoipPushNotificationManager didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];

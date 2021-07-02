@@ -6,7 +6,7 @@ backgroundJobs();
 
 import {setupCallKeep} from './callkeep';
 setupCallKeep();
-
+//import JitsiMeetJS  from './react/features/base/lib-jitsi-meet';
 import React from 'react';
 import KeyboardManager from 'react-native-keyboard-manager';
 
@@ -26,6 +26,7 @@ if (__DEV__) {
   });*/
 }
 
+//JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.TRACE);
 
 if (Platform.OS === 'ios') {
   KeyboardManager.setEnable(true);
