@@ -6,9 +6,9 @@
 ## Running for development
 1) Connect the device to your computer
 
-2) Android: Run "yarn android" - this builds the app and installs the *.apk on the device
+2a) Android: Run "yarn android" - this builds the app and installs the debug version of the application on the device
 
-3) iOS: Press "Start"
+2b) iOS: Open ios/jitsi-meet.xcworkspace  and press "Start"
 
 ## Android Prerequisites
 
@@ -44,7 +44,7 @@ brew install yarn
 
 ## Distribution
 To create *.ipa for ad-hoc distribution:
-1) Open ios/PraxisLottery.xcodeworkspace
+1) Open ios/jitsi-meet.xcworkspace
 2) Select Generic iOS device as build target,
 3) Run Product->Archive
 4) Distribute for team
