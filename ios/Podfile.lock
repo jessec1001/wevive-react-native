@@ -123,6 +123,8 @@ PODS:
     - OLMKit/olmcpp (= 3.2.2)
   - OLMKit/olmc (3.2.2)
   - OLMKit/olmcpp (3.2.2)
+  - Permission-Microphone (3.0.4):
+    - RNPermissions
   - Permission-Notifications (3.0.4):
     - RNPermissions
   - PromisesObjC (1.2.12)
@@ -541,6 +543,7 @@ DEPENDENCIES:
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - OLMKit
+  - Permission-Microphone (from `../node_modules/react-native-permissions/ios/Microphone`)
   - Permission-Notifications (from `../node_modules/react-native-permissions/ios/Notifications`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
@@ -661,6 +664,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/React/FBReactNativeSpec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
+  Permission-Microphone:
+    :path: "../node_modules/react-native-permissions/ios/Microphone"
   Permission-Notifications:
     :path: "../node_modules/react-native-permissions/ios/Notifications"
   RCT-Folly:
@@ -846,6 +851,7 @@ SPEC CHECKSUMS:
   libwebp: e90b9c01d99205d03b6bb8f2c8c415e5a4ef66f0
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   OLMKit: 20d1c564033a1ae7148f8f599378d4c798363905
+  Permission-Microphone: 450ff628a7146c415cfb98025e518810d9fa76ad
   Permission-Notifications: 5b4a12a9b52866667423c93d3af8e43b81872cf4
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
@@ -932,6 +938,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   Yoga: 575c581c63e0d35c9a83f4b46d01d63abc1100ac
 
-PODFILE CHECKSUM: 0d49ef8623749b2e3196304df539113aec0de1b6
+PODFILE CHECKSUM: 7ca7b995589f1494187abe73e0d82580121d712d
 
 COCOAPODS: 1.10.1

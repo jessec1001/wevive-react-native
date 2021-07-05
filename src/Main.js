@@ -29,7 +29,7 @@ import APIService from './service/APIService';
 
 import VideoCalls from './screens/VideoCalls/VideoCalls';
 import ContactsModal from './ContactsModal';
-import {request, PERMISSIONS} from 'react-native-permissions';
+import {check, request, PERMISSIONS} from 'react-native-permissions';
 
 if (Platform.OS === 'android') {
   OverlayPermissionModule.requestOverlayPermission();
@@ -60,11 +60,10 @@ export default function Main({navigation, route}) {
   const [isVideo, setIsVideo] = React.useState(false);
   React.useEffect(() => {
     request(
-      Platform.OS == 'IOS'
+      Platform.OS == 'ios'
         ? PERMISSIONS.IOS.MICROPHONE
         : PERMISSIONS.ANDROID.MICROPHONE,
     ).then((result) => {
-      // …
     });
   }, []);
   const _handleAppStateChange = (nextAppState) => {
