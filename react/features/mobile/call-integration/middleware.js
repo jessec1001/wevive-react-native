@@ -271,18 +271,33 @@ function _conferenceWillJoin({dispatch, getState}, next, action) {
     return result;
   }
   SQLCipherClient().then(({database}) => {
-    database.executeSql(
-      'INSERT INTO calls(`group_id`,`call_uuid`,`name`,`created_by`, created_at) VALUES (?, ?, ?, ?, ?)',
-      [
-        callUUID,
-        callUUID,
-        callHandle,
-        author,
-        Math.floor(Date.now() / 1000),
-      ],
-    ).then(([results]) => {
-      return results;
-    });
+    database
+      .executeSql(
+        'SELECT id FROM calls WHERE call_uuid = ? ORDER BY created_at DESC LIMIT 1',
+        [callUUID],
+      )
+      .then(([results]) => {
+        if (results.rows.length) {
+          const call_id = results.rows.item(0).id;
+          if (call_id) {
+            database.executeSql('UPDATE calls SET answered=? WHERE id=?', [
+              1,
+              call_id,
+            ]);
+          }
+        } else {
+          database.executeSql(
+            'INSERT INTO calls(`group_id`,`call_uuid`,`name`,`created_by`, created_at) VALUES (?, ?, ?, ?, ?)',
+            [
+              callUUID,
+              callUUID,
+              callHandle,
+              author,
+              Math.floor(Date.now() / 1000),
+            ],
+          );
+        }
+      });
   });
   // When assigning the call UUID, do so in upper case, since iOS will return
   // it upper cased.

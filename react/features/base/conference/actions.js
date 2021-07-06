@@ -112,10 +112,13 @@ function _addConferenceListeners(conference, dispatch) {
     }
   };
   const updateUsersCount = () => {
-    CacheStore.set(
-      'activeCallOthersCount',
-      String(conference.getParticipantCount() - 1),
-    );
+    const usersCount = conference.getParticipantCount() - 1;
+    const aloneInTheConference = usersCount <= 0;
+    if (!aloneInTheConference && !global.conferenceTimerStart) {
+      global.conferenceTimerStart = +Date.now();
+    }
+    global.aloneInTheConference = aloneInTheConference;
+    CacheStore.set('activeCallOthersCount', String(usersCount));
   };
   // A simple logger for conference errors received through
   // the listener. These errors are not handled now, but logged.

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import {Platform} from 'react-native';
 import CacheStore from 'react-native-cache-store';
+import { SQLCipherClient } from 'react-native-chat-plugin/utils/SQLCipherClient';
 import IncomingCall from 'react-native-incoming-call';
 import {requestNotifications} from 'react-native-permissions';
 //import PushNotification from 'react-native-push-notification';
@@ -133,6 +134,18 @@ class FCM_Service {
                 'Wevive Call', // Info text
                 30000, // Timeout for end call after 30s
               );
+              SQLCipherClient().then(({database}) => {
+                database.executeSql(
+                  'INSERT INTO calls(`group_id`,`call_uuid`,`name`,`created_by`, created_at) VALUES (?, ?, ?, ?, ?)',
+                  [
+                    remoteMessage.data.callUUID,
+                    remoteMessage.data.callUUID,
+                    remoteMessage.data.username,
+                    remoteMessage.data.caller,
+                    Math.floor(Date.now() / 1000),
+                  ],
+                );
+              });
             }
           }
         } else if (

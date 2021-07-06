@@ -47,6 +47,7 @@ class HangupButton extends AbstractHangupButton<Props, *> {
     super(props);
     this._hangup = async () => {
       try {
+        global.conferenceTimerStart = false;
         const callId = await AsyncStorage.getItem('activeCallUUID');
         AsyncStorage.removeItem('activeCallUUID');
         if (callId && Platform.OS == 'ios') {

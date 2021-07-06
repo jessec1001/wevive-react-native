@@ -1,0 +1,4 @@
+[submodule "local_modules/chat-plugin"]
+	path = local_modules/chat-plugin
+	url = git+ssh://git@gitlab.com/wevive/chat-plugin
+	branch = master

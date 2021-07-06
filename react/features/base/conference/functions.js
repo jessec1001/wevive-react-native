@@ -197,6 +197,9 @@ export function updateConferenceDuration(
   const state = toState(stateful);
   const {callUUID} = state['features/base/flags'];
   return (duration) => {
+    if (global.aloneInTheConference) {
+      return;
+    }
     return SQLCipherClient().then(({database}) => {
       database
         .executeSql(
@@ -207,10 +210,10 @@ export function updateConferenceDuration(
           if (results.rows.length) {
             const call_id = results.rows.item(0).id;
             if (call_id) {
-              database.executeSql('UPDATE calls SET duration=? WHERE id=?', [
-                Math.round(duration),
-                call_id,
-              ]);
+              database.executeSql(
+                'UPDATE calls SET duration=?, answered=? WHERE id=?',
+                [Math.round(duration), 1, call_id],
+              );
             }
           }
         });

@@ -9969,28 +9969,9 @@ react-native-callkeep@^4.2.0:
   resolved "https://registry.yarnpkg.com/react-native-callkeep/-/react-native-callkeep-4.2.0.tgz#84f20eaf07a4b3494502bf9156dbdbf4b7617122"
   integrity sha512-52cA2izvw46K3M6SElV8cH+jUxvH9CYOrsnpIgnBtWLnJDcCehRNIZ0rSGfV3entxBgErCLBeIHHv9nEkMDdFQ==
 
-"react-native-chat-plugin@git+ssh://git@gitlab.com/wevive/chat-plugin#master":
-  version "0.0.24"
-  resolved "git+ssh://git@gitlab.com/wevive/chat-plugin#4943f5b2c3fb7770dfaf533d5b314de288ce86de"
-  dependencies:
-    "@react-native-clipboard/clipboard" "^1.7.0"
-    "@react-native-community/masked-view" "0.1.10"
-    "@react-navigation/native" "^5.9.3"
-    "@react-navigation/stack" "^5.14.3"
-    add "^2.0.6"
-    prop-types "^15.7.2"
-    react-native-contacts "^6.0.4"
-    react-native-haptic-feedback "^1.11.0"
-    react-native-image-picker "^3.2.1"
-    react-native-linear-gradient "^2.5.6"
-    react-native-recording "^0.5.1"
-    react-native-section-alphabet-list "^2.0.3"
-    react-native-share "^5.1.4"
-    react-native-swipe-list-view "^3.2.6"
-    react-native-view-shot "^3.1.2"
-    react-native-webview "^11.2.3"
-    socket.io-client "^3.1.1"
-    yarn "^1.22.10"
+"react-native-chat-plugin@link:./local_modules/chat-plugin":
+  version "0.0.0"
+  uid ""
 
 react-native-codegen@^0.0.6:
   version "0.0.6"

@@ -5,6 +5,7 @@ import CacheStore from 'react-native-cache-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import APIService from './src/service/APIService';
 import RNCallKeep from 'react-native-callkeep';
+import {SQLCipherClient} from 'react-native-chat-plugin/utils/SQLCipherClient';
 export const backgroundJobs = () =>
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     if (Platform.OS === 'android') {
@@ -31,6 +32,18 @@ export const backgroundJobs = () =>
             type: 'call_received',
             callUUID: data.callUUID,
           },
+        });
+        SQLCipherClient().then(({database}) => {
+          database.executeSql(
+            'INSERT INTO calls(`group_id`,`call_uuid`,`name`,`created_by`, created_at) VALUES (?, ?, ?, ?, ?)',
+            [
+              data.callUUID,
+              data.callUUID,
+              data.username,
+              data.caller,
+              Math.floor(Date.now() / 1000),
+            ],
+          );
         });
       } else if (data && data.type === 'hangup') {
         const uuid = await AsyncStorage.getItem('incomingUUID');

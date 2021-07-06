@@ -1,10 +1,13 @@
 // @flow
 
 import {Component} from 'react';
-import { SQLCipherClient } from 'react-native-chat-plugin/utils/SQLCipherClient';
+import {SQLCipherClient} from 'react-native-chat-plugin/utils/SQLCipherClient';
 
 import {renderConferenceTimer} from '../';
-import {getConferenceTimestamp, updateConferenceDuration} from '../../base/conference/functions';
+import {
+  getConferenceTimestamp,
+  updateConferenceDuration,
+} from '../../base/conference/functions';
 import {getLocalizedDurationFormatter} from '../../base/i18n';
 import {connect} from '../../base/redux';
 
@@ -134,7 +137,12 @@ class ConferenceTimer extends Component<Props, State> {
       this._setStateFromUTC(this.props._startTimestamp, new Date().getTime());
 
       this._interval = setInterval(() => {
-        this._setStateFromUTC(this.props._startTimestamp, new Date().getTime());
+        this._setStateFromUTC(
+          global.conferenceTimerStart
+            ? global.conferenceTimerStart
+            : this.props._startTimestamp,
+          new Date().getTime(),
+        );
       }, 1000);
     }
   }
