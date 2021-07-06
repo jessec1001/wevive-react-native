@@ -74,7 +74,7 @@
     "react-native-cache-store": "^1.0.2",
     "react-native-calendar-events": "github:jitsi/react-native-calendar-events#df48ecdc4e1e90c5352f803ddbab1fa7269b74a7",
     "react-native-callkeep": "^4.2.0",
-    "react-native-chat-plugin": "git+ssh://git@gitlab.com/wevive/chat-plugin#master",
+    "react-native-chat-plugin": "link:./local_modules/chat-plugin",
     "react-native-collapsible": "^1.6.0",
     "react-native-contacts": "^7.0.0",
     "react-native-cookies": "^3.3.0",
