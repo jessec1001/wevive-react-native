@@ -1,0 +1,259 @@
+diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
+index 6fb3a7e..1be0642 100644
+--- a/node_modules/react-native-chat-plugin/ChatContainer.js
++++ b/node_modules/react-native-chat-plugin/ChatContainer.js
+@@ -146,7 +146,6 @@ export default function ChatContainer({ options, contacts, children }) {
+     ctx.saveConversationToDB(conversation);
+     conversation.participants && conversation.participants.map(u=>{
+       if (u.id) {
+-        console.log('saveUser, handleConversationCreated', u);
+         ctx.saveUserToDB(u.id, u.avatar, u.username, u.username, 0);
+         ctx.addUser(u);
+       }
+@@ -282,7 +281,6 @@ export default function ChatContainer({ options, contacts, children }) {
+       const options = event ? {since: 0} : {since: 0};
+       updateCount();
+       socket.emit("conversations:fetch", options, async (res) => {
+-        console.log('fetch' , res)
+         if (res && res.success && Array.isArray(res.conversations)) {
+           const conversations = (await decryptConversationsBasic(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys))
+           .map(c=>{
+@@ -329,7 +327,6 @@ export default function ChatContainer({ options, contacts, children }) {
+         for (let i=0;i<usersFromDB.length;i++) {
+           let user = usersFromDB.item(i);
+           user.userId = user.id;
+-          console.log('user path', user.path);
+           user.avatar = "file://"+RNFS.DocumentDirectoryPath + "/"+user.path;
+           //user.phone_number = user.username;
+           delete user.path;
+@@ -341,6 +338,7 @@ export default function ChatContainer({ options, contacts, children }) {
+           userContext.setAuthData(usersList[userContext.authData.id]);
+         }
+         ctx.getConversationsFromDB().then((conversations)=> {
++          return;
+           //return false;
+           let conversationsArray = {};
+           for (let i=0;i<conversations.length;i++) {
+diff --git a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
+index 11a0c6f..c9d0188 100644
+--- a/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
++++ b/node_modules/react-native-chat-plugin/ChatContext/ConversationReducer.js
+@@ -398,7 +398,8 @@ export function createConversationActions(state, dispatch) {
+         if (!notOwner.length) return "Me";
+         const names = notOwner.map(u => this.getContactName(u.username || u.name || u.phone_number));
+         return (names.length > 1 ? "Group chat ("+(names.length+1)+" users)" : names[0]);
+-      } return conversation.name;
++      } 
++      return conversation.name + "";
+     },
+     getContactName(phone_number) {
+       const contactIdx = state.phoneContacts.findIndex(c => c.labels.indexOf(phone_number) !== -1);
+diff --git a/node_modules/react-native-chat-plugin/ChatContext/index.js b/node_modules/react-native-chat-plugin/ChatContext/index.js
+index cfcc385..79a979c 100644
+--- a/node_modules/react-native-chat-plugin/ChatContext/index.js
++++ b/node_modules/react-native-chat-plugin/ChatContext/index.js
+@@ -361,7 +361,6 @@ export function ChatContextProvider({options,children,socketIoUrl, getDB, icon,
+         return;
+       }
+       const path = await saveFileToDisk(url, filetype);
+-      console.log('saved file to ',path);
+       if (!path || path == "") {
+         resolve("0");
+         return;
+diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
+index 9b71ba4..2e299de 100644
+--- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
++++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
+@@ -25,6 +25,7 @@ import { responsiveFontSize, responsiveHeight, responsiveWidth } from "react-nat
+ import { UserContext } from "../../../src/context/UserContext";
+ import moment from "moment";
+ import CacheStore from "react-native-cache-store";
++import FastImage from "react-native-fast-image";
+ 
+ const styles = StyleSheet.create({
+   container: {
+@@ -295,7 +296,6 @@ export default function ChatScreen({ navigation, route }) {
+   const chatName = ctx.getChatname(conversation);
+   const lastOnline = ctx.getChatLastOnline(conversation);
+ 
+-  moment.locale('en')
+   const lastOnlineHumanized = moment(lastOnline).fromNow();
+   const voipCall = React.useCallback((conversation, video) => {
+     if (others) {
+@@ -334,7 +334,6 @@ export default function ChatScreen({ navigation, route }) {
+   const [visible, setVisible] = React.useState(false);
+   const [selectedContact, setSelectedContact] = React.useState(false);
+   const selectedUser = ctx.getUserById(selectedContact);
+-  console.log('selectedUserr', selectedUser);
+   const settings = ctx.getSettings();
+   const events = conversation.events || ctx.getEvents(conversation.id);
+   const parseEvents = React.useCallback((events)=> {
+@@ -619,7 +618,7 @@ export default function ChatScreen({ navigation, route }) {
+     }
+   }
+   const onHeaderPress = isGroupChat() ? setModalVisible : onContactPress(conversation.participants[conversation.participants.findIndex(p => p.id == others[0])],true)
+-  const contactName = ctx.getContactName(selectedUser.phone_number);
++  const contactName = ctx.getContactName(selectedUser.username || selectedUser.phone_number);
+   const closeReply = React.useCallback(()=>{
+     setReply(false);
+   },[]);
+@@ -713,7 +712,7 @@ export default function ChatScreen({ navigation, route }) {
+               {selectedUser.blocked_at > 0 && <Icon name="trash" style={styles.profileMuteIcon}/>}
+             </View>
+             <View style={styles.profileBox}>
+-              <Image source={{url:selectedUser.avatar ? selectedUser.avatar : ""}} style={styles.profileAvatar} />
++              <FastImage source={{uri:selectedUser.avatar ? selectedUser.avatar : ""}} style={styles.profileAvatar} />
+               <View style={styles.namesBox}>
+                 <Text style={styles.profilePhone}>{selectedUser.name || selectedUser.username}</Text>
+                 <Text style={styles.profileUsername}>{selectedUser.phone_number || selectedUser.username}</Text>
+diff --git a/node_modules/react-native-chat-plugin/Components/ProfilePreview.js b/node_modules/react-native-chat-plugin/Components/ProfilePreview.js
+index 0ff1f7e..54b6d1b 100644
+--- a/node_modules/react-native-chat-plugin/Components/ProfilePreview.js
++++ b/node_modules/react-native-chat-plugin/Components/ProfilePreview.js
+@@ -50,7 +50,6 @@ function ProfilePreview({ text, contacts, size, conversation }) {
+   if (avatarSource == weviveLogo) {
+     child = <FastImage style={[styles.image, { height: size + 1, width: size + 1 }]} source={avatarSource} />;
+   } else if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+-    //console.log('avatarSource', avatarSource.uri);
+     child = <>
+       <FastImage style={[styles.image, { height: size - 8, width: size - 8 }]} source={avatarSource} />
+     </>;
+diff --git a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
+index 43bcfc2..91cf98c 100644
+--- a/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
++++ b/node_modules/react-native-chat-plugin/ContactsScreen/ContactComponent.js
+@@ -28,6 +28,12 @@ const styles = StyleSheet.create(
+       fontFamily: Fonts.Light,
+       marginTop: 0,
+     },
++    usersCount: {
++      fontSize: 9,
++      alignSelf: "center",
++      color: "#333",
++      top: 1,
++    },
+     date: {
+       fontSize: 10,
+       position: "absolute",
+@@ -106,8 +112,8 @@ const styles = StyleSheet.create(
+     lockIcon: {
+       top: 7,
+       marginLeft: 5,
+-      fontSize: responsiveFontSize(1.3),
+-      color: "rgb(150,150,150)"
++      fontSize: responsiveFontSize(1.1),
++      color: "#aaa"
+     },
+     
+   }
+@@ -166,6 +172,7 @@ export default function ContactComponent({ conversation, onPress, onLongPress })
+   if (user && Array.isArray(participants) && participants.length > 1) {
+     participants = participants.filter(p => p.id != user.id);
+   }
++  const isGroupChat =  participants.length > 1 || !!(conversation && conversation.name);
+   const Icon = ctx.icon;
+   const chatName = ctx.getChatname(conversation);
+   return (
+@@ -174,12 +181,12 @@ export default function ContactComponent({ conversation, onPress, onLongPress })
+       onLongPress={() => onLongPress && onLongPress(conversation)}
+       underlayColor="#F8E2DD">
+       <View style={styles.container} colors={['#ffffff', '#f3f3f3']}>
+-        <ProfilePreview text={chatName} a={"b"} contacts={participants} conversation={conversation} />
+-        
++        <ProfilePreview text={chatName} contacts={participants} conversation={conversation} />
+         <View>
+           <View style={styles.conversationName}>
+             <Text style={styles.name}>{chatName}</Text>
+-            {conversation.encrypted && <Icon name="lock" style={styles.conversationIcon} />}
++            {conversation.encrypted && <Icon name="lock" style={styles.lockIcon} />}
++            {isGroupChat && <><Icon name="add" style={styles.conversationIcon} /><Text style={styles.usersCount}>{conversation.participants.length}</Text></>}
+             {conversation.muted > 0 && <Icon name="mute-icon" style={styles.conversationIcon} />}
+             {conversation.pinned > 0 && <Icon name="office-push-pin" style={styles.conversationIcon} />}
+             {conversation.archived > 0 && <Icon name="archive" style={styles.conversationIcon} />}
+diff --git a/node_modules/react-native-chat-plugin/PropTypes.js b/node_modules/react-native-chat-plugin/PropTypes.js
+index 293d4ce..84fde9a 100644
+--- a/node_modules/react-native-chat-plugin/PropTypes.js
++++ b/node_modules/react-native-chat-plugin/PropTypes.js
+@@ -7,7 +7,7 @@ export const NavigationPropType = PropType.shape({
+ 
+ export const UserPropType = PropType.shape({
+   id: PropType.any,
+-  username: PropType.string.isRequired,
++  username: PropType.string,
+   color: PropType.string,
+   avatar: PropType.string,
+ });
+diff --git a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
+index 3d232b2..f80099f 100644
+--- a/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
++++ b/node_modules/react-native-chat-plugin/SearchContactsScreen/SearchResultComponent.js
+@@ -1,8 +1,10 @@
+ import React from "react";
+ import { TouchableOpacity, Text, StyleSheet, View, Image } from "react-native";
+ import PropTypes from "prop-types";
+-
++import FastImage from "react-native-fast-image"
+ import ProfilePreview from "../Components/ProfilePreview";
++import { ChatContext } from "react-native-chat-plugin/ChatContext";
++import moment from "moment";
+ const chatRadial = require("../images/chatradial.png");
+ const radialTick = require("../images/chatradialtick.png");
+ 
+@@ -42,23 +44,30 @@ const styles = StyleSheet.create(
+     selected: {
+     },
+     unselected: {
++    },
++    lastOnline: {
++      fontSize: 11,
+     }
+   }
+ );
+ 
+-export default function SearchResultComponent({ contacts, contact, onPress, notSelectable }) {
+-  console.log(contact);
++export default function SearchResultComponent({ contact, onPress, notSelectable }) {
++  const ctx = React.useContext(ChatContext);
++  const user = ctx.getUserById(contact.id);
++  const profileName = user.name;
++  const contactName = ctx.getContactName(user.username || user.phone_number);
++  moment.locale('en');
+   return (
+     <TouchableOpacity style={styles.container} onPress={() => onPress(contact)}>
+       <ProfilePreview text={contact.username} contacts={[contact]} />
+       <View style={styles.nameContainer}>
+-        <Text style={styles.name}>{contact.name || contact.username}</Text>
+-        <Text style={styles.profileName}>{contacts && Object.keys(contacts).indexOf(contact.username) !== -1 ? contacts[contact.username] : contact.username  }</Text>
++        <Text style={styles.name}>{contactName || profileName}</Text>
++        <Text style={styles.lastOnline}>{moment(user.lastOnline).fromNow()}</Text>
+       </View>
+       {!notSelectable && (
+         contact.selected
+-          ? <Image source={radialTick} style={[styles.selection, styles.selected]} />
+-          : <Image source={chatRadial} style={[styles.selection, styles.selected]} />
++          ? <FastImage source={radialTick} style={[styles.selection, styles.selected]} />
++          : <FastImage source={chatRadial} style={[styles.selection, styles.selected]} />
+           )
+       }
+     </TouchableOpacity>
+diff --git a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
+index e624b30..48bdc75 100644
+--- a/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
++++ b/node_modules/react-native-chat-plugin/utils/SQLCipherClient.js
+@@ -5,7 +5,7 @@ SQLite.enablePromise(true);
+ let init = false;
+ let opening = false;
+ let db = null;
+-let db_version = 1;
++let db_version = 16;
+ export function getEncryptionKeys(context) {
+   return new Promise((resolve, reject) => {
+     context.getDB().then((db) => {
+@@ -153,6 +153,7 @@ function initDB() {
+           name TEXT NOT NULL,
+           created_by TEXT NOT NULL,
+           created_at INTEGER NOT NULL,
++          answered INTEGER,
+           duration INTEGER,
+           bytes_total INTEGER,
+           bytes_incoming INTEGER,

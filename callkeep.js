@@ -4,7 +4,7 @@ import RNCallKeep from 'react-native-callkeep';
 import APIService from './src/service/APIService';
 import VoipPushNotification from 'react-native-voip-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SQLCipherClient } from 'react-native-chat-plugin/utils/SQLCipherClient';
+import {SQLCipherClient} from 'react-native-chat-plugin/utils/SQLCipherClient';
 
 export const setupCallKeep = () => {
   if (Platform.OS === 'ios') {
