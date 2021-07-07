@@ -190,7 +190,7 @@ export default function VideoCalls(r) {
             <Icon name="arrow" style={styles.backBtnText} />
           </TouchableOpacity>
           <TouchableOpacity onPress={addUsersToCall} style={styles.addBtn}>
-            <Icon name="add" style={styles.addBtnText} />
+            <Icon name="add-user" style={styles.addBtnText} />
           </TouchableOpacity>
         </>
       )}
