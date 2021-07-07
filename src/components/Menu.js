@@ -1,6 +1,13 @@
 import React, {Component} from 'react';
 import Icon from './Icon';
-import {StyleSheet, Text, View, TouchableOpacity, Switch, TextInput} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Switch,
+  TextInput,
+} from 'react-native';
 
 import {
   responsiveHeight,
@@ -39,45 +46,53 @@ export const MenuItem = (props) => {
     <TouchableOpacity
       style={styles.menuRow}
       activeOpacity={1.0}
-      onPress={props.onPress ? props.onPress : () => {
-        if (props.type == 'textinput') {
-          input.current.focus();
-        }
-      }}>
+      onPress={
+        props.onPress
+          ? props.onPress
+          : () => {
+              if (props.type == 'textinput') {
+                input.current.focus();
+              }
+            }
+      }>
       <View style={styles.menuContainer}>
-      <Icon size={25} name={'w-watermark'} style={styles.menuIcon} />
-      {props.type !== 'textinput' && (
-      <Text
-        style={
-          !props.important
-            ? !props.notice
-              ? styles.menuItem
-              : styles.noticeMenuItem
-            : styles.importantMenuItem
-        }>
-        {props.children}
-      </Text>
-      )}
-      {props.type == 'textinput' && (
-        <TextInput
-          ref={input}
-          textAlignVertical={"top"}
-          numberOfLines={1}
-          multiline={false}
-          style={styles.textInput}
-          onSubmitEditing={props.onChange}
-          placeholder={props.placeholder}
-          placeholderTextColor={"rgb(125,125,125)"}
-          blurOnSubmit={true}
-          onChangeText={props.onChangeText} />
-      )}
-      
+        {!props.hideIcon && (
+          <Icon size={25} name={'w-watermark'} style={styles.menuIcon} />
+        )}
+        {props.type !== 'textinput' && (
+          <Text
+            style={
+              !props.important
+                ? !props.notice
+                  ? styles.menuItem
+                  : styles.noticeMenuItem
+                : styles.importantMenuItem
+            }>
+            {props.children}
+          </Text>
+        )}
+        {props.type == 'textinput' && (
+          <TextInput
+            ref={input}
+            textAlignVertical={'top'}
+            numberOfLines={1}
+            multiline={false}
+            style={styles.textInput}
+            onSubmitEditing={props.onChange}
+            placeholder={props.placeholder}
+            placeholderTextColor={'rgb(125,125,125)'}
+            blurOnSubmit={true}
+            onChangeText={props.onChangeText}
+          />
+        )}
       </View>
-      {props.type !== 'selection' && props.type !== 'toggle' && props.type !== 'textinput' && (
-      <Icon size={25} name={'arrow'} style={styles.nextIcon} />
-      )}
+      {props.type !== 'selection' &&
+        props.type !== 'toggle' &&
+        props.type !== 'textinput' && (
+          <Icon size={25} name={'arrow'} style={styles.nextIcon} />
+        )}
       {props.selected && (
-      <Icon size={25} name={'ticks'} style={styles.ticksIcon} />
+        <Icon size={25} name={'ticks'} style={styles.ticksIcon} />
       )}
       {props.type == 'toggle' && (
         <View style={styles.toggleContainer}>
@@ -87,7 +102,7 @@ export const MenuItem = (props) => {
             value={typeof props.value == 'boolean' ? props.value : toggle}
             accessibilityRole="button"
             style={styles.toggleStyle}
-            onValueChange={(value) =>  {
+            onValueChange={(value) => {
               if (typeof props.onChange !== 'undefined') {
                 setToggle(props.onChange(value));
               } else {
@@ -98,10 +113,7 @@ export const MenuItem = (props) => {
         </View>
       )}
       {props.type == 'info' && (
-      <Text
-        style={styles.infoItem}>
-        {props.info}
-      </Text>
+        <Text style={styles.infoItem}>{props.info}</Text>
       )}
     </TouchableOpacity>
   );
@@ -110,21 +122,21 @@ export const MenuItem = (props) => {
 const styles = StyleSheet.create({
   nextIcon: {
     fontSize: responsiveFontSize(0.8),
-    transform: [{rotate: "270deg"}],
-    alignSelf: "center",
-    color: "rgb(100,100,100)",
+    transform: [{rotate: '270deg'}],
+    alignSelf: 'center',
+    color: 'rgb(100,100,100)',
   },
   ticksIcon: {
     fontSize: responsiveFontSize(1.5),
-    alignSelf: "center",
-    color: "rgb(100,100,100)",
+    alignSelf: 'center',
+    color: 'rgb(100,100,100)',
     color: 'rgb(230, 142, 67)',
   },
   menuDividerText: {
     paddingHorizontal: responsiveWidth(7.5),
     fontWeight: '700',
     color: 'rgb(100,100,100)',
-    fontFamily: "SFProDisplay-Regular",
+    fontFamily: 'SFProDisplay-Regular',
     fontSize: responsiveFontSize(2),
   },
   toggleStyle: {
@@ -142,7 +154,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     fontSize: responsiveFontSize(1.5),
     color: 'rgb(100,100,100)',
-    fontFamily: "SFProDisplay-Regular",
+    fontFamily: 'SFProDisplay-Regular',
   },
   menuDivider: {
     backgroundColor: 'rgb(215,215,215)',
@@ -164,39 +176,39 @@ const styles = StyleSheet.create({
     paddingVertical: responsiveWidth(4),
     paddingHorizontal: responsiveWidth(7.5),
     backgroundColor: 'white',
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
   menuIcon: {
     color: 'rgb(230, 142, 67)',
     marginRight: responsiveWidth(3),
   },
   infoItem: {
-    position: "absolute",
+    position: 'absolute',
     top: responsiveWidth(4.2),
     right: responsiveWidth(12.4),
     alignSelf: 'center',
-    textAlign: "right",
-    color: "rgb(150,150,150)",
-    fontWeight: "300",
+    textAlign: 'right',
+    color: 'rgb(150,150,150)',
+    fontWeight: '300',
     fontSize: responsiveFontSize(2.1),
     lineHeight: responsiveFontSize(3),
   },
   menuItem: {
     alignSelf: 'center',
     fontSize: responsiveWidth(4.5),
-    fontFamily: "SFProDisplay-Regular",
+    fontFamily: 'SFProDisplay-Regular',
   },
   importantMenuItem: {
     color: 'rgb(230, 142, 67)',
     alignSelf: 'center',
     fontSize: responsiveWidth(4.5),
-    fontFamily: "SFProDisplay-Regular",
+    fontFamily: 'SFProDisplay-Regular',
   },
   noticeMenuItem: {
     color: 'rgb(75,189,163)',
     alignSelf: 'center',
     fontSize: responsiveWidth(4.5),
-    fontFamily: "SFProDisplay-Regular",
+    fontFamily: 'SFProDisplay-Regular',
   },
   textInput: {
     fontSize: responsiveFontSize(2.3),
