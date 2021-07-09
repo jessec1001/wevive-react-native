@@ -134,21 +134,26 @@ export default function VideoCalls(r) {
     [videoStyle],
   );
   const disableFullscreen = () => {
-    setThemeSettings({
-      ...themeSettings,
-      hiddenHeader: false,
-      hiddenFooter: false,
-    });
     setVideoStyle('pipModeViewTopRight');
   };
   const enableFullscreen = () => {
-    setThemeSettings({
-      ...themeSettings,
-      hiddenHeader: true,
-      hiddenFooter: true,
-    });
     setVideoStyle('fullscreenView');
   };
+  React.useEffect(() => {
+    if (videoStyle == 'fullscreenView') {
+      setThemeSettings({
+        ...themeSettings,
+        hiddenHeader: true,
+        hiddenFooter: true,
+      });
+    } else {
+      setThemeSettings({
+        ...themeSettings,
+        hiddenHeader: false,
+        hiddenFooter: false,
+      });
+    }
+  }, [videoStyle]);
   return (
     <>
       <View style={styles[videoStyle]}>
