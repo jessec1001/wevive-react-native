@@ -20,6 +20,8 @@
 		528741C826361651002D1901 /* WebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE050388256E904600DEE3A5 /* WebRTC.xcframework */; };
 		528741C926361651002D1901 /* WebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DE050388256E904600DEE3A5 /* WebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		52A38585265AAAA400C7BF15 /* ringingtone.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 52A38584265AAAA400C7BF15 /* ringingtone.mp3 */; };
+		52AE32182697DBB300C71360 /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52AE32172697DBB300C71360 /* MobileVLCKit.xcframework */; };
+		52AE32192697DBB300C71360 /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52AE32172697DBB300C71360 /* MobileVLCKit.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		52C1F93425DD1A3300CC2653 /* wevive.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 52C1F93325DD1A3300CC2653 /* wevive.ttf */; };
 		C503B20533A38D507CD13082 /* libPods-JitsiMeet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CEAA33BD8662222E46563F72 /* libPods-JitsiMeet.a */; };
 		DE4C456121DE1E4E00EA0709 /* FIRUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = DE4C455F21DE1E4E00EA0709 /* FIRUtilities.m */; };
@@ -35,6 +37,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				528741C926361651002D1901 /* WebRTC.xcframework in Embed Frameworks */,
+				52AE32192697DBB300C71360 /* MobileVLCKit.xcframework in Embed Frameworks */,
 				DEA9F28A258A6EA800D4CD74 /* JitsiMeetSDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -54,14 +57,12 @@
 
 /* Begin PBXFileReference section */
 		09AA3B93E4CC62D84B424690 /* Pods-jitsi-meet.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jitsi-meet.release.xcconfig"; path = "../Pods/Target Support Files/Pods-jitsi-meet/Pods-jitsi-meet.release.xcconfig"; sourceTree = "<group>"; };
-		0B26BE6D1EC5BC3C00EEFB41 /* JitsiMeet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = JitsiMeet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B412F1D1EDEE6E800B1A0A6 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		0B412F1E1EDEE6E800B1A0A6 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		0B412F201EDEE95300B1A0A6 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0B5418461F7C5D8C00A2DD86 /* MeetingRowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRowController.swift; sourceTree = "<group>"; };
 		0B70016F1F7C51CC005944F4 /* InCallController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InCallController.swift; sourceTree = "<group>"; };
 		0BBD021F212EB69D00CCB19F /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Types.h; sourceTree = "<group>"; };
-		0BD6B4361EF82A6B00D1F4CD /* WebRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebRTC.framework; path = "../../node_modules/react-native-webrtc/ios/WebRTC.framework"; sourceTree = "<group>"; };
 		0BEA5C281F7B8F73000D0AB4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		0BEA5C2A1F7B8F73000D0AB4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0BEA5C2C1F7B8F73000D0AB4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -83,6 +84,7 @@
 		522A00B22600E61800F07924 /* SFProDisplay-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "SFProDisplay-Semibold.ttf"; path = "../../../src/fonts/SFProDisplay-Semibold.ttf"; sourceTree = "<group>"; };
 		5253F25C2677CFEA0060449C /* busy.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = busy.mp3; sourceTree = "<group>"; };
 		52A38584265AAAA400C7BF15 /* ringingtone.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = ringingtone.mp3; sourceTree = "<group>"; };
+		52AE32172697DBB300C71360 /* MobileVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MobileVLCKit.xcframework; path = ../Pods/MobileVLCKit/MobileVLCKit.xcframework; sourceTree = "<group>"; };
 		52C1F93325DD1A3300CC2653 /* wevive.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = wevive.ttf; path = ../../../src/fonts/wevive.ttf; sourceTree = "<group>"; };
 		609CB2080B75F75A89923F3D /* Pods-JitsiMeet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JitsiMeet.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-JitsiMeet/Pods-JitsiMeet.debug.xcconfig"; sourceTree = "<group>"; };
 		B3B083EB1D4955FF0069CEE7 /* app.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = app.entitlements; sourceTree = "<group>"; };
@@ -91,7 +93,6 @@
 		DE4C455F21DE1E4E00EA0709 /* FIRUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FIRUtilities.m; sourceTree = "<group>"; };
 		DE4C456021DE1E4E00EA0709 /* FIRUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FIRUtilities.h; sourceTree = "<group>"; };
 		DEA9F288258A6EA800D4CD74 /* JitsiMeetSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = JitsiMeetSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		DEFDBBDB25656E3B00344B23 /* WebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = WebRTC.xcframework; path = "../../node_modules/react-native-webrtc/ios/WebRTC.xcframework"; sourceTree = "<group>"; };
 		E58801132278944E008B0561 /* JitsiMeetContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JitsiMeetContext.swift; sourceTree = "<group>"; };
 		E5C97B62227A1EB400199214 /* JitsiMeetCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JitsiMeetCommands.swift; sourceTree = "<group>"; };
 		FC040BBED70876444D89E91C /* Pods-JitsiMeet.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JitsiMeet.release.xcconfig"; path = "../Pods/Target Support Files/Pods-JitsiMeet/Pods-JitsiMeet.release.xcconfig"; sourceTree = "<group>"; };
@@ -102,6 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52AE32182697DBB300C71360 /* MobileVLCKit.xcframework in Frameworks */,
 				DEA9F289258A6EA800D4CD74 /* JitsiMeetSDK.framework in Frameworks */,
 				C503B20533A38D507CD13082 /* libPods-JitsiMeet.a in Frameworks */,
 				528741C826361651002D1901 /* WebRTC.xcframework in Frameworks */,
@@ -114,11 +116,9 @@
 		0B26BE711EC5BC4D00EEFB41 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				52AE32172697DBB300C71360 /* MobileVLCKit.xcframework */,
 				DEA9F288258A6EA800D4CD74 /* JitsiMeetSDK.framework */,
 				DE050388256E904600DEE3A5 /* WebRTC.xcframework */,
-				0B26BE6D1EC5BC3C00EEFB41 /* JitsiMeet.framework */,
-				DEFDBBDB25656E3B00344B23 /* WebRTC.xcframework */,
-				0BD6B4361EF82A6B00D1F4CD /* WebRTC.framework */,
 				CEAA33BD8662222E46563F72 /* libPods-JitsiMeet.a */,
 			);
 			name = Frameworks;

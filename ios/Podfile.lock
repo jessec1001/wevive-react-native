@@ -113,6 +113,7 @@ PODS:
   - libwebp/mux (1.2.0):
     - libwebp/demux
   - libwebp/webp (1.2.0)
+  - MobileVLCKit (3.3.16.3)
   - nanopb (2.30908.0):
     - nanopb/decode (= 2.30908.0)
     - nanopb/encode (= 2.30908.0)
@@ -364,6 +365,9 @@ PODS:
     - React
   - react-native-view-shot (3.1.2):
     - React
+  - react-native-vlc (1.0.0):
+    - MobileVLCKit (= 3.3.16.3)
+    - React
   - react-native-webrtc (1.89.3):
     - React-Core
   - react-native-webview (11.6.2):
@@ -579,6 +583,7 @@ DEPENDENCIES:
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - react-native-version-number (from `../node_modules/react-native-version-number`)
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
+  - "react-native-vlc (from `../node_modules/@nghinv/react-native-vlc`)"
   - react-native-webrtc (from `../node_modules/react-native-webrtc`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -645,6 +650,7 @@ SPEC REPOS:
     - GoogleUtilities
     - IQKeyboardManagerSwift
     - libwebp
+    - MobileVLCKit
     - nanopb
     - OLMKit
     - PromisesObjC
@@ -732,6 +738,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-version-number"
   react-native-view-shot:
     :path: "../node_modules/react-native-view-shot"
+  react-native-vlc:
+    :path: "../node_modules/@nghinv/react-native-vlc"
   react-native-webrtc:
     :path: "../node_modules/react-native-webrtc"
   react-native-webview:
@@ -849,6 +857,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: e1d9ed4e544fc32a93e00e721400cbc3f377200d
   IQKeyboardManagerSwift: 2dde0fc70110e8eac7ccce2a46fdbec6a850b414
   libwebp: e90b9c01d99205d03b6bb8f2c8c415e5a4ef66f0
+  MobileVLCKit: 2b408a9c5cc327353afab418fafbc942780b248a
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   OLMKit: 20d1c564033a1ae7148f8f599378d4c798363905
   Permission-Microphone: 450ff628a7146c415cfb98025e518810d9fa76ad
@@ -886,6 +895,7 @@ SPEC CHECKSUMS:
   react-native-sqlite-storage: cd80d46253cfb38a31eb83c67681502d4c4295df
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
   react-native-view-shot: 4475fde003fe8a210053d1f98fb9e06c1d834e1c
+  react-native-vlc: 9a391ffa6d1ecbc05bf22f0f914bc95e5cb9f066
   react-native-webrtc: 2e8095a43dd3d95ce796d9750280c0f48aadad3d
   react-native-webview: 193d233c29eacce1f42ca2637dab7ba79c25a6de
   React-perflogger: 25373e382fed75ce768a443822f07098a15ab737
