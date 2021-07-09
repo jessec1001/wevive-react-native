@@ -30,12 +30,10 @@ import APIService from './service/APIService';
 import VideoCalls from './screens/VideoCalls/VideoCalls';
 import ContactsModal from './ContactsModal';
 import {check, request, PERMISSIONS} from 'react-native-permissions';
-
+import {chat_url} from "../app.json"
 if (Platform.OS === 'android') {
   OverlayPermissionModule.requestOverlayPermission();
 }
-const chat_url = 'https://chat.wevive.com/';
-//const chat_url = 'http://192.168.0.180:3001/';
 const playBusySound = () => {
   var whoosh = new Sound('busy.mp3', Sound.MAIN_BUNDLE, (error) => {
     if (error) {
