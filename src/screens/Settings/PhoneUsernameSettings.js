@@ -151,7 +151,7 @@ export default function PhoneUsernameSettings(props) {
         onChange={onUsernameChange}
         onChangeText={onUsernameChange}
         placeholder="User Name">
-        {authData.userName}
+        {name}
       </TextInput>
 
       <MenuDivider text="Status" />
@@ -185,7 +185,7 @@ export default function PhoneUsernameSettings(props) {
         onChange={onAboutChange}
         onChangeText={onAboutChange}
         placeholder="About me">
-        {authData.about}
+        {about}
       </TextInput>
 
       <MenuDivider text="Website" />
@@ -195,7 +195,7 @@ export default function PhoneUsernameSettings(props) {
         onChange={onWebsiteChange}
         onChangeText={onWebsiteChange}
         placeholder="www.mywebsite.com">
-        {authData.website}
+        {website}
       </TextInput>
     </ScrollView>
   );
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   inputText: {
     textAlign: 'left',
-    marginLeft: responsiveWidth(5),
+    paddingHorizontal: responsiveWidth(7.5),
     fontSize: responsiveFontSize(2),
     maxWidth: responsiveWidth(90),
     maxHeight: responsiveHeight(50),
