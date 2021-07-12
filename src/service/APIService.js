@@ -74,6 +74,7 @@ const APIService = async (endpoint, data, cache_time, forceToken) => {
     } else {
       options.body = requestData;
     }
+    console.log('Fetching: URL', url, 'Options', options);
     return fetch(url, options)
       .then((response) => {
         if (headers['Content-Type'] === 'multipart/form-data') {

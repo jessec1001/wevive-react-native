@@ -86,7 +86,7 @@ export default class SignIn extends Component {
         routes: [
           {
             name: 'PINVerificationScreen',
-            params: {user}
+            params: {user},
           },
         ],
       }),
@@ -166,7 +166,7 @@ export default class SignIn extends Component {
                 ) : null}
                 <Formik
                   initialValues={{
-                    country: geo && geo.country_code ? geo.country_code : 'GB',
+                    country: geo && geo.country_code ? geo.country_code : 'US',
                     phone:
                       this.state.phoneNumber ||
                       this.props.route.params?.phone_number,

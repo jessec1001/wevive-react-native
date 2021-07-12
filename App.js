@@ -30,6 +30,7 @@ import {ClientContext} from './src/context/ClientContext';
 import APIService from './src/service/APIService';
 import {AppLoadingIndicator} from './src/components/AppLoadingIndicator';
 import {getPhoneContacts} from './src/utils/helpers';
+import styles from './src/styles/content';
 
 NetInfo.fetch().then((state) => {
   global.isInternetReachable = state.isInternetReachable;
@@ -40,6 +41,11 @@ const netinfo_unsubscribe = NetInfo.addEventListener((state) => {
 });
 
 class AppContainer extends Component {
+  styles = {
+    body: {
+      fontColor: '#FF0000',
+    },
+  };
   setDimensionsIos = (dim) => {
     const {
       screen: {height: screenHeight, width: screenWidth},
@@ -115,7 +121,7 @@ class AppContainer extends Component {
     return (
       <>
         {this.state.ready && (
-          <SafeAreaProvider>
+          <SafeAreaProvider style={styles.body}>
             <ClientContext.Provider value={this.state.geo}>
               <BioID>
                 <RootStack initialProps={this.props.initialProps} />
