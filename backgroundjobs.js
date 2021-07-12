@@ -19,12 +19,15 @@ export const backgroundJobs = () =>
         AsyncStorage.setItem('incomingUUID', data.callUUID);
         //TODO: Store participants
         //CacheStore.set('callParticipants', payload.participants, 0.5);
+        isVideo = data.video === true || data.video === 'true';
+        message = isVideo ? 'Wevive Video Call' : 'Wevive Voice Call';
         IncomingCall.display(
           data.callUUID, // Call UUID v4
           data.username, // Username
           data.avatarURL,
-          'Wevive Call', // Info text
+          message, // Info text
           60000, // Timeout for end call after 60s
+          isVideo,
         );
         APIService('users/pushmessage/', {
           users: [data.caller],

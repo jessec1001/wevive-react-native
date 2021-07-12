@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import {Platform} from 'react-native';
 import CacheStore from 'react-native-cache-store';
-import { SQLCipherClient } from 'react-native-chat-plugin/utils/SQLCipherClient';
+import {SQLCipherClient} from 'react-native-chat-plugin/utils/SQLCipherClient';
 import IncomingCall from 'react-native-incoming-call';
 import {requestNotifications} from 'react-native-permissions';
 //import PushNotification from 'react-native-push-notification';
@@ -123,6 +123,12 @@ class FCM_Service {
           if (remoteMessage.data.video) {
             CacheStore.set(remoteMessage.data.callUUID, 1, 0.5);
           }
+
+          isVideo =
+            remoteMessage.data.video === true ||
+            remoteMessage.data.video === 'true';
+          message = isVideo ? 'Wevive Video Call' : 'Wevive Voice Call';
+          console.log('value:', remoteMessage.data.video);
           const activeCall = await AsyncStorage.getItem('activeCallUUID');
           if (!activeCall || activeCall !== remoteMessage.data.callUUID) {
             if (Platform.OS === 'android') {
@@ -131,8 +137,9 @@ class FCM_Service {
                 remoteMessage.data.callUUID, // Call UUID v4
                 remoteMessage.data.username, // Username
                 remoteMessage.data.avatarURL,
-                'Wevive Call', // Info text
+                message, // Info text
                 30000, // Timeout for end call after 30s
+                isVideo,
               );
               SQLCipherClient().then(({database}) => {
                 database.executeSql(
