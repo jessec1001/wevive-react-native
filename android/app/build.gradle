@@ -21,7 +21,7 @@ android {
         //exclude '**/libhermes-inspector.so'
         //exclude '**/libhermes-executor-debug.so'
         //exclude '**/libhermes-executor-common-debug.so'
-        //pickFirst '**/libc++_shared.so'
+        pickFirst '**/libc++_shared.so'
 
         //exclude 'lib/*/libhermes*.so'
         pickFirst 'lib/armeabi-v7a/libsodium.so'
@@ -112,6 +112,7 @@ dependencies {
     def hermesPath = "../../node_modules/hermes-engine/android/";
     debugImplementation files(hermesPath + "hermes-debug.aar")
     releaseImplementation files(hermesPath + "hermes-release.aar")
+    //implementation 'org.videolan.android:libvlc-all:3.3.8'
 }
 
 gradle.projectsEvaluated {

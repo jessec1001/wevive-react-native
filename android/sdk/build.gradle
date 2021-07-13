@@ -73,6 +73,9 @@ dependencies {
         implementation project(':react-native-device-info')
     }
 
+    //implementation('com.yyl.vlc:vlc-android-sdk:3.1.4'){
+    //   transitive = false
+    //}
     testImplementation 'junit:junit:4.13.2'
 }
 

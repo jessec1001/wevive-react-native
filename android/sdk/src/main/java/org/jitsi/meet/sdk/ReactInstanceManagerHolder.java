@@ -173,6 +173,8 @@ class ReactInstanceManagerHolder {
     
         SoLoader.init(activity, /* native exopackage */ false);
         List<ReactPackage> packages = (new ArrayList<>(Arrays.asList(
+                // @nghinv/react-native-vlc
+                //new com.yuanzhou.vlc.ReactVlcPlayerPackage(),
                 // @react-native-async-storage/async-storage
                 new com.reactnativecommunity.asyncstorage.AsyncStoragePackage(),
                 // @react-native-clipboard/clipboard
@@ -209,6 +211,8 @@ class ReactInstanceManagerHolder {
                 new com.rt2zz.reactnativecontacts.ReactNativeContacts(),
                 // react-native-cookies
                 new com.psykar.cookiemanager.CookieManagerPackage(),
+                // react-native-create-thumbnail
+                new com.reactlibrary.createthumbnail.CreateThumbnailPackage(),
                 // react-native-default-preference
                 new com.kevinresol.react_native_default_preference.RNDefaultPreferencePackage(),
                 // react-native-device-info

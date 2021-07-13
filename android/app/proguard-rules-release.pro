@@ -11,3 +11,4 @@
   *;
 }
 -keep class com.facebook.react.turbomodule.** { *; }
+-keep class org.videolan.libvlc.** { *; }

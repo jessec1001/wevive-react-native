@@ -100,3 +100,6 @@
   **[] $VALUES;
   public *;
 }
+
+#VLC
+-keep class org.videolan.libvlc.** { *; }
