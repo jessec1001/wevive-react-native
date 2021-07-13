@@ -277,6 +277,8 @@ class ReactInstanceManagerHolder {
                 new fr.greweb.reactnativeviewshot.RNViewShotPackage(),
                 // react-native-image-picker
                 new com.imagepicker.ImagePickerPackage(),
+                // react-native-image-resizer
+                new fr.bamlab.rnimageresizer.ImageResizerPackage(),
                 // react-native-webrtc
                 //new com.oney.WebRTCModule.WebRTCModulePackage(),
                 // react-native-webview
