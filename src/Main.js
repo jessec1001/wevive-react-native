@@ -191,7 +191,7 @@ export default function Main({navigation, route}) {
       }, //onNotification
       (b) => {
         console.log('[FCMService] onOpenNotification', b);
-        if (b.data.conversationId) {
+        if (b && b.data && b.data.conversationId) {
           navigation.navigate('ChatScreen', {
             conversation: b.data.conversationId,
           });
