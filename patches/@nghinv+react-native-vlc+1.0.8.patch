@@ -60,7 +60,7 @@ index 3fd0490..96ef0fb 100644
                    showRightButton ? (
                      <TouchableOpacity
 diff --git a/node_modules/@nghinv/react-native-vlc/playerView/VLCPlayerView.js b/node_modules/@nghinv/react-native-vlc/playerView/VLCPlayerView.js
-index 020415c..046bd65 100644
+index 020415c..a89af4f 100644
 --- a/node_modules/@nghinv/react-native-vlc/playerView/VLCPlayerView.js
 +++ b/node_modules/@nghinv/react-native-vlc/playerView/VLCPlayerView.js
 @@ -12,7 +12,7 @@ import VLCPlayer from '../VLCPlayer';
@@ -85,7 +85,7 @@ index 020415c..046bd65 100644
          <VLCPlayer
            {...otherProps}
            ref={ref => (this.vlcPlayer = ref)}
-+          autoplay={false}
++          autoplay={true}
            paused={this.state.paused}
            style={[styles.video]}
            source={source}
