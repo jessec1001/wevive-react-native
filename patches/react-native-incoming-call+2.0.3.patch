@@ -1,127 +1,3 @@
-diff --git a/node_modules/react-native-incoming-call/.idea/modules.xml b/node_modules/react-native-incoming-call/.idea/modules.xml
-new file mode 100644
-index 0000000..f95db9a
---- /dev/null
-+++ b/node_modules/react-native-incoming-call/.idea/modules.xml
-@@ -0,0 +1,8 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<project version="4">
-+  <component name="ProjectModuleManager">
-+    <modules>
-+      <module fileurl="file://$PROJECT_DIR$/.idea/react-native-incoming-call.iml" filepath="$PROJECT_DIR$/.idea/react-native-incoming-call.iml" />
-+    </modules>
-+  </component>
-+</project>
-\ No newline at end of file
-diff --git a/node_modules/react-native-incoming-call/.idea/react-native-incoming-call.iml b/node_modules/react-native-incoming-call/.idea/react-native-incoming-call.iml
-new file mode 100644
-index 0000000..49a8d23
---- /dev/null
-+++ b/node_modules/react-native-incoming-call/.idea/react-native-incoming-call.iml
-@@ -0,0 +1,24 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<module type="JAVA_MODULE" version="4">
-+  <component name="FacetManager">
-+    <facet type="android" name="Android">
-+      <configuration>
-+        <option name="GEN_FOLDER_RELATIVE_PATH_APT" value="/../../react-native-incoming-call/gen" />
-+        <option name="GEN_FOLDER_RELATIVE_PATH_AIDL" value="/../../react-native-incoming-call/gen" />
-+        <option name="MANIFEST_FILE_RELATIVE_PATH" value="/../../react-native-incoming-call/AndroidManifest.xml" />
-+        <option name="RES_FOLDER_RELATIVE_PATH" value="/../../react-native-incoming-call/res" />
-+        <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/../../react-native-incoming-call/assets" />
-+        <option name="LIBS_FOLDER_RELATIVE_PATH" value="/../../react-native-incoming-call/libs" />
-+        <option name="PROGUARD_LOGS_FOLDER_RELATIVE_PATH" value="/../../react-native-incoming-call/proguard_logs" />
-+      </configuration>
-+    </facet>
-+  </component>
-+  <component name="NewModuleRootManager" inherit-compiler-output="true">
-+    <exclude-output />
-+    <content url="file://$MODULE_DIR$">
-+      <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" generated="true" />
-+    </content>
-+    <orderEntry type="jdk" jdkName="Android API 30 Platform" jdkType="Android SDK" />
-+    <orderEntry type="sourceFolder" forTests="false" />
-+  </component>
-+</module>
-\ No newline at end of file
-diff --git a/node_modules/react-native-incoming-call/.idea/runConfigurations.xml b/node_modules/react-native-incoming-call/.idea/runConfigurations.xml
-new file mode 100644
-index 0000000..797acea
---- /dev/null
-+++ b/node_modules/react-native-incoming-call/.idea/runConfigurations.xml
-@@ -0,0 +1,10 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<project version="4">
-+  <component name="RunConfigurationProducerService">
-+    <option name="ignoredProducers">
-+      <set>
-+        <option value="com.android.tools.idea.compose.preview.runconfiguration.ComposePreviewRunConfigurationProducer" />
-+      </set>
-+    </option>
-+  </component>
-+</project>
-\ No newline at end of file
-diff --git a/node_modules/react-native-incoming-call/.idea/workspace.xml b/node_modules/react-native-incoming-call/.idea/workspace.xml
-new file mode 100644
-index 0000000..6d2350e
---- /dev/null
-+++ b/node_modules/react-native-incoming-call/.idea/workspace.xml
-@@ -0,0 +1,54 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<project version="4">
-+  <component name="AndroidLayouts">
-+    <shared>
-+      <config />
-+    </shared>
-+  </component>
-+  <component name="AndroidLogFilters">
-+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
-+  </component>
-+  <component name="AutoImportSettings">
-+    <option name="autoReloadType" value="NONE" />
-+  </component>
-+  <component name="ChangeListManager">
-+    <list default="true" id="1561a484-087e-4418-ac52-b204335a26f5" name="Default Changelist" comment="" />
-+    <option name="SHOW_DIALOG" value="false" />
-+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
-+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
-+    <option name="LAST_RESOLUTION" value="IGNORE" />
-+  </component>
-+  <component name="ProjectId" id="1vEXQNRg0pax7PHLRXOjroK2lTd" />
-+  <component name="ProjectViewState">
-+    <option name="hideEmptyMiddlePackages" value="true" />
-+    <option name="showLibraryContents" value="true" />
-+  </component>
-+  <component name="PropertiesComponent">
-+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-+    <property name="android.sdk.path" value="$PROJECT_DIR$/../../../../../SDK/Android-SDK" />
-+    <property name="last_opened_file_path" value="$PROJECT_DIR$/android/src/main/res/layout" />
-+    <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
-+  </component>
-+  <component name="RecentsManager">
-+    <key name="CopyFile.RECENT_KEYS">
-+      <recent name="C:\Bitbucket\Wevive\wevive-react-native\node_modules\react-native-incoming-call\android\src\main\res\layout" />
-+    </key>
-+  </component>
-+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
-+  <component name="TaskManager">
-+    <task active="true" id="Default" summary="Default task">
-+      <changelist id="1561a484-087e-4418-ac52-b204335a26f5" name="Default Changelist" comment="" />
-+      <created>1626128204710</created>
-+      <option name="number" value="Default" />
-+      <option name="presentableId" value="Default" />
-+      <updated>1626128204710</updated>
-+    </task>
-+    <servers />
-+  </component>
-+  <component name="WindowStateProjectService">
-+    <state x="1539" y="364" width="1650" height="846" key="AVDManager" timestamp="1626129738436">
-+      <screen x="0" y="0" width="3440" height="1400" />
-+    </state>
-+    <state x="1539" y="364" width="1650" height="846" key="AVDManager/0.0.3440.1400@0.0.3440.1400" timestamp="1626129738436" />
-+  </component>
-+</project>
-\ No newline at end of file
 diff --git a/node_modules/react-native-incoming-call/android/build/.transforms/4496caa7283af1069c78a9af3666fe4b/results.bin b/node_modules/react-native-incoming-call/android/build/.transforms/4496caa7283af1069c78a9af3666fe4b/results.bin
 new file mode 100644
 index 0000000..e69de29
@@ -44279,15 +44155,12 @@ index 0b3bb9e..be07126 100644
      }
  
      private void acceptDialing() {
-diff --git a/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_call.png b/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_call.png
-index db4677e..9b9e1d7 100644
-Binary files a/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_call.png and b/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_call.png differ
-diff --git a/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_video.png b/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_video.png
+diff --git a/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_call_audio.png b/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_call_audio.png
 new file mode 100644
-index 0000000..db4677e
-Binary files /dev/null and b/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_video.png differ
+index 0000000..9b9e1d7
+Binary files /dev/null and b/node_modules/react-native-incoming-call/android/src/main/res/drawable-mdpi/ic_accept_call_audio.png differ
 diff --git a/node_modules/react-native-incoming-call/android/src/main/res/layout/activity_call_incoming.xml b/node_modules/react-native-incoming-call/android/src/main/res/layout/activity_call_incoming.xml
-index a0e1555..8542728 100644
+index a0e1555..6450270 100644
 --- a/node_modules/react-native-incoming-call/android/src/main/res/layout/activity_call_incoming.xml
 +++ b/node_modules/react-native-incoming-call/android/src/main/res/layout/activity_call_incoming.xml
 @@ -58,10 +58,9 @@
@@ -44302,9 +44175,18 @@ index a0e1555..8542728 100644
  
          <TextView
              android:id="@+id/tvInfo"
+@@ -126,7 +125,7 @@
+                 android:layout_width="60dp"
+                 android:layout_height="60dp"
+                 android:scaleType="centerInside"
+-                android:src="@drawable/ic_accept_call"
++                android:src="@drawable/ic_accept_call_audio"
+             />
+             <TextView
+                 android:id="@+id/tvAccept"
 diff --git a/node_modules/react-native-incoming-call/android/src/main/res/layout/activity_video_incoming.xml b/node_modules/react-native-incoming-call/android/src/main/res/layout/activity_video_incoming.xml
 new file mode 100644
-index 0000000..b253d3f
+index 0000000..c04aa64
 --- /dev/null
 +++ b/node_modules/react-native-incoming-call/android/src/main/res/layout/activity_video_incoming.xml
 @@ -0,0 +1,145 @@
@@ -44437,7 +44319,7 @@ index 0000000..b253d3f
 +                android:layout_width="60dp"
 +                android:layout_height="60dp"
 +                android:scaleType="centerInside"
-+                android:src="@drawable/ic_accept_video" />
++                android:src="@drawable/ic_accept_call" />
 +            <TextView
 +                android:id="@+id/tvAccept"
 +                android:layout_width="match_parent"
@@ -44453,7 +44335,6 @@ index 0000000..b253d3f
 +
 +    </LinearLayout>
 +</RelativeLayout>
-\ No newline at end of file
 diff --git a/node_modules/react-native-incoming-call/android/src/main/res/values/strings.xml b/node_modules/react-native-incoming-call/android/src/main/res/values/strings.xml
 index 4147f20..14a5ac3 100644
 --- a/node_modules/react-native-incoming-call/android/src/main/res/values/strings.xml
