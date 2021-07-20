@@ -61,7 +61,7 @@ index cfcc385..79a979c 100644
          resolve("0");
          return;
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
-index 698b4d6..c07b2b6 100644
+index 698b4d6..64e84b9 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatForm.js
 @@ -8,6 +8,7 @@ import Colors from "../constants/Colors";
@@ -81,7 +81,35 @@ index 698b4d6..c07b2b6 100644
  const sendButton = require("../images/sendbtn.png");
  const styles = StyleSheet.create({
    container: {
-@@ -226,17 +229,26 @@ export default function ChatForm({ conversation, reply, setReply }) {
+@@ -168,7 +171,7 @@ export default function ChatForm({ conversation, reply, setReply }) {
+   
+   const ctx = React.useContext(ChatContext);
+   const {authData} = React.useContext(UserContext);
+-  const [message, setMessage] = React.useState();
++  const [message, setMessage] = React.useState(global.lastMessage && global.lastMessage[conversation.id]);
+   const [tries, setTries] = React.useState(0);
+   const settings = ctx.getSettings();
+   //const Icon = ctx.icon;
+@@ -178,6 +181,10 @@ export default function ChatForm({ conversation, reply, setReply }) {
+   //const currentUser = users[userIdx];
+   
+   const onChangeText = React.useCallback((text) => {
++    if (!global.lastMessage) { 
++      global.lastMessage = {};
++    }
++    global.lastMessage[conversation.id] = text;
+     setMessage(text);
+     const socket = getSocket();
+     if (!settings.disable_typing_events) {
+@@ -198,6 +205,7 @@ export default function ChatForm({ conversation, reply, setReply }) {
+     const socket = getSocket();
+     setMessage("");
+     setReply(false);
++    delete global.lastMessage[conversation.id];
+     const contents = !reply ? message : "reply:"+reply.event+"|"+message; 
+     const encrypted = await encryptMessage(contents, global.encryptionKeys.public_key, global.encryptionKeys.private_key);
+     const messageToSend = encrypted.nonce + "|" + global.encryptionKeys.public_key + "|" + encrypted.encryptedMessage;
+@@ -226,17 +234,26 @@ export default function ChatForm({ conversation, reply, setReply }) {
          }
        } else if (event) {
          const others = conversation.participants.map(p => p.id).filter(p => String(p) !== String(socket.chat_user_id));
@@ -117,7 +145,7 @@ index 698b4d6..c07b2b6 100644
          }
          ctx.updateEvent(conversation.id, localMsg, {...event, text:contents, is_delivered:true, encrypted: true})
          ctx.updateMessageEvent(localMsg, event)
-@@ -271,65 +283,113 @@ export default function ChatForm({ conversation, reply, setReply }) {
+@@ -271,65 +288,113 @@ export default function ChatForm({ conversation, reply, setReply }) {
      }
    },[message, ctx]);
  
@@ -280,7 +308,7 @@ index 698b4d6..c07b2b6 100644
    };
    const openCamera = () => {
      if (Platform.OS == 'android') {
-@@ -364,9 +424,12 @@ export default function ChatForm({ conversation, reply, setReply }) {
+@@ -364,9 +429,12 @@ export default function ChatForm({ conversation, reply, setReply }) {
    const chooseMedia = (index) => {
      switch (index) {
        case 0:
@@ -294,7 +322,7 @@ index 698b4d6..c07b2b6 100644
          openCamera();
          break;
        default:
-@@ -382,7 +445,8 @@ export default function ChatForm({ conversation, reply, setReply }) {
+@@ -382,7 +450,8 @@ export default function ChatForm({ conversation, reply, setReply }) {
      );
    };
    const actionSheet = [
@@ -305,14 +333,14 @@ index 698b4d6..c07b2b6 100644
      'Cancel',
    ];
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index 9b71ba4..371fffc 100644
+index 9b71ba4..af9e37b 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,6 +1,6 @@
  import React from "react";
  import Modal from 'react-native-modal';
 -import { View, StyleSheet, Alert, KeyboardAvoidingView, Image, ImageBackground, Platform, Text, ScrollView, FlatList, Dimensions } from "react-native";
-+import { View, StyleSheet, Alert, KeyboardAvoidingView, Image, ImageBackground, Platform, Text, ScrollView, FlatList, Dimensions, SafeAreaView } from "react-native";
++import { View, StyleSheet, Alert, Animated, Easing, ImageBackground,  Text,  FlatList, SafeAreaView } from "react-native";
  import PropTypes, { string } from "prop-types";
  import Header from "../Components/Header";
  import ChatForm from "./ChatForm";

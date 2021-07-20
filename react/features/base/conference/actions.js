@@ -118,6 +118,9 @@ function _addConferenceListeners(conference, dispatch) {
       global.conferenceTimerStart = +Date.now();
     }
     global.aloneInTheConference = aloneInTheConference;
+    if (!aloneInTheConference) {
+      global.setPendingCallParticipants([]);
+    }
     CacheStore.set('activeCallOthersCount', String(usersCount));
   };
   // A simple logger for conference errors received through

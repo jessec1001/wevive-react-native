@@ -19,8 +19,11 @@ import {
 import Icon from '../../components/Icon';
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
 import APIService from '../../service/APIService';
+import BouncingAvatar from '../../components/BouncingAvatar';
 
 export default function VideoCalls(r) {
+  const [joinedIds, setJoinedIds] = React.useState([]);
+  global.setJoinedIds = setJoinedIds;
   const themeSettings = React.useContext(AppThemeContext);
   const {authData, setThemeSettings} = React.useContext(UserContext);
   const {getUserByPhone} = React.useContext(ChatContext);
@@ -54,6 +57,7 @@ export default function VideoCalls(r) {
           const contactUserIds = contacts
             .map((c) => {
               const user = getUserByPhone([...c.labels]);
+              setPendingCallParticipants([...pendingCallParticipants, user]);
               return user ? user.id : null;
             })
             .filter((c) => c);
@@ -154,6 +158,8 @@ export default function VideoCalls(r) {
       });
     }
   }, [videoStyle]);
+  const [pendingCallParticipants,setPendingCallParticipants] = React.useState(conversation.participants.filter(p => p.id !== userId));
+  global.setPendingCallParticipants = setPendingCallParticipants;
   return (
     <>
       <View style={styles[videoStyle]}>
@@ -209,6 +215,11 @@ export default function VideoCalls(r) {
           </GestureRecognizer>
         </>
       )}
+      {pendingCallParticipants.length > 0 && 
+      <View style={{position:"absolute",top:pendingCallParticipants.length == 1 ? responsiveWidth(57) : responsiveWidth(20), left: pendingCallParticipants.length == 1 ? responsiveWidth(20) : 0}}>
+        {pendingCallParticipants.map(o => <BouncingAvatar big={pendingCallParticipants.length == 1} contact={o} joinedIds={joinedIds} id={o.id} url={o.avatar} text={o.name} />)}
+      </View>
+    }
     </>
   );
 }

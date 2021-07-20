@@ -103,6 +103,7 @@ const RootStack = ({initialProps}) => {
     const sameTheme = deepEqual(changedTheme, themeSettings);
     if (!sameTheme) {
       setThemeSettings(changedTheme);
+      global.lastAppliedTheme = changedTheme;
     }
     analytics().logScreenView({
       screen_name: routeName,

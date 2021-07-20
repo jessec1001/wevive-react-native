@@ -221,11 +221,7 @@ export default function Main({navigation, route}) {
         } else {
           setCallUUID(false);
           setIsVideo(false);
-          setThemeSettings({
-            ...themeSettings,
-            hiddenHeader: false,
-            hiddenFooter: false,
-          });
+          global.lastAppliedTheme && setThemeSettings(global.lastAppliedTheme);
         }
       }
     }, 200);
