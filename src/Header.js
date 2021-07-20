@@ -217,7 +217,6 @@ export default function Header({route, themeSettings}) {
           ) : null}
         </View>
         <View style={styles.mainLogoContainerStyle}>
-          {logo}
           {title && <Text style={style}>{title}</Text>}
         </View>
         <View style={styles.right}>{nextOrProfile}</View>
@@ -259,17 +258,17 @@ const styles = StyleSheet.create({
     color: 'rgb(227,140,57)',
   },
   headerTitle: {
-    top: -responsiveWidth(3.5),
     fontFamily: 'SFProDisplay-Regular',
-    fontSize: responsiveFontSize(1.6),
-    fontWeight: '100',
+    fontSize: responsiveFontSize(2.4),
+    alignSelf: "flex-end",
+    fontWeight: '200',
   },
   mainLogoContainerStyle: {
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     //backgroundColor: colors.secondaryBackground,
     borderRadius: 7,
-    marginBottom: responsiveWidth(1),
+    marginBottom: responsiveWidth(0),
     padding: responsiveWidth(2),
   },
   mainLogoImageStyle: {

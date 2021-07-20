@@ -56,7 +56,7 @@ export const MenuItem = (props) => {
             }
       }>
       <View style={styles.menuContainer}>
-        {!props.hideIcon && (
+        {props.showIcon && (
           <Icon size={25} name={'w-watermark'} style={styles.menuIcon} />
         )}
         {props.type !== 'textinput' && (

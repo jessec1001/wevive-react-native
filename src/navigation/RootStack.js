@@ -89,6 +89,9 @@ const RootStack = ({initialProps}) => {
         changedTheme.hiddenFooter = false;
       }
     }
+    if (routeName == 'ChatScreen') {
+      changedTheme.hiddenHeader = true;
+    }
     if (routeName === 'PhoneContactsScreen') {
       changedTheme.hiddenHeader = true;
     }

@@ -40,18 +40,6 @@ export default class Settings extends Component {
         </MenuItem>
         <MenuItem
           onPress={() => {
-            this.props.navigation.navigate('About');
-          }}>
-          About
-        </MenuItem>
-        <MenuItem
-          onPress={() => {
-            this.props.navigation.navigate('ContactsScreen', {type: 'starred'});
-          }}>
-          Starred Messages
-        </MenuItem>
-        <MenuItem
-          onPress={() => {
             this.props.navigation.navigate('ContactsScreen', {
               type: 'archived',
             });
@@ -98,6 +86,13 @@ export default class Settings extends Component {
             });
           }}>
           Log Out
+        </MenuItem>
+        <MenuDivider />
+        <MenuItem
+          onPress={() => {
+            this.props.navigation.navigate('About');
+          }}>
+          About Wevive
         </MenuItem>
       </ScrollView>
     );
