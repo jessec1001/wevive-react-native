@@ -65,6 +65,7 @@ import {
   sendLocalParticipant,
 } from './functions';
 import logger from './logger';
+import { Platform } from 'react-native';
 
 declare var APP: Object;
 
@@ -92,6 +93,10 @@ function _addConferenceListeners(conference, dispatch) {
       if (error || !whoosh) {
         console.log('failed to load the sound', error);
         return;
+      }
+      if(Platform.OS == 'ios'){
+        // Sound.setCategory('Playback', false);
+        Sound.setCategory('Ambient', false);
       }
       whoosh.getSystemVolume((volume) => {
         //console.error('volume is set to', volume);

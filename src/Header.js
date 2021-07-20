@@ -206,10 +206,10 @@ export default function Header({route, themeSettings}) {
               onPress={() => {
                 global.navigation.goBack();
               }}>
-              <View style={{padding: 15}}>
+              <View style={{paddingHorizontal: 15}}>
                 <Icon
                   name="back-arrow"
-                  size={responsiveFontSize(3.5)}
+                  size={responsiveFontSize(2.5)}
                   color={colors.headerText}
                 />
               </View>
@@ -226,7 +226,7 @@ export default function Header({route, themeSettings}) {
 }
 const styles = StyleSheet.create({
   header: {
-    height: responsiveHeight(8.5),
+    height: responsiveHeight(7),
     marginTop: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',

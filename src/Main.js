@@ -36,6 +36,10 @@ if (Platform.OS === 'android') {
 }
 const playBusySound = () => {
   var whoosh = new Sound('busy.mp3', Sound.MAIN_BUNDLE, (error) => {
+    if(Platform.OS == 'ios'){
+      // Sound.setCategory('Playback', false);
+      Sound.setCategory('Ambient', false);
+    }
     if (error) {
       console.log('failed to load the sound', error);
       return;
