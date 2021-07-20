@@ -589,7 +589,7 @@ index 9b71ba4..371fffc 100644
  }
  
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
-index d2bd68d..16ed066 100644
+index d2bd68d..95ad564 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/MessageItem.js
 @@ -8,26 +8,31 @@ import Colors from "../constants/Colors";
@@ -838,8 +838,15 @@ index d2bd68d..16ed066 100644
        return <>
                <ImageView
                  images={images}
-@@ -257,61 +340,88 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
-               <TouchableOpacity onPress={() => {
+@@ -254,64 +337,97 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
+                 visible={visible}
+                 onRequestClose={() => setIsVisible(false)}
+               />
+-              <TouchableOpacity onPress={() => {
++              <TouchableOpacity onLongPress={(evt) => {
++                setSelectedEvent({event, viewRef, tapEvent:evt});
++              }} onPress={() => {
++                setSelectedEvent(null);
                  setIsVisible(true);
                }} style={{flex: 1}}>
 -                <FastImage source={{uri:text}} style={styles.bodyImage} resizeMode="cover" />
@@ -859,6 +866,7 @@ index d2bd68d..16ed066 100644
 -            newNumbers.map(async (l) => {
 -              if (!exists) {
 -                exists = await getContactsByPhoneNumber(l);
++        setSelectedEvent(null);
 +        if (isOwn) return;
 +        Alert.prompt("Add new contact", "Would you like to add this contact to your contact list?", [
 +          {text: 'No', onPress: () => {}},
@@ -942,7 +950,10 @@ index d2bd68d..16ed066 100644
 +        ], 'default');
        }
        //const contacts = contact.map(() =>)
-       return <Pressable style={styles.sharedContactNameBox} onPress={addToContacts}>
+-      return <Pressable style={styles.sharedContactNameBox} onPress={addToContacts}>
++      return <Pressable style={styles.sharedContactNameBox} onPress={addToContacts} onLongPress={(evt) => {
++        setSelectedEvent({event, viewRef, tapEvent:evt});
++      }}>
                  {Object.keys(contact).map((i)=>{
 -                  return <Text style={styles.sharedContactName}>{contact[i].humanValue}</Text>
 +                  return <View style={styles.sharedContactNameItem}><Icon name="medium-call-icon" style={styles.sharedContactIcon} /><Text style={styles.sharedContactName}>{contact[i].humanValue}</Text></View>
@@ -964,7 +975,7 @@ index d2bd68d..16ed066 100644
    //{(new Date(time)).toLocaleDateString()} {(new Date(time)).toLocaleTimeString()}
    return (
      <>
-@@ -321,23 +431,31 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
+@@ -321,23 +437,34 @@ function Message({ event, text, time, author, isOwn, encrypted, setSelectedEvent
          setSelectedEvent({event, viewRef, tapEvent:evt});
        }}>
          <>
@@ -981,8 +992,11 @@ index d2bd68d..16ed066 100644
 -          {encrypted ? <Image source={lockIcon} style={styles.encryptedIcon} /> : null }
 +          {!isVlcPlaying && isVideo(text) &&
 +            <TouchableOpacity onPress={() => {
++                setSelectedEvent(null);
 +                setIsVlcPlaying(true);
-+              }} style={{width:responsiveWidth(70)+10,height:responsiveWidth(70)+20, zIndex: 999, position: "absolute"}}>
++              }} style={{width:responsiveWidth(70)+10,height:responsiveWidth(70)+20, zIndex: 999, position: "absolute"}} onLongPress={(evt) => {
++                setSelectedEvent({event, viewRef, tapEvent:evt});
++              }}>
 +              <Icon name="play-icon" style={styles.videoPlayIcon}/>
 +            </TouchableOpacity>
 +          }
@@ -1042,10 +1056,10 @@ index 2dfa6c3..acb18a4 100644
  }
  TypingIndicator.propTypes = {
 diff --git a/node_modules/react-native-chat-plugin/Components/Header.js b/node_modules/react-native-chat-plugin/Components/Header.js
-index 2027dec..4b72399 100644
+index 2027dec..e0d2fc0 100644
 --- a/node_modules/react-native-chat-plugin/Components/Header.js
 +++ b/node_modules/react-native-chat-plugin/Components/Header.js
-@@ -3,13 +3,17 @@ import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
+@@ -3,18 +3,22 @@ import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
  import PropTypes from "prop-types";
  import Colors from "../constants/Colors";
  import moment from "moment";
@@ -1064,6 +1078,12 @@ index 2027dec..4b72399 100644
    },
    title: {
      fontWeight: "bold",
+     color: Colors.FOREGROUND,
+-    textAlign: "center",
++    textAlign: "left",
+   },
+   emptyView: {
+     
 @@ -24,7 +28,7 @@ const styles = StyleSheet.create({
      height: 30,
      borderRadius: 30,
@@ -1073,7 +1093,7 @@ index 2027dec..4b72399 100644
      top: 0,
    },
    lastOnline: {
-@@ -38,8 +42,8 @@ const styles = StyleSheet.create({
+@@ -38,15 +42,15 @@ const styles = StyleSheet.create({
      flexDirection: "row",
      position: "absolute",
      justifyContent: "center",
@@ -1084,6 +1104,16 @@ index 2027dec..4b72399 100644
    }
  });
  const Avatar = ({avatar}) => {
+   if (typeof avatar == 'string') return <Image source={{uri: avatar}} style={styles.avatar} />
+-  return avatar  ? avatar.slice(0,5).map((a,i) => 
+-    <Image source={{uri: a}} style={{...styles.avatar, zIndex: i*1, left: 30+i*20}} />
+-  ) : null;
++  return avatar  ? <View style={{flex: 1, alignSelf: "flex-start", marginRight: avatar.slice(0,5).length * 20 - 10, left: -50,}}>{avatar.slice(0,5).map((a,i) => 
++    <Image source={{uri: a}} style={{...styles.avatar, zIndex: i*1, left: 20+i*20}} />
++  )}</View> : null;
+ }
+ export default function Header({ left, right, title, avatar, lastOnline, onPress }) {
+   //console.error(avatar);
 @@ -56,7 +60,6 @@ export default function Header({ left, right, title, avatar, lastOnline, onPress
    }
    return (
