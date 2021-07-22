@@ -252,11 +252,24 @@ index 0000000..aa2015b
 +}
 \ No newline at end of file
 diff --git a/node_modules/react-native-libsodium/android/build.gradle b/node_modules/react-native-libsodium/android/build.gradle
-index fa448f4..acf6a14 100644
+index fa448f4..21e1a13 100644
 --- a/node_modules/react-native-libsodium/android/build.gradle
 +++ b/node_modules/react-native-libsodium/android/build.gradle
-@@ -42,6 +42,7 @@ apply plugin: 'com.android.library'
- apply plugin: 'maven'
+@@ -20,7 +20,7 @@ def safeExtGet(prop, fallback) {
+ }
+ 
+ apply plugin: 'com.android.library'
+-apply plugin: 'maven'
++apply plugin: 'maven-publish'
+ 
+ buildscript {
+     // The Android Gradle plugin is only required when opening the android folder stand-alone.
+@@ -39,9 +39,10 @@ buildscript {
+ }
+ 
+ apply plugin: 'com.android.library'
+-apply plugin: 'maven'
++apply plugin: 'maven-publish'
  
  android {
 +    ndkVersion = "22.1.7171670"
@@ -278,3 +291,15 @@ index fa448f4..acf6a14 100644
      lintOptions {
          abortOnError false
      }
+@@ -172,11 +177,6 @@ afterEvaluate { project ->
+ 
+     task installArchives(type: Upload) {
+         configuration = configurations.archives
+-        repositories.mavenDeployer {
+-            // Deploy to react-native-event-bridge/maven, ready to publish to npm
+-            repository url: "file://${projectDir}/../android/maven"
+-            configureReactNativePom pom
+-        }
+     }
+ }
+ 

@@ -173,6 +173,7 @@ class ReactInstanceManagerHolder {
     
         SoLoader.init(activity, /* native exopackage */ false);
         List<ReactPackage> packages = (new ArrayList<>(Arrays.asList(
+                new com.brentvatne.react.ReactVideoPackage(),
                 // @nghinv/react-native-vlc
                 //new com.yuanzhou.vlc.ReactVlcPlayerPackage(),
                 // @react-native-async-storage/async-storage
