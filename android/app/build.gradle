@@ -113,6 +113,10 @@ dependencies {
     debugImplementation files(hermesPath + "hermes-debug.aar")
     releaseImplementation files(hermesPath + "hermes-release.aar")
     //implementation 'org.videolan.android:libvlc-all:3.3.8'
+    //implementation('com.yyl.vlc:vlc-android-sdk:3.3.0'){
+    //    transitive = false
+    //}
+    //implementation 'de.mrmaffen:libvlc-android:2.1.12@aar'
 }
 
 gradle.projectsEvaluated {

@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     }
 });
 export default function BouncingAvatar({big, contact, url, text}) {
-    const backgroundImage={url};
+    const backgroundImage={uri: url};
     const animatedValue = new Animated.Value(0);
     Animated.loop(
         Animated.timing(animatedValue, {
