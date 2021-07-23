@@ -126,7 +126,9 @@ function _addConferenceListeners(conference, dispatch) {
     if (!aloneInTheConference) {
       global.setPendingCallParticipants([]);
     }
-    CacheStore.set('activeCallOthersCount', String(usersCount));
+    setTimeout(() => {
+      CacheStore.set('activeCallOthersCount', String(usersCount));
+    }, 5000);
   };
   // A simple logger for conference errors received through
   // the listener. These errors are not handled now, but logged.

@@ -44,7 +44,7 @@ const playBusySound = () => {
       console.log('failed to load the sound', error);
       return;
     }
-    whoosh.setNumberOfLoops(1);
+    //whoosh.setNumberOfLoops(0);
     if (!global.incomingCallID) {
       whoosh.play((success) => {
         whoosh.release();
