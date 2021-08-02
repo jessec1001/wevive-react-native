@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:684342741259:android:f815e1b47667aaac26fa0e",
+        "mobilesdk_app_id": "1:684342741259:android:e2d6f2518a96336026fa0e",
         "android_client_info": {
-          "package_name": "com.wevive.weviveapp"
+          "package_name": "com.wevive.wevivedev"
         }
       },
       "oauth_client": [

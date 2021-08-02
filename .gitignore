@@ -61,3 +61,6 @@ buck-out/
 
 #vscode debugger
 /.vscode/.react/
+
+builds
+ios/sdk/GoogleService-Info.plist

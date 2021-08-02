@@ -10,6 +10,7 @@ TEAM_ID="ZN624JHU82"
 
 
 PLIST="ios/app/src/Info.plist"
+IMAGEEXT_PLIST="ios/app/ImageNotification/Info.plist"
 EXPORT_PLIST="ios/export.plist"
 
 ENTITLEMENTS_PLIST="ios/app/app.entitlements"
@@ -32,6 +33,10 @@ sed -i '' "s/APP_VERSION=.*/APP_VERSION=$BUNDLE_SHORT_VERSION/g" android/gradle.
 #sed -i '' "s/APP_VERSIONCODE=.*/APP_VERSIONCODE=${VERSIONCODE}/g" android/gradle.properties
 
 #iOS - Set plist values
+
+/usr/libexec/Plistbuddy -c "Set CFBundleShortVersionString $BUNDLE_SHORT_VERSION" "$IMAGEEXT_PLIST"
+/usr/libexec/Plistbuddy -c "Set CFBundleIdentifier $BUNDLE_NAME.ImageNotification" "$IMAGEEXT_PLIST"
+
 /usr/libexec/PlistBuddy -c "Set CFBundleURLTypes:0:CFBundleURLSchemes:0 $BUNDLE_NAME" "$PLIST"
 /usr/libexec/PlistBuddy -c "Set CFBundleURLTypes:0:CFBundleURLName $BUNDLE_NAME_SHORT" "$PLIST"
 /usr/libexec/Plistbuddy -c "Set CFBundleDisplayName $BUNDLE_DISPLAY_NAME" "$PLIST"
@@ -48,11 +53,11 @@ sed -i '' "s/APP_VERSION=.*/APP_VERSION=$BUNDLE_SHORT_VERSION/g" android/gradle.
 yarn androidReleaseAPK
 
 #Build Android IPA
-#cd android && gradle bundleRelease
-#cd ..
+cd android && gradle bundleRelease
+cd ..
 
 #Build iOS
-xcodebuild clean archive -workspace ios/jitsi-meet.xcworkspace -scheme JitsiMeet -archivePath builds/wevive.xcarchive -allowProvisioningUpdates #&& \
+xcodebuild clean archive -workspace ios/jitsi-meet.xcworkspace -scheme Wevive -archivePath builds/wevive.xcarchive -allowProvisioningUpdates #&& \
 
 
 #Upload to Firebase
