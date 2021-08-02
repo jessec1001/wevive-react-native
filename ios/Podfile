@@ -38,6 +38,10 @@ target 'JitsiMeetSDK' do
   pod 'Permission-Notifications', :path => "#{permissions_path}/Notifications"
   pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone"
   pod 'CocoaLumberjack', '~>3.5.3'
+  
+  pod 'Firebase/Messaging', '~> 7.10.0'
+  pod 'Firebase/Analytics', '~> 7.10.0'
+  pod 'Firebase/Core', '~> 7.10.0'
 end
 
 target 'ImageNotification' do

@@ -29,9 +29,9 @@ android {
     }
 
     defaultConfig {
-        applicationId 'com.wevive.weviveapp'
+        applicationId project.property("APP_ID")
         versionCode vcode
-        versionName project.appVersion
+        versionName project.property("APP_VERSION")
 
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

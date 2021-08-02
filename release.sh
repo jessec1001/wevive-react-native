@@ -1,7 +1,64 @@
 #!/bin/bash
 
+BUILD_NUMBER="1"
+BUNDLE_SHORT_VERSION="21.8.01"
+BUNDLE_DISPLAY_NAME="Wevive"
+BUNDLE_NAME="com.wevive.wevivedev"
+DOMAIN="appdev.wevive.com"
+BUNDLE_NAME_SHORT="wevivedev"
+TEAM_ID="ZN624JHU82"
+
+
+PLIST="ios/app/src/Info.plist"
+EXPORT_PLIST="ios/export.plist"
+
+ENTITLEMENTS_PLIST="ios/app/app.entitlements"
+
+#Prepare configs
+cp app.dev.json app.json
+cp firebase/$BUNDLE_NAME.json android/app/google-services.json
+cp firebase/$BUNDLE_NAME.plist ios/app/GoogleService-Info.plist
+cp firebase/$BUNDLE_NAME.plist ios/sdk/GoogleService-Info.plist
+FIREBASE_APP=$(cat firebase/$BUNDLE_NAME.json | grep "mobilesdk_app_id" | cut -f 4 -d\")
 MESSAGE=`git log -1 --pretty=%B`
-echo $MESSAGE
+
+VERSIONCODE=$(echo "${BUNDLE_SHORT_VERSION}-${BUILD_NUMBER}" | sed "s/[^0-9]//g")
+
+#Android - Set versions etc
+#sed -i '' "s/APP_NAME=.*/APP_NAME=$BUNDLE_DISPLAY_NAME/g" android/gradle.properties
+sed -i '' "s/APP_ID=.*/APP_ID=$BUNDLE_NAME/g" android/gradle.properties
+sed -i '' "s/APP_VERSION=.*/APP_VERSION=$BUNDLE_SHORT_VERSION/g" android/gradle.properties
+#sed -i '' "s/APP_VERSION_BUILD=.*/APP_VERSION_BUILD=$BUILD_NUMBER/g" android/gradle.properties
+#sed -i '' "s/APP_VERSIONCODE=.*/APP_VERSIONCODE=${VERSIONCODE}/g" android/gradle.properties
+
+#iOS - Set plist values
+/usr/libexec/PlistBuddy -c "Set CFBundleURLTypes:0:CFBundleURLSchemes:0 $BUNDLE_NAME" "$PLIST"
+/usr/libexec/PlistBuddy -c "Set CFBundleURLTypes:0:CFBundleURLName $BUNDLE_NAME_SHORT" "$PLIST"
+/usr/libexec/Plistbuddy -c "Set CFBundleDisplayName $BUNDLE_DISPLAY_NAME" "$PLIST"
+/usr/libexec/Plistbuddy -c "Set CFBundleIdentifier $BUNDLE_NAME" "$PLIST"
+/usr/libexec/Plistbuddy -c "Set CFBundleVersion $BUILD_NUMBER" "$PLIST"
+/usr/libexec/Plistbuddy -c "Set CFBundleShortVersionString $BUNDLE_SHORT_VERSION" "$PLIST"
+/usr/libexec/Plistbuddy -c "Set teamID $TEAM_ID" "$EXPORT_PLIST"
+#/usr/libexec/Plistbuddy -c "Set application-identifier $BUNDLE_NAME" "$ENTITLEMENTS_PLIST"
+/usr/libexec/Plistbuddy -c "Set aps-environment development" "$ENTITLEMENTS_PLIST"
+/usr/libexec/Plistbuddy -c "Set com.apple.developer.associated-domains:0 applinks:$DOMAIN" "$ENTITLEMENTS_PLIST"
+/usr/libexec/Plistbuddy -c "Set com.apple.developer.associated-domains:0 applinks:$DOMAIN" "$ENTITLEMENTS_PLIST"
+
+#Build Android
+yarn androidReleaseAPK
+
+#Build Android IPA
+#cd android && gradle bundleRelease
+#cd ..
+
+#Build iOS
+xcodebuild clean archive -workspace ios/jitsi-meet.xcworkspace -scheme JitsiMeet -archivePath builds/wevive.xcarchive -allowProvisioningUpdates #&& \
+
+
+#Upload to Firebase
 firebase appdistribution:distribute ./android/app/build/outputs/apk/release/app-release.apk \
---app 1:684342741259:android:f815e1b47667aaac26fa0e \
+--app "$FIREBASE_APP" \
 --release-notes "$MESSAGE" --testers-file testers.txt
+
+#Upload to Testflight
+xcodebuild -exportArchive -archivePath builds/wevive.xcarchive -exportPath builds/wevive.ipa -exportOptionsPlist ios/export.plist -allowProvisioningUpdates
