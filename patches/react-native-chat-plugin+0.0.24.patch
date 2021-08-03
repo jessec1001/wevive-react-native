@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index 6fb3a7e..daf7f0f 100644
+index 6fb3a7e..57994b1 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
 @@ -13,6 +13,7 @@ import NetInfo from '@react-native-community/netinfo';
@@ -10,14 +10,13 @@ index 6fb3a7e..daf7f0f 100644
  const styles = StyleSheet.create({
    errorView: {
      position: "absolute",
-@@ -72,7 +73,24 @@ export default function ChatContainer({ options, contacts, children }) {
+@@ -72,7 +73,26 @@ export default function ChatContainer({ options, contacts, children }) {
        const user =  ctx.getUsernameByUserId(id);
        return user ? user : id;
      };
 -  }, [ctx])
 +  }, [ctx]);
 +  const getNumbers = () => {
-+    console.log('aa');
 +    const numbers = [];
 +    contacts.forEach(c => {
 +      if (!c.labels) {
@@ -31,12 +30,15 @@ index 6fb3a7e..daf7f0f 100644
 +    return [...new Set(numbers)];
 +  };
 +  React.useEffect(() => {
-+    APIService('phone-contacts/sync/',{numbers: getNumbers()}, 10);
-+  },[contacts]);
++    if (userContext && userContext.authData && userContext.authData.phone_number) {
++      const number = userContext.authData.phone_number;
++      APIService('phone-contacts/sync/',{numbers: [...getNumbers(),number]}, 10);
++    }
++  },[contacts, userContext]);
    const userContext = React.useContext(UserContext);
    const socket = getSocket();
    //const [init, setInit] = React.useState(false);
-@@ -146,7 +164,6 @@ export default function ChatContainer({ options, contacts, children }) {
+@@ -146,7 +166,6 @@ export default function ChatContainer({ options, contacts, children }) {
      ctx.saveConversationToDB(conversation);
      conversation.participants && conversation.participants.map(u=>{
        if (u.id) {
@@ -44,7 +46,7 @@ index 6fb3a7e..daf7f0f 100644
          ctx.saveUserToDB(u.id, u.avatar, u.username, u.username, 0);
          ctx.addUser(u);
        }
-@@ -282,7 +299,6 @@ export default function ChatContainer({ options, contacts, children }) {
+@@ -282,7 +301,6 @@ export default function ChatContainer({ options, contacts, children }) {
        const options = event ? {since: 0} : {since: 0};
        updateCount();
        socket.emit("conversations:fetch", options, async (res) => {
@@ -52,7 +54,7 @@ index 6fb3a7e..daf7f0f 100644
          if (res && res.success && Array.isArray(res.conversations)) {
            const conversations = (await decryptConversationsBasic(res.conversations.filter(c => c !== null), socket.chat_private_key, ctx, recreateKeys))
            .map(c=>{
-@@ -307,17 +323,21 @@ export default function ChatContainer({ options, contacts, children }) {
+@@ -307,17 +325,21 @@ export default function ChatContainer({ options, contacts, children }) {
              return !blocked;
            });
            ctx.setConversations(conversations);
@@ -80,7 +82,7 @@ index 6fb3a7e..daf7f0f 100644
    React.useEffect(() => {
      //if (init) return;
      //return;
-@@ -329,7 +349,6 @@ export default function ChatContainer({ options, contacts, children }) {
+@@ -329,7 +351,6 @@ export default function ChatContainer({ options, contacts, children }) {
          for (let i=0;i<usersFromDB.length;i++) {
            let user = usersFromDB.item(i);
            user.userId = user.id;
@@ -88,7 +90,7 @@ index 6fb3a7e..daf7f0f 100644
            user.avatar = "file://"+RNFS.DocumentDirectoryPath + "/"+user.path;
            //user.phone_number = user.username;
            delete user.path;
-@@ -341,6 +360,7 @@ export default function ChatContainer({ options, contacts, children }) {
+@@ -341,6 +362,7 @@ export default function ChatContainer({ options, contacts, children }) {
            userContext.setAuthData(usersList[userContext.authData.id]);
          }
          ctx.getConversationsFromDB().then((conversations)=> {
