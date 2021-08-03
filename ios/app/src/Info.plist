@@ -36,13 +36,13 @@
 	<key>CFBundleVersion</key>
 	<string>3</string>
 	<key>Comments</key>
-	<string></string>
+	<string>string Testing Testflight comments (8c5031eb98ce244fa192e5fa84ebb8a4bde518f8)</string>
 	<key>FirebaseCrashlyticsCollectionEnabled</key>
 	<true/>
 	<key>FirebaseScreenReportingEnabled</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
-	<true/>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
