@@ -22,6 +22,7 @@ import APIService from '../../service/APIService';
 import BouncingAvatar from '../../components/BouncingAvatar';
 
 export default function VideoCalls(r) {
+  if (!r.params || !r.params.callId) return null;
   const [joinedIds, setJoinedIds] = React.useState([]);
   global.setJoinedIds = setJoinedIds;
   const themeSettings = React.useContext(AppThemeContext);

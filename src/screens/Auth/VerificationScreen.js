@@ -86,7 +86,6 @@ export default class VerificationScreen extends Component {
                       setAuthData({...result, userToken: result.access_token});
                       AsyncStorage.removeItem('sessionToken');
                       AsyncStorage.setItem('userId', String(result.id));
-                      AsyncStorage.setItem('userName', result.name);
                       this.navigateSuccess(result);
                     } else {
                       actions.setFieldError('pin', result.non_field_errors[0]);

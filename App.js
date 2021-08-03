@@ -5,7 +5,7 @@ import {
   UIManager,
   Platform,
   Dimensions,
-  PermissionsAndroid,
+  PermissionsAndroid
 } from 'react-native';
 
 import './react/features/app/middlewares';
@@ -64,7 +64,7 @@ class AppContainer extends Component {
   };
   componentDidMount() {
     bootstrap();
-    APIService('users/geoip/', null, 60 * 24 * 365).then((geo) => {
+    APIService('users/geoip/', null, 60*2).then((geo) => {
       if (Platform.OS === 'android') {
         PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
@@ -76,12 +76,13 @@ class AppContainer extends Component {
         ).then((status) => {
           if (status === 'granted') {
             getPhoneContacts(geo);
+            this.setState({geo, ready: true});
           }
         });
       } else {
         getPhoneContacts(geo);
+        this.setState({geo, ready: true});
       }
-      this.setState({geo, ready: true});
     });
     if (Platform.OS === 'android') {
       //FIXME

@@ -91,7 +91,7 @@ export default class PINScreen extends Component {
               <Text style={styles.pageHeadlineStyle}>Create your PIN!</Text>
               <Text style={styles.pageTextStyle}>
                 Your PIN keeps your information safe and accessible to you in
-                case you need to reinstall Wevive WeTalk.
+                case you need to reinstall Wevive.
               </Text>
               <Text style={styles.pageTextStyle}>
                 Please enter it below to continue.
@@ -103,6 +103,9 @@ export default class PINScreen extends Component {
                 cellStyleFocused={styles.cellStyleFocused}
                 value={values.pin}
                 onTextChange={handleChange('pin')}
+                inputProps={{textContentType: 'none', keyboardType: 'numeric'}}
+                password={true}
+                restrictToNumbers={true}
               />
               {values.pin.length > 0 && !errors.pin && (
                 <View style={styles.buttonContainerStyle}>

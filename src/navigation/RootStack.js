@@ -135,9 +135,9 @@ const RootStack = ({initialProps}) => {
       ...newData,
       userName: 'name' in newData ? newData.name : authData.userName,
       avatarUrl:
-        'avatar' in newData
+        'avatar' in newData && newData.avatar
           ? newData.avatar
-          : 'avatarUrl' in newData
+          : 'avatarUrl' in newData && newData.avatarUrl
           ? newData.avatarUrl
           : authData.avatarUrl,
       avatarHosted:

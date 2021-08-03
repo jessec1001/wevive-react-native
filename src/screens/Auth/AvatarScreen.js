@@ -26,6 +26,7 @@ import {
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UserContext } from '../../context/UserContext';
 const defaultAvatar = require('../../images/PNG/wewelogo.png');
 export default class AvatarScreen extends Component {
   state = {
@@ -64,104 +65,110 @@ export default class AvatarScreen extends Component {
   render() {
     const {navigate} = this.props.navigation;
     return (
-      <AuthView
-        headline={'Profile'}
-        route={this.props.route}
-        navigation={this.props.navigation}>
-        <Formik
-          initialValues={{
-            name: '',
-          }}
-          onSubmit={(values, actions) => {
-            global.appIsLoading();
-            APIService('users/me/', {
-              name: values.name,
-            }).then(() => {
-              APIService('user-photo/update_photo/', {
-                photo: this.state.avatarImage,
-                filename: this.state.avatarFile,
-                mime: this.state.avatarMime,
-                name: values.name,
-              }).then((result) => {
-                global.appIsNotLoading();
-                if (result) {
-                  AsyncStorage.setItem('avatarUrl', result);
-                  AsyncStorage.setItem('userName', values.name);
-                  this.navigateSuccess();
-                } else {
-                  actions.setFieldError('name', 'Failed to upload.');
-                }
-              });
-            });
-          }}
-          validationSchema={yup.object().shape({
-            //email: yup.string().email().required(),
-            //password: yup.string().min(3).required(),
-          })}>
-          {({
-            values,
-            handleChange,
-            errors,
-            setFieldTouched,
-            touched,
-            isValid,
-            handleSubmit,
-            setFieldValue,
-          }) => (
-            <View>
-              <Text style={styles.pageHeadlineStyle}>
-                Your Profile Information
-              </Text>
-              <Text style={styles.pageTextStyle}>
-                Your profile is encrypted. It will be visible to your contacts,
-                when you accept or start new chats, or when you join groups.
-              </Text>
-              <TouchableOpacity onPress={this.pickImage.bind(this)}>
-                <Text style={styles.pageHeadlineStyle}>Your photo</Text>
-
-                {this.state.avatarImage ? (
-                  <Image
-                    source={{uri: this.state.avatarImage}}
-                    style={styles.avatarImage}
-                  />
-                ) : (
-                  <View style={styles.defaultAvatarImage}>
-                    <Icon
-                      source={defaultAvatar}
-                      name="plus-icon"
-                      size={responsiveHeight(8)}
-                      color={'white'}
-                      style={styles.defaultAvatarImageIcon}
-                    />
-                  </View>
-                )}
-              </TouchableOpacity>
-              <View style={styles.inputContainerStyle}>
+      <UserContext.Consumer>
+        {({authData, setAuthData}) => (
+          <AuthView
+            headline={'Profile'}
+            route={this.props.route}
+            navigation={this.props.navigation}>
+            <Formik
+              initialValues={{
+                name: '',
+              }}
+              onSubmit={(values, actions) => {
+                global.appIsLoading();
+                APIService('users/me/', {
+                  name: values.name,
+                }).then(() => {
+                  APIService('user-photo/update_photo/', {
+                    photo: this.state.avatarImage,
+                    filename: this.state.avatarFile,
+                    mime: this.state.avatarMime,
+                    name: values.name,
+                  }).then((result) => {
+                    global.appIsNotLoading();
+                    if (result) {
+                      const avatarUrl = result.slice(1, -1);
+                      setAuthData({...authData, avatarUrl, avatarHosted: avatarUrl});
+                      AsyncStorage.setItem('avatarUrl', avatarUrl);
+                      AsyncStorage.setItem('userName', values.name);
+                      this.navigateSuccess();
+                    } else {
+                      actions.setFieldError('name', 'Failed to upload.');
+                    }
+                  });
+                });
+              }}
+              validationSchema={yup.object().shape({
+                //email: yup.string().email().required(),
+                //password: yup.string().min(3).required(),
+              })}>
+              {({
+                values,
+                handleChange,
+                errors,
+                setFieldTouched,
+                touched,
+                isValid,
+                handleSubmit,
+                setFieldValue,
+              }) => (
                 <View>
-                  <TextInput
-                    value={values.name}
-                    onChangeText={handleChange('name')}
-                    onBlur={() => setFieldTouched('name')}
-                    placeholder="Name"
-                    style={styles.inputStyle}
-                    name="name"
-                    placeholderTextColor={styles.inputStyle.color}
-                    autoCapitalize="none"
-                    testID="name"
-                    accessibilityLabel="name"
-                    accessible
-                    textContentType="name"
-                  />
-                </View>
-              </View>
+                  <Text style={styles.pageHeadlineStyle}>
+                    Your Profile Information
+                  </Text>
+                  <Text style={styles.pageTextStyle}>
+                    Your profile is encrypted. It will be visible to your contacts,
+                    when you accept or start new chats, or when you join groups.
+                  </Text>
+                  <TouchableOpacity onPress={this.pickImage.bind(this)}>
+                    <Text style={styles.pageHeadlineStyle}>Your photo</Text>
 
-              <View style={styles.buttonContainerStyle}>
-                <Button onPress={handleSubmit} title="SAVE" />
-              </View>
-            </View>
-          )}
-        </Formik>
-      </AuthView>
+                    {this.state.avatarImage ? (
+                      <Image
+                        source={{uri: this.state.avatarImage}}
+                        style={styles.avatarImage}
+                      />
+                    ) : (
+                      <View style={styles.defaultAvatarImage}>
+                        <Icon
+                          source={defaultAvatar}
+                          name="plus-icon"
+                          size={responsiveHeight(8)}
+                          color={'white'}
+                          style={styles.defaultAvatarImageIcon}
+                        />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                  <View style={styles.inputContainerStyle}>
+                    <View>
+                      <TextInput
+                        value={values.name}
+                        onChangeText={handleChange('name')}
+                        onBlur={() => setFieldTouched('name')}
+                        placeholder="Name"
+                        style={styles.inputStyle}
+                        name="name"
+                        placeholderTextColor={styles.inputStyle.color}
+                        autoCapitalize="none"
+                        testID="name"
+                        accessibilityLabel="name"
+                        accessible
+                        textContentType="name"
+                      />
+                    </View>
+                  </View>
+
+                  <View style={styles.buttonContainerStyle}>
+                    <Button onPress={handleSubmit} title="SAVE" />
+                  </View>
+                </View>
+              )}
+            </Formik>
+          </AuthView>
+        )}
+      </UserContext.Consumer>
     );
   }
 }
