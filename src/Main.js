@@ -34,8 +34,8 @@ import {chat_url} from "../app.json"
 const playBusySound = () => {
   var whoosh = new Sound('busy.mp3', Sound.MAIN_BUNDLE, (error) => {
     if(Platform.OS == 'ios'){
-      // Sound.setCategory('Playback', false);
-      Sound.setCategory('Ambient', false);
+      //Sound.setCategory('Playback', false);
+      //Sound.setCategory('Ambient', false);
     }
     if (error) {
       console.log('failed to load the sound', error);
@@ -171,7 +171,8 @@ export default function Main({navigation, route}) {
         if (a.data.type && a.data.type === 'hangup') {
           //Hangup active call;
           if (activeCall && activeCall === a.data.callUUID) {
-            if (activeCallOtherCount <= 1) {
+            if (activeCallOtherCount == 0) {
+              //If there are no users in the call and hangup for the call is received, stop the call and play busy sound
               playBusySound();
               global.hangup && global.hangup();
               if (Platform.OS === 'ios') {

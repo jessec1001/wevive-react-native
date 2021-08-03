@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-chat-plugin/ChatContainer.js b/node_modules/react-native-chat-plugin/ChatContainer.js
-index 6fb3a7e..57994b1 100644
+index 6fb3a7e..d6e73d9 100644
 --- a/node_modules/react-native-chat-plugin/ChatContainer.js
 +++ b/node_modules/react-native-chat-plugin/ChatContainer.js
 @@ -13,6 +13,7 @@ import NetInfo from '@react-native-community/netinfo';
@@ -32,7 +32,7 @@ index 6fb3a7e..57994b1 100644
 +  React.useEffect(() => {
 +    if (userContext && userContext.authData && userContext.authData.phone_number) {
 +      const number = userContext.authData.phone_number;
-+      APIService('phone-contacts/sync/',{numbers: [...getNumbers(),number]}, 10);
++      APIService('phone-contacts/sync/',{numbers: [...getNumbers(), number]}, 10);
 +    }
 +  },[contacts, userContext]);
    const userContext = React.useContext(UserContext);
@@ -422,7 +422,7 @@ index 698b4d6..98a899e 100644
      'Cancel',
    ];
 diff --git a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
-index 9b71ba4..300ac26 100644
+index 9b71ba4..45cca4d 100644
 --- a/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 +++ b/node_modules/react-native-chat-plugin/ChatScreen/ChatScreen.js
 @@ -1,6 +1,6 @@
@@ -612,6 +612,23 @@ index 9b71ba4..300ac26 100644
    const settings = ctx.getSettings();
    const events = conversation.events || ctx.getEvents(conversation.id);
    const parseEvents = React.useCallback((events)=> {
+@@ -462,14 +475,14 @@ export default function ChatScreen({ navigation, route }) {
+     <Pressable style={styles.button} onPress={()=>{
+       voipCall(conversation, false);
+       global.incomingCallID = false;
+-      global.navigateTo("VideoCalls",{callId:conversation.id, video:false});
++      global.navigateTo("VideoCalls",{conversationId:conversation.id, callId:conversation.id, video:false});
+     }}>
+       <Icon name="medium-call-icon" style={styles.callIcon} />
+     </Pressable>
+     <Pressable style={styles.button} onPress={()=>{
+       voipCall(conversation, true);
+       global.incomingCallID = false;
+-      global.navigateTo("VideoCalls",{callId:conversation.id, video:true});
++      global.navigateTo("VideoCalls",{conversationId:conversation.id, callId:conversation.id, video:true});
+     }}>
+       <Icon name="medium-video-icon" style={styles.videoCallIcon} />
+     </Pressable>
 @@ -619,7 +632,7 @@ export default function ChatScreen({ navigation, route }) {
      }
    }
@@ -45485,9 +45502,18 @@ new file mode 100644
 index 0000000..00708db
 Binary files /dev/null and b/node_modules/react-native-chat-plugin/android/build/tmp/compileReleaseJavaWithJavac/previous-compilation-data.bin differ
 diff --git a/node_modules/react-native-chat-plugin/index.js b/node_modules/react-native-chat-plugin/index.js
-index cde1153..86d35f8 100644
+index cde1153..31d85b6 100644
 --- a/node_modules/react-native-chat-plugin/index.js
 +++ b/node_modules/react-native-chat-plugin/index.js
+@@ -26,7 +26,7 @@ export default function ChatModule({ socketIoUrl, options, children }) {
+     return db.database;
+   };
+   const clientctx = React.useContext(ClientContext);
+-  const geo = clientctx.geo;
++  const geo = clientctx && clientctx.geo;
+   const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+   //updateCount();
+   
 @@ -116,11 +116,13 @@ export default function ChatModule({ socketIoUrl, options, children }) {
    //if (typeof geo == 'undefined') return null;
    if (contactsAllowed) {

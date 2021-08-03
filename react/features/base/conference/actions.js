@@ -96,7 +96,7 @@ function _addConferenceListeners(conference, dispatch) {
       }
       if(Platform.OS == 'ios'){
         // Sound.setCategory('Playback', false);
-        Sound.setCategory('Ambient', false);
+        //Sound.setCategory('Ambient', false);
       }
       whoosh.getSystemVolume((volume) => {
         //console.error('volume is set to', volume);
@@ -128,7 +128,7 @@ function _addConferenceListeners(conference, dispatch) {
     }
     setTimeout(() => {
       CacheStore.set('activeCallOthersCount', String(usersCount));
-    }, 5000);
+    }, 100);
   };
   // A simple logger for conference errors received through
   // the listener. These errors are not handled now, but logged.
