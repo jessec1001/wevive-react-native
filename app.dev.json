@@ -2,9 +2,9 @@
   "name": "WeviveRN",
   "displayName": "WeviveRN",
   "domainReversed": "com.wevive.wevivedev",
-  "deepLinkURL": "https://appdev.wevive.com/",
-  "api_url": "https://appdev.wevive.com/api/",
-  "chat_url": "https://chatdev.wevive.com/",
+  "deepLinkURL": "http://appdev.wevive.com/",
+  "api_url": "http://appdev.wevive.com/api/",
+  "chat_url": "http://chatdev.wevive.com/",
   "api_hmac_secret": "api_hmac_secret",
   "debug": false,
   "colors": {

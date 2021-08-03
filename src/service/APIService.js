@@ -89,9 +89,10 @@ const APIService = async (endpoint, data, cache_time, forceToken) => {
         return responseJson;
       })
       .catch((error) => {
-        if (debug) {
-          console.error(error);
-        }
+        //if (debug) {
+          //Log and send to backend later?
+          console.log('APIService Error', url, options, error);
+        //}
       });
   };
   const tokens = await AsyncStorage.multiGet(['userToken', 'refreshToken']);

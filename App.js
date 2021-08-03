@@ -64,7 +64,7 @@ class AppContainer extends Component {
   };
   componentDidMount() {
     bootstrap();
-    APIService('users/geoip/', null, 60*2).then((geo) => {
+    APIService('users/geoip/', null, 60).then((geo) => {
       if (Platform.OS === 'android') {
         PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_CONTACTS,

@@ -32,11 +32,13 @@ export default function CallHistory({navigation, route}) {
     getCalls();
   }, []);
   const swiper = React.useRef();
-  const onPress = (conversation) => {
+  const onPress = (call) => {
+    const conversation = ctx.getConversationById(call.group_id);
     voipCall(conversation);
     global.navigateTo('VideoCalls', {
-      callId: conversation.group_id,
-      video: !!conversation.video,
+      callId: call.group_id,
+      conversationId: call.group_id,
+      video: !!call.video,
     });
   };
   const voipCall = React.useCallback(

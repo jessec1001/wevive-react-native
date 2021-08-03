@@ -21,8 +21,8 @@ import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
 import APIService from '../../service/APIService';
 import BouncingAvatar from '../../components/BouncingAvatar';
 
-export default function VideoCalls(r) {
-  if (!r.params || !r.params.callId) return null;
+export default function VideoCalls({params}) {
+  if (!params || !params.callId) return null;
   const [joinedIds, setJoinedIds] = React.useState([]);
   global.setJoinedIds = setJoinedIds;
   const themeSettings = React.useContext(AppThemeContext);
@@ -32,8 +32,9 @@ export default function VideoCalls(r) {
   //const [fullscreen, setFullscreen] = React.useState(true);
   const [videoStyle, setVideoStyle] = React.useState('fullscreenView');
   const ctx = React.useContext(ChatContext);
-  const displayName = ctx.getCallname(r.params.callId);
-  const conversation = ctx.getConversationById(r.params.callId);
+  
+  const conversation = ctx.getConversationById(params.callId); //FIXME: change to  conversationId
+  const displayName = ctx.getChatname(conversation);
   const userId = ctx.getUserId();
   const others = conversation
     ? conversation.participants
@@ -44,7 +45,7 @@ export default function VideoCalls(r) {
     return others.length > 1 || (conversation && conversation.name);
   };
   React.useEffect(() => {
-    AsyncStorage.setItem('activeCallUUID', r.params.callId);
+    AsyncStorage.setItem('activeCallUUID', params.callId);
     setTimeout(() => {
       AsyncStorage.removeItem('incomingUUID');
       CacheStore.remove('incomingUUID');
@@ -67,14 +68,14 @@ export default function VideoCalls(r) {
               users: contactUserIds,
               callUUID: conversation.id,
               message: 'Wevive Call',
-              video: r.params.video ? "true" : "0",
+              video: params.video ? "true" : "0",
             });
             APIService('users/pushmessage/', {
               users: contactUserIds,
               message: 'Call from ' + authData.userName,
               extra: {
                 type: 'call',
-                video: r.params.video,
+                video: params.video,
                 callUUID: conversation.id,
                 caller: authData.id,
                 username: authData.userName,
@@ -166,7 +167,7 @@ export default function VideoCalls(r) {
       <View style={styles[videoStyle]}>
         <App
           flags={{
-            room: r.params.callId,
+            room: params.callId,
             'ios.recording.enabled': 0,
             'pip.enabled': 0,
             resolution: 480,
@@ -174,16 +175,16 @@ export default function VideoCalls(r) {
             playDialingTone: !isGroupChat(),
             subject: displayName,
             callHandle: displayName,
-            callUUID: r.params.callId,
+            callUUID: params.callId,
             author: authData.id,
-            conferenceId: r.params.callId,
+            conferenceId: params.callId,
             displayName: String(authData.id),
             avatarURL: authData.avatarHosted,
           }}
           serverURL={'https://webrtc.wevive.com'}
           settings={{
-            startAudioOnly: !r.params.video,
-            startWithVideoMuted: !r.params.video,
+            startAudioOnly: !params.video,
+            startWithVideoMuted: !params.video,
             serverURL: 'https://webrtc.wevive.com',
             disableCallIntegration: false,
             displayName: String(authData.id),

@@ -65,6 +65,7 @@ const RootStack = ({initialProps}) => {
     if (navigationRef.current && initialProps?.url?.room) {
       global.navigateTo('VideoCalls', {
         callId: initialProps.url.room,
+        conversationId: initialProps.url.room,
         video: !!initialProps?.video,
       });
     }
@@ -120,6 +121,9 @@ const RootStack = ({initialProps}) => {
     /*if (newData && newData.access_token) {
       newData.userToken = newData.access_token;
     }*/
+    if (!newData && !authData) {
+      return;
+    }
     const userToken =
       !newData || !newData.access_token
         ? await AsyncStorage.getItem('userToken')

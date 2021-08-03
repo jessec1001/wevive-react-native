@@ -77,6 +77,7 @@ export default function Main({navigation, route}) {
         const video = (await AsyncStorage.getItem('incomingHasVideo')) == '1';
         global.navigateTo('VideoCalls', {
           callId: uuid,
+          conversationId: uuid,
           video,
         });
       }
@@ -125,6 +126,7 @@ export default function Main({navigation, route}) {
                 (await AsyncStorage.getItem('incomingHasVideo')) == '1';
               global.navigateTo('VideoCalls', {
                 callId: payload.uuid,
+                conversationId: uuid,
                 video: video,
               });
             }, 100);
@@ -142,6 +144,7 @@ export default function Main({navigation, route}) {
     global.incomingCallID = callUUID;
     global.navigateTo('VideoCalls', {
       callId: callUUID,
+      conversationId: uuid,
       video,
     });
   });
@@ -240,7 +243,7 @@ export default function Main({navigation, route}) {
       {!themeSettings.hiddenFooter && <FooterTabs />}
       <ContactsModal />
       {callUUID !== false && (
-        <VideoCalls params={{callId: callUUID, video: isVideo}} />
+        <VideoCalls params={{callId: callUUID, conversationId: callUUID, video: isVideo}} />
       )}
     </ChatModule>
   );
