@@ -1,7 +1,23 @@
 #!/bin/bash
+while [[ $# -gt 0 ]] ; do
+    key="$1"
 
-BUILD_NUMBER="1"
-BUNDLE_SHORT_VERSION="21.8.01"
+    case $key in
+        --android)
+            ANDROID=1
+            shift
+            ;;
+        --ios)
+            IOS=1
+            shift
+            ;;
+        *)
+    esac
+    shift
+done
+
+BUILD_NUMBER="3"
+BUNDLE_SHORT_VERSION="21.8.033"
 BUNDLE_DISPLAY_NAME="Wevive"
 BUNDLE_NAME="com.wevive.wevivedev"
 DOMAIN="appdev.wevive.com"
@@ -14,7 +30,7 @@ IMAGEEXT_PLIST="ios/app/ImageNotification/Info.plist"
 EXPORT_PLIST="ios/export.plist"
 
 ENTITLEMENTS_PLIST="ios/app/app.entitlements"
-
+COMMIT=$(git rev-parse HEAD)
 #Prepare configs
 cp app.dev.json app.json
 cp firebase/$BUNDLE_NAME.json android/app/google-services.json
@@ -36,7 +52,9 @@ sed -i '' "s/APP_VERSION=.*/APP_VERSION=$BUNDLE_SHORT_VERSION/g" android/gradle.
 
 /usr/libexec/Plistbuddy -c "Set CFBundleShortVersionString $BUNDLE_SHORT_VERSION" "$IMAGEEXT_PLIST"
 /usr/libexec/Plistbuddy -c "Set CFBundleIdentifier $BUNDLE_NAME.ImageNotification" "$IMAGEEXT_PLIST"
-
+/usr/libexec/Plistbuddy -c "Set CFBundleVersion $BUILD_NUMBER" "$IMAGEEXT_PLIST"
+/usr/libexec/Plistbuddy -c "Set ITSAppUsesNonExemptEncryption bool false" "$PLIST"
+/usr/libexec/Plistbuddy -c "Set Comments string '$MESSAGE ($COMMIT)'" "$PLIST"
 /usr/libexec/PlistBuddy -c "Set CFBundleURLTypes:0:CFBundleURLSchemes:0 $BUNDLE_NAME" "$PLIST"
 /usr/libexec/PlistBuddy -c "Set CFBundleURLTypes:0:CFBundleURLName $BUNDLE_NAME_SHORT" "$PLIST"
 /usr/libexec/Plistbuddy -c "Set CFBundleDisplayName $BUNDLE_DISPLAY_NAME" "$PLIST"
@@ -49,21 +67,24 @@ sed -i '' "s/APP_VERSION=.*/APP_VERSION=$BUNDLE_SHORT_VERSION/g" android/gradle.
 /usr/libexec/Plistbuddy -c "Set com.apple.developer.associated-domains:0 applinks:$DOMAIN" "$ENTITLEMENTS_PLIST"
 /usr/libexec/Plistbuddy -c "Set com.apple.developer.associated-domains:0 applinks:$DOMAIN" "$ENTITLEMENTS_PLIST"
 
-#Build Android
-yarn androidReleaseAPK
+if [[ ! -z "$ANDROID" ]]; then
+    #Build Android
+    yarn androidReleaseAPK
 
-#Build Android IPA
-cd android && gradle bundleRelease
-cd ..
+    #Build Android IPA
+    cd android && gradle bundleRelease
+    cd ..
 
+    #Upload to Firebase
+    firebase appdistribution:distribute ./android/app/build/outputs/apk/release/app-release.apk \
+    --app "$FIREBASE_APP" \
+    --release-notes "$MESSAGE ($COMMIT)" --testers-file testers.txt
+
+
+fi;
+if [[ ! -z "$IOS" ]]; then
 #Build iOS
-xcodebuild clean archive -workspace ios/jitsi-meet.xcworkspace -scheme Wevive -archivePath builds/wevive.xcarchive -allowProvisioningUpdates #&& \
-
-
-#Upload to Firebase
-firebase appdistribution:distribute ./android/app/build/outputs/apk/release/app-release.apk \
---app "$FIREBASE_APP" \
---release-notes "$MESSAGE" --testers-file testers.txt
-
+xcodebuild clean archive -workspace ios/jitsi-meet.xcworkspace -scheme Wevive -archivePath builds/wevive.xcarchive -allowProvisioningUpdates && \
 #Upload to Testflight
 xcodebuild -exportArchive -archivePath builds/wevive.xcarchive -exportPath builds/wevive.ipa -exportOptionsPlist ios/export.plist -allowProvisioningUpdates
+fi;
