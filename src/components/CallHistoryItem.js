@@ -9,6 +9,7 @@ import {ChatContext} from '../../node_modules/react-native-chat-plugin/ChatConte
 import LinearGradient from 'react-native-linear-gradient';
 import {responsiveFontSize} from 'react-native-responsive-dimensions';
 import TypingIndicator from 'react-native-chat-plugin/ChatScreen/TypingIndicator';
+import { formatDateForHumans } from '../utils/helpers';
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'red',
@@ -86,10 +87,10 @@ const styles = StyleSheet.create({
 });
 function getCallDate(call) {
   const time = call.created_at;
+  const formattedDate = formatDateForHumans(new Date(time));
   return (
     <Text style={styles.date}>
-      {new Date(time).toLocaleDateString()}{' '}
-      {new Date(time).toLocaleTimeString()}
+      {formattedDate}
     </Text>
   );
 }

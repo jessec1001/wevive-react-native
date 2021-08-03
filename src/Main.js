@@ -31,9 +31,6 @@ import VideoCalls from './screens/VideoCalls/VideoCalls';
 import ContactsModal from './ContactsModal';
 import {check, request, PERMISSIONS} from 'react-native-permissions';
 import {chat_url} from "../app.json"
-if (Platform.OS === 'android') {
-  OverlayPermissionModule.requestOverlayPermission();
-}
 const playBusySound = () => {
   var whoosh = new Sound('busy.mp3', Sound.MAIN_BUNDLE, (error) => {
     if(Platform.OS == 'ios'){
@@ -61,6 +58,9 @@ export default function Main({navigation, route}) {
   const [callUUID, setCallUUID] = React.useState(false);
   const [isVideo, setIsVideo] = React.useState(false);
   React.useEffect(() => {
+    if (Platform.OS === 'android') {
+      OverlayPermissionModule.requestOverlayPermission();
+    }
     request(
       Platform.OS == 'ios'
         ? PERMISSIONS.IOS.MICROPHONE
