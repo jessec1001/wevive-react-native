@@ -49,9 +49,11 @@
         builder.welcomePageEnabled = YES;
     }];
 
-  [jitsiMeet application:application didFinishLaunchingWithOptions:launchOptions];
-
+    [jitsiMeet application:application didFinishLaunchingWithOptions:launchOptions];
+    CXCallObserver *callObserver = [[CXCallObserver alloc] init];
+    [callObserver setDelegate:self queue:nil];
     //[jitsiMeet showSplashScreen:rootController.view];
+    self.callObserver = callObserver;
 
     return YES;
 }
@@ -135,13 +137,26 @@
 {
   // --- The system calls this method when a previously provided push token is no longer valid for use. No action is necessary on your part to reregister the push type. Instead, use this method to notify your server not to send push notifications using the matching push token.
 }
+- (void)callObserver:(CXCallObserver *)callObserver callChanged:(CXCall *)call {
+    if (call.hasConnected) {
+      self.hasConnected = TRUE;
+    }
+}
+
+-(void)onTick:(NSTimer *)timer {
+   if (self.hasConnected) {
+     //phone call is accepted
+   } else {
+     [RNCallKeep endCallWithUUID: self.last_uuid reason:6];
+   }
+}
 
 // --- Handle incoming pushes
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void (^)(void))completion {
   NSString *uuid = payload.dictionaryPayload[@"uuid"];
-  NSString *message = payload.dictionaryPayload[@"message"];
+  //NSString *message = payload.dictionaryPayload[@"message"];
   NSString *call_type = payload.dictionaryPayload[@"type"];
-  BOOL *video = [payload.dictionaryPayload[@"video"] isEqual: @"true"];
+  BOOL video = [payload.dictionaryPayload[@"video"] isEqual: @"true"];
   NSString *handle = payload.dictionaryPayload[@"handle"];
   if ([call_type  isEqual: @"hangup"]) {
     [RNCallKeep reportNewIncomingCall: uuid
@@ -159,7 +174,8 @@
     [RNCallKeep endCallWithUUID: uuid reason:6];
     completion();
   } else {
-    self.last_uuid = uuid
+    self.last_uuid = uuid;
+    self.hasConnected = FALSE;
     // --- this is optional, only required if you want to call `completion()` on the js side
     //[RNVoipPushNotificationManager addCompletionHandler:uuid completionHandler:completion];
     AVAudioSession* audioSession = [AVAudioSession sharedInstance];
@@ -193,23 +209,6 @@
     completion();
     [self performSelector:@selector(onTick:) withObject:nil afterDelay:30.0];
   }
-
-  -(void)onTick:(NSTimer *)timer {
-   if (isOnPhoneCall()) {
-     //phone call is accepted
-   } else {
-     [RNCallKeep endCallWithUUID: self.last_uuid reason:6];
-   }
-  }
-  -(bool)isOnPhoneCall {
-    CTCallCenter *callCenter = [[[CTCallCenter alloc] init] autorelease];
-    for (CTCall *call in callCenter.currentCalls)  {
-        if (call.callState == CTCallStateConnected) {
-            return YES;
-        }
-    }
-    return NO;
-}
 }
 
 @end
