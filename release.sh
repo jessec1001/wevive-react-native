@@ -16,9 +16,9 @@ while [[ $# -gt 0 ]] ; do
     shift
 done
 
-BUILD_NUMBER="5"
-BUNDLE_SHORT_VERSION="21.8.035"
-BUNDLE_DISPLAY_NAME="Wevive"
+BUILD_NUMBER="1"
+BUNDLE_SHORT_VERSION="21.8.041"
+BUNDLE_DISPLAY_NAME="Wevive Dev"
 BUNDLE_NAME="com.wevive.wevivedev"
 DOMAIN="appdev.wevive.com"
 BUNDLE_NAME_SHORT="wevivedev"
