@@ -25,6 +25,9 @@
 
 #import <Firebase.h>
 
+#import <CoreTelephony/CTCallCenter.h>
+#import <CoreTelephony/CTCall.h>
+
 @import JitsiMeetSDK;
 
 @implementation AppDelegate
@@ -156,7 +159,7 @@
     [RNCallKeep endCallWithUUID: uuid reason:6];
     completion();
   } else {
-
+    self.last_uuid = uuid
     // --- this is optional, only required if you want to call `completion()` on the js side
     //[RNVoipPushNotificationManager addCompletionHandler:uuid completionHandler:completion];
     AVAudioSession* audioSession = [AVAudioSession sharedInstance];
@@ -188,7 +191,25 @@
     //  --- You should make sure to report to callkit BEFORE execute `completion()`
     // --- You don't need to call it if you stored `completion()` and will call it on the js side.
     completion();
+    [self performSelector:@selector(onTick:) withObject:nil afterDelay:30.0];
   }
+
+  -(void)onTick:(NSTimer *)timer {
+   if (isOnPhoneCall()) {
+     //phone call is accepted
+   } else {
+     [RNCallKeep endCallWithUUID: self.last_uuid reason:6];
+   }
+  }
+  -(bool)isOnPhoneCall {
+    CTCallCenter *callCenter = [[[CTCallCenter alloc] init] autorelease];
+    for (CTCall *call in callCenter.currentCalls)  {
+        if (call.callState == CTCallStateConnected) {
+            return YES;
+        }
+    }
+    return NO;
+}
 }
 
 @end
