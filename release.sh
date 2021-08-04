@@ -1,27 +1,23 @@
 #!/bin/bash
 while [[ $# -gt 0 ]] ; do
     key="$1"
-
     case $key in
         --android)
             ANDROID=1
-            shift
             ;;
         --ios)
             IOS=1
-            shift
+            ;;
+        --prod)
+            PROD=1
             ;;
         *)
     esac
     shift
 done
 
-BUILD_NUMBER="2"
-BUNDLE_SHORT_VERSION="21.8.042"
-BUNDLE_DISPLAY_NAME="Wevive Dev"
-BUNDLE_NAME="com.wevive.wevivedev"
-DOMAIN="appdev.wevive.com"
-BUNDLE_NAME_SHORT="wevivedev"
+BUILD_NUMBER="5"
+BUNDLE_SHORT_VERSION="21.8.045"
 TEAM_ID="ZN624JHU82"
 
 
@@ -31,8 +27,20 @@ EXPORT_PLIST="ios/export.plist"
 
 ENTITLEMENTS_PLIST="ios/app/app.entitlements"
 COMMIT=$(git rev-parse HEAD)
+if [[ -z "$PROD" ]]; then
+BUNDLE_DISPLAY_NAME="Wevive Dev"
+BUNDLE_NAME="com.wevive.wevivedev"
+DOMAIN="appdev.wevive.com"
+BUNDLE_NAME_SHORT="wevivedev"
 #Prepare configs
 cp app.dev.json app.json
+else
+BUNDLE_DISPLAY_NAME="Wevive"
+BUNDLE_NAME="com.wevive.weviveapp"
+DOMAIN="app.wevive.com"
+BUNDLE_NAME_SHORT="weviveapp"
+cp app.prod.json app.json
+fi
 cp firebase/$BUNDLE_NAME.json android/app/google-services.json
 cp firebase/$BUNDLE_NAME.plist ios/app/GoogleService-Info.plist
 cp firebase/$BUNDLE_NAME.plist ios/sdk/GoogleService-Info.plist
