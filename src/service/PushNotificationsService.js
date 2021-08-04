@@ -124,11 +124,10 @@ class FCM_Service {
             CacheStore.set(remoteMessage.data.callUUID, 1, 0.5);
           }
 
-          isVideo =
+          const isVideo =
             remoteMessage.data.video === true ||
             remoteMessage.data.video === 'true';
-          message = isVideo ? 'Wevive Video Call' : 'Wevive Voice Call';
-          console.log('value:', remoteMessage.data.video);
+          const message = isVideo ? 'Wevive Video Call' : 'Wevive Voice Call';
           const activeCall = await AsyncStorage.getItem('activeCallUUID');
           if (!activeCall || activeCall !== remoteMessage.data.callUUID) {
             if (Platform.OS === 'android') {

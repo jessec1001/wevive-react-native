@@ -11,6 +11,8 @@ export const backgroundJobs = () =>
     if (Platform.OS === 'android') {
       const data = remoteMessage?.data;
       if (data && data.callUUID && data.type === 'call') {
+        const activeCall = await AsyncStorage.getItem('activeCallUUID');
+        if (activeCall && data.callUUID == activeCall) return;
         if (data.video) {
           CacheStore.set(data.callUUID, '1', 0.5);
         }
