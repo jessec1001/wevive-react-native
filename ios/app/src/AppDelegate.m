@@ -140,6 +140,8 @@
 - (void)callObserver:(CXCallObserver *)callObserver callChanged:(CXCall *)call {
     if (call.hasConnected) {
       self.hasConnected = TRUE;
+    } else if (call.hasEnded) {
+      self.hasConnected = FALSE;
     }
 }
 
@@ -158,7 +160,7 @@
   NSString *call_type = payload.dictionaryPayload[@"type"];
   BOOL video = [payload.dictionaryPayload[@"video"] isEqual: @"true"];
   NSString *handle = payload.dictionaryPayload[@"handle"];
-  if ([call_type  isEqual: @"hangup"]) {
+  if ([call_type  isEqual: @"hangup"] || self.hasConnected) {
     [RNCallKeep reportNewIncomingCall: uuid
                             handle: handle
                         handleType: @"number"

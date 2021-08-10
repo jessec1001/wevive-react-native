@@ -43,6 +43,9 @@ const APIService = async (endpoint, data, cache_time, forceToken) => {
     if (url.indexOf('users/me/') > 0 && method === 'POST') {
       method = 'PUT';
     }
+    if (url.indexOf('users/geoip/') > 0) {
+      delete headers.Authorization;
+    }
     if (url.indexOf('users/password_update/') > 0 && method === 'POST') {
       method = 'PUT';
     }
