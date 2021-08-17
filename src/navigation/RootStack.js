@@ -116,12 +116,12 @@ const RootStack = ({initialProps}) => {
   const routeNameRef = React.useRef();
   const navigationRef = React.useRef();
   global.navigation = navigationRef.current;
-  const [authData, setAuthData] = useState(null);
+  const [authData, setAuthData] = useState(false);
   const updateAuthData = async (newData) => {
     /*if (newData && newData.access_token) {
       newData.userToken = newData.access_token;
     }*/
-    if (!newData && !authData) {
+    if (!newData && authData) {
       return;
     }
     const userToken =
@@ -136,6 +136,7 @@ const RootStack = ({initialProps}) => {
       return;
     }
     setAuthData({
+      ...authData,
       ...newData,
       userName: 'name' in newData ? newData.name : authData.userName,
       avatarUrl:
@@ -152,6 +153,32 @@ const RootStack = ({initialProps}) => {
       userToken: userToken,
     });
   };
+  React.useEffect(() => {
+    if (!authData) {
+      AsyncStorage.multiGet([
+        'userId',
+        'avatarUrl',
+        'userToken',
+        'userName',
+      ]).then((items) => {
+        const k = {};
+        items.map((i) => (k[i[0]] = i[1]));
+        if (k.userId) {
+          rootLoaded = true;
+          const avatarUrl = k.avatarUrl ? k.avatarUrl.slice(1, -1) : null;
+          /*setAuthData({
+            id: k.userId,
+            avatarUrl,
+            userToken: k.userToken,
+            userName: k.userName,
+          });*/
+          setTimeout(() => {
+            updateMe(k.userToken);
+          }, 10);
+        }
+      });
+    }
+  }, [authData])
   const updateMe = async (token) => {
     const userToken = token || authData.userToken;
     if (userToken) {
@@ -170,30 +197,6 @@ const RootStack = ({initialProps}) => {
         });
     }
   };
-  if (!authData) {
-    AsyncStorage.multiGet([
-      'userId',
-      'avatarUrl',
-      'userToken',
-      'userName',
-    ]).then((items) => {
-      const k = {};
-      items.map((i) => (k[i[0]] = i[1]));
-      if (k.userId && !rootLoaded) {
-        rootLoaded = true;
-        const avatarUrl = k.avatarUrl ? k.avatarUrl.slice(1, -1) : null;
-        setAuthData({
-          id: k.userId,
-          avatarUrl,
-          userToken: k.userToken,
-          userName: k.userName,
-        });
-        setTimeout(() => {
-          updateMe(k.userToken);
-        }, 10);
-      }
-    });
-  }
   const appUserContextValue = {authData, setAuthData: updateAuthData, updateMe, setThemeSettings};
   return (
     <AppUserContext.Provider value={appUserContextValue}>
