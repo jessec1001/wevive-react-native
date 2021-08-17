@@ -51,7 +51,7 @@ export default function VideoCalls({params}) {
       CacheStore.remove('incomingUUID');
       CacheStore.remove('callUUID');
     }, 1000);
-  }, [r]);
+  }, [params]);
   const addUsersToCall = () => {
     global.showContacts(
       (contacts) => {

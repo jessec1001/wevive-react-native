@@ -16,8 +16,8 @@ while [[ $# -gt 0 ]] ; do
     shift
 done
 
-BUILD_NUMBER="5"
-BUNDLE_SHORT_VERSION="21.8.045"
+BUILD_NUMBER="1"
+BUNDLE_SHORT_VERSION="21.8.171"
 TEAM_ID="ZN624JHU82"
 
 

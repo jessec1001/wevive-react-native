@@ -166,7 +166,7 @@ export default class SignIn extends Component {
                 ) : null}
                 <Formik
                   initialValues={{
-                    country: geo && geo.country_code ? geo.country_code : 'US',
+                    country: geo && geo.country_code ? geo.country_code : 'GB',
                     phone:
                       this.state.phoneNumber ||
                       this.props.route.params?.phone_number,

@@ -63,3 +63,6 @@ Make sure you set up the SSH key in Gitlab
 (Windows only) 2) “.ps1 is not digitally signed. The script will not execute on the system.”
 Run:
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+3) To see console.log in console, comment out this in babel.config.js:
+    //plugins: ['transform-remove-console'],

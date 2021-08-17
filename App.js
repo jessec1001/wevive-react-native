@@ -64,7 +64,7 @@ class AppContainer extends Component {
   };
   componentDidMount() {
     bootstrap();
-    APIService('users/geoip/', null, 60).then((geo) => {
+    APIService('users/geoip/', null).then((geo) => {
       if (Platform.OS === 'android') {
         PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
@@ -75,13 +75,23 @@ class AppContainer extends Component {
           },
         ).then((status) => {
           if (status === 'granted') {
-            getPhoneContacts(geo);
-            this.setState({geo, ready: true});
+            if (geo) {
+              getPhoneContacts(geo);
+              this.setState({geo, ready: true});
+            } else {
+              getPhoneContacts(this.state.geo);
+              this.setState({ready: true});
+            }
           }
         });
       } else {
-        getPhoneContacts(geo);
-        this.setState({geo, ready: true});
+        if (geo) {
+          getPhoneContacts(geo);
+          this.setState({geo, ready: true});
+        } else {
+          getPhoneContacts(this.state.geo);
+          this.setState({ready: true});
+        }
       }
     });
     if (Platform.OS === 'android') {
@@ -114,7 +124,11 @@ class AppContainer extends Component {
 
   state = {
     client: null,
-    geo: null,
+    geo: {
+      geo: {
+        country_code: RNLocalize.getCountry()
+      }
+    },
     ready: false,
   };
 
